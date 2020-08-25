@@ -1,3 +1,6 @@
+context:
+  initializer:
+    classes: com.angorasix.projects.core.BeansInitializer
 server:
   port: ${PORT:8090}
 
@@ -7,10 +10,13 @@ spring:
   data:
     mongodb:
       uri: ${MONGO_DB_URI:mongodb://localhost:27017/projects.core}
+
+    #eureka:
+    #  client:
+    #    serviceUrl:
+    #      defaultZone: ${DISCOVERY_SERVER_URI:http://127.0.0.1:8761/eureka/}
+    #    healthcheck:
+    #      enabled: true
+    #  instance:
+    #    hostname: ${DISCOVERY_INSTANCE_HOSTNAME:localhost}
     
-eureka:
-  client:
-    serviceUrl:
-      defaultZone: ${DISCOVERY_SERVER_URI:http://127.0.0.1:8761/eureka/}
-    healthcheck:
-      enabled: true
