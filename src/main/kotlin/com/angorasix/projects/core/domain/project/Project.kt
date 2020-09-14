@@ -1,11 +1,11 @@
 package com.angorasix.projects.core.domain.project
 
-import com.angorasix.projects.core.domain.Attribute
+import com.angorasix.projects.core.domain.attribute.Attribute
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.PersistenceConstructor
 import java.time.ZoneId
 import java.time.ZonedDateTime
-import java.util.*
+import java.util.Optional
 
 /**
  * Project Aggregate Root.
@@ -15,12 +15,14 @@ import java.util.*
  *
  * @author rozagerardo
  */
-data class Project @PersistenceConstructor private constructor(@field:Id val id: String?,
-                                                               var name: String,
-                                                               var attributes: MutableCollection<Attribute<*>> = mutableSetOf<Attribute<*>>(),
-                                                               val createdAt: ZonedDateTime,
-                                                               var requirements: Collection<Requirement<*>>,
-                                                               val creatorId: String) {
+data class Project @PersistenceConstructor private constructor(
+    @field:Id val id: String?,
+    var name: String,
+    var attributes: MutableCollection<Attribute<*>> = mutableSetOf<Attribute<*>>(),
+    val createdAt: ZonedDateTime,
+    var requirements: Collection<Attribute<*>> = mutableSetOf<Attribute<*>>(),
+    val creatorId: String
+) {
 
     /**
      * The final constructor that sets all initial fields.
@@ -29,15 +31,16 @@ data class Project @PersistenceConstructor private constructor(@field:Id val id:
      * @param creator - a reference to the `Contributor` that created the `Project`
      * @param zone - the `ZoneId` used to indicate the createdAt timestamp
      */
-    constructor(name: String,
-                creatorId: String,
-                zone: ZoneId?) : this(null,
-            name,
-            mutableSetOf<Attribute<*>>(),
-            ZonedDateTime.now(Optional.ofNullable<ZoneId>(zone).orElse(ZoneId.systemDefault())),
-            emptySet(),
-            creatorId) {
-    }
+    constructor(
+        name: String, creatorId: String, zone: ZoneId?
+    ) : this(
+        null,
+        name,
+        mutableSetOf<Attribute<*>>(),
+        ZonedDateTime.now(Optional.ofNullable<ZoneId>(zone).orElse(ZoneId.systemDefault())),
+        emptySet(),
+        creatorId
+    )
 
     /**
      * Add a single attribute to the list.
@@ -47,5 +50,4 @@ data class Project @PersistenceConstructor private constructor(@field:Id val id:
     fun addAttribute(attribute: Attribute<*>) {
         attributes.add(attribute)
     }
-
 }

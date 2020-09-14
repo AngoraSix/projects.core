@@ -6,7 +6,8 @@ import org.bson.Document
 import org.junit.jupiter.api.Test
 import java.time.ZoneId
 import java.time.ZonedDateTime
-import java.util.*
+import java.util.Date
+import java.util.HashMap
 
 class ZonedDateTimeConvertersUnitTest {
     private val writingConverter = ZonedDateTimeConvertersUtils.ZonedDateTimeWritingConverter()
@@ -21,8 +22,13 @@ class ZonedDateTimeConvertersUnitTest {
         val inputZdt = ZonedDateTime.of(1991, 4, 22, 23, 0, 0, 0, ZoneId.of("America/Argentina/Cordoba"))
         val outputDocument = writingConverter.convert(inputZdt)
         assertThat<Any>(outputDocument!!["zone"]).isEqualTo("America/Argentina/Cordoba")
-        Assertions.assertThat(outputDocument!!.getDate("dateTime")).isEqualTo(Date.from(inputZdt.withZoneSameInstant(
-                        ZoneId.of("UTC")).toInstant()))
+        Assertions.assertThat(outputDocument!!.getDate("dateTime")).isEqualTo(
+            Date.from(
+                inputZdt.withZoneSameInstant(
+                    ZoneId.of("UTC")
+                ).toInstant()
+            )
+        )
     }
 
     @Test
@@ -31,8 +37,13 @@ class ZonedDateTimeConvertersUnitTest {
         val inputZdt = ZonedDateTime.of(1991, 4, 22, 15, 0, 0, 0, ZoneId.of("Pacific/Auckland"))
         val outputDocument = writingConverter.convert(inputZdt)
         assertThat<Any>(outputDocument!!["zone"]).isEqualTo("Pacific/Auckland")
-        Assertions.assertThat(outputDocument!!.getDate("dateTime")).isEqualTo(Date.from(inputZdt.withZoneSameInstant(
-                        ZoneId.of("UTC")).toInstant()))
+        Assertions.assertThat(outputDocument!!.getDate("dateTime")).isEqualTo(
+            Date.from(
+                inputZdt.withZoneSameInstant(
+                    ZoneId.of("UTC")
+                ).toInstant()
+            )
+        )
     }
 
     @Test

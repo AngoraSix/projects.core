@@ -1,6 +1,5 @@
 package com.angorasix.projects.core.integration
 
-
 /**
  *
  *
@@ -8,11 +7,11 @@ package com.angorasix.projects.core.integration
  */
 
 //val beans = beans {
-    /*   bean<ProjectService>()
-       bean<ProjectHandler>()
-       bean {
-           ProjectRouter(ref()).projectRouterFunction()
-       }*/
+/*   bean<ProjectService>()
+   bean<ProjectHandler>()
+   bean {
+       ProjectRouter(ref()).projectRouterFunction()
+   }*/
 //    bean<IMongoImportConfig> {
 //        val jsonFile = env.getProperty("integration.mongodb.importJsonFile")
 //        MongoImportConfigBuilder().db("projects.core").collection("projects").version(Version.Main.DEVELOPMENT).net(Net(

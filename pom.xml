@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.angorasix</groupId>
@@ -14,9 +13,6 @@
     <description>Projects Core Service</description>
 
     <properties>
-        <docker.image.prefix>geroza</docker.image.prefix>
-        <docker.image.artifact>angorasix.projects.core</docker.image.artifact>
-
         <jacoco-coverage.class.line.min>0.20</jacoco-coverage.class.line.min>
         <jacoco-coverage.class.branch.min>0.20</jacoco-coverage.class.branch.min>
     </properties>
@@ -41,10 +37,6 @@
             <version>${playtika.testcontainers.version}</version>
             <scope>test</scope>
         </dependency>
-        <!--        <dependency>-->
-        <!--            <groupId>org.springframework.cloud</groupId>-->
-        <!--            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>-->
-        <!--        </dependency>-->
     </dependencies>
 
     <dependencyManagement>
@@ -58,5 +50,4 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-
 </project>

@@ -1,6 +1,70 @@
 [
   {
-    "name" : "Project name",
-    "creatorId" : "id-test"
+    "name": "Angora Sustainable",
+    "creatorId": "rozagerardo",
+    "createdAt": {
+      "dateTime": "2020-08-09 00:23:00",
+      "zone": "America/Argentina/Cordoba"
+    },
+    "attributes": [
+      {
+        "value": "Project Management",
+        "key": "category"
+      },
+      {
+        "value": "Kotlin",
+        "key": "technology"
+      },
+      {
+        "value": "Open-source",
+        "key": "licence"
+      },
+      {
+        "value": "Systems",
+        "key": "industry"
+      },
+      {
+        "value": "Systems",
+        "key": "industry"
+      }
+    ],
+    "requirements": [
+      {
+        "value": "Kotlin",
+        "key": "technology"
+      }
+    ]
+  },
+  {
+    "name": "A Local Project",
+    "creatorId": "mockUserId",
+    "createdAt": {
+      "dateTime": "2020-09-01 00:00:00",
+      "zone": "America/Argentina/Cordoba"
+    },
+    "attributes": [
+      {
+        "value": "Social Care",
+        "key": "category"
+      },
+      {
+        "value": "Textile",
+        "key": "industry"
+      },
+      {
+        "value": "Argentina/Cordoba/Cordoba",
+        "key": "location"
+      }
+    ],
+    "requirements": [
+      {
+        "value": "Argentina/Cordoba/Cordoba",
+        "key": "location"
+      },
+      {
+        "value": "Apparel design",
+        "key": "skill"
+      }
+    ]
   }
 ]

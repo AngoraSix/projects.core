@@ -51,5 +51,4 @@ class ProjectService(private val repository: ProjectRepository) {
     suspend fun findSingleProject(projectId: String): Project? {
         return repository.findById(projectId)
     }
-
 }

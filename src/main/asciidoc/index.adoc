@@ -1,0 +1,21 @@
+= Angorasix Projects Core server
+
+GET Projects using cURL:
+
+include::{snippets}/project/curl-request.adoc[]
+
+HTTP request:
+
+include::{snippets}/project/http-request.adoc[]
+
+Request body:
+
+include::{snippets}/project/request-body.adoc[]
+
+HTTP response:
+
+include::{snippets}/project/http-response.adoc[]
+
+Response body:
+
+include::{snippets}/project/response-body.adoc[]

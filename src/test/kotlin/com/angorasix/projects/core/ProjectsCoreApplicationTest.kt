@@ -14,5 +14,4 @@ class ProjectsCoreApplicationTest {
     @Test
     fun contextLoads() {
     }
-
 }

@@ -27,5 +27,4 @@ class ProjectRouter(private val handler: ProjectHandler) {
             POST("/", handler::createProject)
         }
     }
-
 }

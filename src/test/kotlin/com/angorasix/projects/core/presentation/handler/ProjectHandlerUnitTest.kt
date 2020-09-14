@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.reactor.mono
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runBlockingTest
 import org.assertj.core.api.AssertionsForClassTypes.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -24,6 +25,7 @@ import java.time.ZoneId
 
 @ExtendWith(MockKExtension::class)
 class ProjectHandlerUnitTest {
+
     private lateinit var handler: ProjectHandler
 
     @MockK
@@ -55,21 +57,22 @@ class ProjectHandlerUnitTest {
 
     @Test
     @Throws(Exception::class)
-    fun `Given request with project - When create project - Then handler retrieves Created`() = runBlockingTest {
-        val mockedProjectDto = ProjectDto(null, "mockedProjectName", emptyList(), emptyList(), null)
-        val mockedRequest: ServerRequest = MockServerRequest.builder().body(mono { mockedProjectDto })
-        val mockedProject = Project("mockedProjectName", "creator_id", ZoneId.systemDefault())
-        coEvery { service.createProject(ofType(Project::class)) } returns mockedProject
+    fun `Given request with project - When create project - Then handler retrieves Created`() =
+        runBlocking { //= runBlockingTest { // until we resolve why service.createProject is hanging https://github.com/Kotlin/kotlinx.coroutines/issues/1204
+            val mockedProjectDto = ProjectDto(null, "mockedInputProjectName", emptyList(), emptyList(), null)
+            val mockedRequest: ServerRequest = MockServerRequest.builder().body(mono { mockedProjectDto })
+            val mockedProject = Project("mockedProjectName", "creator_id", ZoneId.systemDefault())
+            coEvery { service.createProject(ofType(Project::class)) } returns mockedProject
 
-        val outputResponse = handler.createProject(mockedRequest)
+            val outputResponse = handler.createProject(mockedRequest)
 
-        assertThat(outputResponse.statusCode()).isEqualTo(HttpStatus.CREATED)
-        val responseBody = (outputResponse as EntityResponse<ProjectDto>).entity()
-        assertThat(responseBody).isNotSameAs(mockedProjectDto)
-        assertThat(responseBody.name).isEqualTo("mockedProjectName")
-        assertThat(responseBody.creatorId).isEqualTo("creator_id")
-        coVerify { service.findProjects() }
-    }
+            assertThat(outputResponse.statusCode()).isEqualTo(HttpStatus.CREATED)
+            val responseBody = (outputResponse as EntityResponse<ProjectDto>).entity()
+            assertThat(responseBody).isNotSameAs(mockedProjectDto)
+            assertThat(responseBody.name).isEqualTo("mockedProjectName")
+            assertThat(responseBody.creatorId).isEqualTo("creator_id")
+            coVerify { service.createProject(ofType(Project::class)) }
+        }
 
     @Test
     @Throws(Exception::class)

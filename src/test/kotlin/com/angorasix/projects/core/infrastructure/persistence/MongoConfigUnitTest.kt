@@ -4,25 +4,37 @@ import com.angorasix.projects.core.infrastructure.persistence.converter.ZonedDat
 import org.assertj.core.api.Assertions
 import org.bson.Document
 import org.junit.jupiter.api.Test
+import org.springframework.data.mongodb.core.convert.MongoCustomConversions
 import java.time.LocalDateTime
 import java.time.ZonedDateTime
 
 class MongoConfigUnitTest {
-    private val config = MongoConfig()
 
     @Test
     fun whenCustomConversionsInvoked_thenMongoConversionsWithZonedDateTimeConvertersRetrieved() {
         val readerConverter = ZonedDateTimeConvertersUtils.ZonedDateTimeReaderConverter()
         val writerConverter = ZonedDateTimeConvertersUtils.ZonedDateTimeWritingConverter()
-        val conversionsOutput = config.customConversions(readerConverter, writerConverter)
+        val conversionsOutput = MongoCustomConversions(
+            listOf(
+                ZonedDateTimeConvertersUtils.ZonedDateTimeReaderConverter(),
+                ZonedDateTimeConvertersUtils.ZonedDateTimeWritingConverter()
+            )
+        )
 
         // handled conversions
-        Assertions.assertThat(conversionsOutput.getCustomWriteTarget(ZonedDateTime::class.java).get().name).isEqualTo("org.bson.Document")
-        Assertions.assertThat(conversionsOutput.hasCustomReadTarget(Document::class.java,
-                ZonedDateTime::class.java)).isTrue()
+        Assertions.assertThat(conversionsOutput.getCustomWriteTarget(ZonedDateTime::class.java).get().name)
+            .isEqualTo("org.bson.Document")
+        Assertions.assertThat(
+            conversionsOutput.hasCustomReadTarget(
+                Document::class.java, ZonedDateTime::class.java
+            )
+        ).isTrue()
         // not handled conversions
         Assertions.assertThat(conversionsOutput.getCustomWriteTarget(Document::class.java)).isEmpty
-        Assertions.assertThat(conversionsOutput.hasCustomReadTarget(Document::class.java,
-                LocalDateTime::class.java)).isFalse()
+        Assertions.assertThat(
+            conversionsOutput.hasCustomReadTarget(
+                Document::class.java, LocalDateTime::class.java
+            )
+        ).isFalse()
     }
 }

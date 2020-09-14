@@ -1,13 +1,13 @@
 [
   {
-    "name" : "Project name",
-    "attributes" : {},
-    "createdAt" : {
-      "dateTime" : "2020-08-09 00:23:08",
-      "zone" : "America/Argentina/Cordoba"
+    "name": "Project name",
+    "attributes": {},
+    "createdAt": {
+      "dateTime": "2020-08-09 00:23:08",
+      "zone": "America/Argentina/Cordoba"
     },
-    "requirements" : [],
-    "creatorId" : "id-test",
-    "_class" : "com.angorasix.projects.core.domain.project.Project"
+    "requirements": [],
+    "creatorId": "id-test",
+    "_class": "com.angorasix.projects.core.domain.project.Project"
   }
 ]
