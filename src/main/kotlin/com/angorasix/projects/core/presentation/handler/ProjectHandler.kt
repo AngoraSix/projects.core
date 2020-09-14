@@ -32,8 +32,10 @@ class ProjectHandler(private val service: ProjectService) {
      * @return the `ServerResponse`
      */
     suspend fun listProjects(request: ServerRequest): ServerResponse {
-        val projects = service.findProjects().map { convertProjectToDto(it) } //.map { convertToDto(it) }
-        return ok().contentType(MediaType.APPLICATION_JSON).bodyAndAwait(projects)
+        val projects = service.findProjects()
+            .map { convertProjectToDto(it) } // .map { convertToDto(it) }
+        return ok().contentType(MediaType.APPLICATION_JSON)
+            .bodyAndAwait(projects)
     }
 
     /**
@@ -61,11 +63,14 @@ class ProjectHandler(private val service: ProjectService) {
      */
     suspend fun getProject(request: ServerRequest): ServerResponse {
         val projectId = request.pathVariable("id")
-        return service.findSingleProject(projectId)?.let {
-            val outputProject = convertProjectToDto(it)
-            // TODO HATEOAS for location header
-            ok().contentType(MediaType.APPLICATION_JSON).bodyValueAndAwait(outputProject)
-        } ?: ServerResponse.notFound().buildAndAwait()
+        return service.findSingleProject(projectId)
+            ?.let {
+                val outputProject = convertProjectToDto(it)
+                // TODO HATEOAS for location header
+                ok().contentType(MediaType.APPLICATION_JSON)
+                    .bodyValueAndAwait(outputProject)
+            } ?: ServerResponse.notFound()
+            .buildAndAwait()
         //        return ok().contentType(MediaType.APPLICATION_JSON).bodyValueAndAwait(ProjectDto("asd2", "asd22", "asd2"))
     }
 
@@ -91,11 +96,17 @@ class ProjectHandler(private val service: ProjectService) {
         }
 
         private fun convertAttributeToDto(attribute: Attribute<*>): AttributeDto {
-            return AttributeDto(attribute.value as String, attribute.key)
+            return AttributeDto(
+                attribute.value as String,
+                attribute.key
+            )
         }
 
         private fun convertAttributeToDomainObject(attributeDto: AttributeDto): Attribute<*> {
-            return Attribute(attributeDto.value, attributeDto.key)
+            return Attribute(
+                attributeDto.value,
+                attributeDto.key
+            )
         }
     }
 }

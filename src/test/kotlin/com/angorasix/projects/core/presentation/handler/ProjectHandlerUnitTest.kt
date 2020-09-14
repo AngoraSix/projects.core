@@ -39,8 +39,13 @@ class ProjectHandlerUnitTest {
     @Test
     @Throws(Exception::class)
     fun `Given existing projects - When list projects - Then handler retrieves Ok Response`() = runBlockingTest {
-        val mockedRequest: ServerRequest = MockServerRequest.builder().build()
-        val mockedProject = Project("mockedProjectName", "creator_id", ZoneId.systemDefault())
+        val mockedRequest: ServerRequest = MockServerRequest.builder()
+            .build()
+        val mockedProject = Project(
+            "mockedProjectName",
+            "creator_id",
+            ZoneId.systemDefault()
+        )
         val retrievedProject = flowOf(mockedProject)
         coEvery { service.findProjects() } returns retrievedProject
 
@@ -58,10 +63,21 @@ class ProjectHandlerUnitTest {
     @Test
     @Throws(Exception::class)
     fun `Given request with project - When create project - Then handler retrieves Created`() =
-        runBlocking { //= runBlockingTest { // until we resolve why service.createProject is hanging https://github.com/Kotlin/kotlinx.coroutines/issues/1204
-            val mockedProjectDto = ProjectDto(null, "mockedInputProjectName", emptyList(), emptyList(), null)
-            val mockedRequest: ServerRequest = MockServerRequest.builder().body(mono { mockedProjectDto })
-            val mockedProject = Project("mockedProjectName", "creator_id", ZoneId.systemDefault())
+        runBlocking { // = runBlockingTest { // until we resolve why service.createProject is hanging https://github.com/Kotlin/kotlinx.coroutines/issues/1204
+            val mockedProjectDto = ProjectDto(
+                null,
+                "mockedInputProjectName",
+                emptyList(),
+                emptyList(),
+                null
+            )
+            val mockedRequest: ServerRequest = MockServerRequest.builder()
+                .body(mono { mockedProjectDto })
+            val mockedProject = Project(
+                "mockedProjectName",
+                "creator_id",
+                ZoneId.systemDefault()
+            )
             coEvery { service.createProject(ofType(Project::class)) } returns mockedProject
 
             val outputResponse = handler.createProject(mockedRequest)
@@ -78,8 +94,17 @@ class ProjectHandlerUnitTest {
     @Throws(Exception::class)
     fun `Given existing projects - When get project - Then handler retrieves Ok Response`() = runBlockingTest {
         val projectId = "projectId"
-        val mockedRequest: ServerRequest = MockServerRequest.builder().pathVariable("id", projectId).build()
-        val mockedProject = Project("mockedProjectName", "creator_id", ZoneId.systemDefault())
+        val mockedRequest: ServerRequest = MockServerRequest.builder()
+            .pathVariable(
+                "id",
+                projectId
+            )
+            .build()
+        val mockedProject = Project(
+            "mockedProjectName",
+            "creator_id",
+            ZoneId.systemDefault()
+        )
         coEvery { service.findSingleProject(projectId) } returns mockedProject
 
         val outputResponse = handler.getProject(mockedRequest)

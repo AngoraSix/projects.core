@@ -26,7 +26,10 @@ object ZonedDateTimeConvertersUtils {
                 val dateTime = it.getDate(DATE_TIME)
                 val zoneId = it.getString(ZONE)
                 val zone = ZoneId.of(zoneId)
-                return ZonedDateTime.ofInstant(dateTime.toInstant(), zone)
+                return ZonedDateTime.ofInstant(
+                    dateTime.toInstant(),
+                    zone
+                )
             }
         }
     }

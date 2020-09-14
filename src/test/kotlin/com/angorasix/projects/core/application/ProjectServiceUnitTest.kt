@@ -30,7 +30,11 @@ class ProjectServiceUnitTest {
     @Test
     @Throws(Exception::class)
     fun `given existing projects - when request find projects - then receive projects`() = runBlockingTest {
-        val mockedProject = Project("mockedProjectName", "creator_id", ZoneId.systemDefault())
+        val mockedProject = Project(
+            "mockedProjectName",
+            "creator_id",
+            ZoneId.systemDefault()
+        )
         coEvery { repository.findAll() } returns flowOf(mockedProject)
 
         val outputProjects = service.findProjects()
@@ -45,7 +49,11 @@ class ProjectServiceUnitTest {
     @Throws(Exception::class)
     fun givenExistingProject_whenFindSingleProjects_thenServiceRetrievesMonoWithProject() = runBlockingTest {
         val mockedProjectId = "id1"
-        val mockedProject = Project("mockedProjectName", "creator_id", ZoneId.systemDefault())
+        val mockedProject = Project(
+            "mockedProjectName",
+            "creator_id",
+            ZoneId.systemDefault()
+        )
         coEvery { repository.findById(mockedProjectId) } returns mockedProject
         val outputProject = service.findSingleProject(mockedProjectId)
         assertThat(outputProject).isSameAs(mockedProject)
@@ -55,8 +63,16 @@ class ProjectServiceUnitTest {
     @Test
     @Throws(Exception::class)
     fun whenCreateProject_thenServiceRetrieveSavedProject() = runBlockingTest {
-        val mockedProject = Project("mockedProjectName", "creator_id", ZoneId.systemDefault())
-        val savedProject = Project("savedProjectName", "creator_id", ZoneId.systemDefault())
+        val mockedProject = Project(
+            "mockedProjectName",
+            "creator_id",
+            ZoneId.systemDefault()
+        )
+        val savedProject = Project(
+            "savedProjectName",
+            "creator_id",
+            ZoneId.systemDefault()
+        )
         coEvery { repository.save(mockedProject) } returns savedProject
         val outputProject = service.createProject(mockedProject)
         assertThat(outputProject).isSameAs(savedProject)
@@ -66,8 +82,16 @@ class ProjectServiceUnitTest {
     @Test
     @Throws(Exception::class)
     fun whenUpdateProject_thenServiceRetrieveUpdatedProject() = runBlockingTest {
-        val mockedProject = Project("mockedProjectName", "creator_id", ZoneId.systemDefault())
-        val updatedProject = Project("updatedProjectName", "creator_id", ZoneId.systemDefault())
+        val mockedProject = Project(
+            "mockedProjectName",
+            "creator_id",
+            ZoneId.systemDefault()
+        )
+        val updatedProject = Project(
+            "updatedProjectName",
+            "creator_id",
+            ZoneId.systemDefault()
+        )
         coEvery { repository.save(mockedProject) } returns updatedProject
         val outputProject = service.createProject(mockedProject)
         assertThat(outputProject).isSameAs(updatedProject)

@@ -32,7 +32,10 @@ import org.springframework.test.web.reactive.server.WebTestClient
 inline fun <reified T> typeReference() = object : ParameterizedTypeReference<T>() {}
 
 @ExtendWith(RestDocumentationExtension::class)
-@SpringBootTest(classes = [ProjectsCoreApplication::class], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(
+    classes = [ProjectsCoreApplication::class],
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
+)
 @TestPropertySource(locations = ["classpath:integration-application.properties"])
 @EnableConfigurationProperties(IntegrationProperties::class)
 class ProjectCoreIntegrationTest(
@@ -61,17 +64,28 @@ class ProjectCoreIntegrationTest(
 
     @BeforeEach
     fun setUp(
-        applicationContext: ApplicationContext, restDocumentation: RestDocumentationContextProvider
+        applicationContext: ApplicationContext,
+        restDocumentation: RestDocumentationContextProvider
     ) = runBlocking {
-        webTestClient = WebTestClient.bindToApplicationContext(applicationContext).configureClient().filter(
-            documentationConfiguration(restDocumentation)
-        ).build()
-        initializeMongodb(properties.mongodb.baseJsonFile, mongoTemplate, mapper)
+        webTestClient = WebTestClient.bindToApplicationContext(applicationContext)
+            .configureClient()
+            .filter(
+                documentationConfiguration(restDocumentation)
+            )
+            .build()
+        initializeMongodb(
+            properties.mongodb.baseJsonFile,
+            mongoTemplate,
+            mapper
+        )
     }
 
     @Test
     fun `Given persisted projects - When request existing project - Then Ok response`() {
-        webTestClient.get().uri("/projects").accept(MediaType.APPLICATION_JSON).exchange()
+        webTestClient.get()
+            .uri("/projects")
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
             .expectStatus().isOk.expectBody()
             //                .consumeWith(document("project",
             //                responseFields(fieldWithPath("[]").description("An array of projects")).andWithPrefix("[].",
@@ -79,18 +93,24 @@ class ProjectCoreIntegrationTest(
 
             .consumeWith(
                 document(
-                    "project", preprocessResponse(prettyPrint()),
+                    "project",
+                    preprocessResponse(prettyPrint()),
                     //                        responseFields(beneathPath("[].attributes").withSubsectionId("attribute"), *attributeDescriptor),//fieldWithPath("key").description("Attribute id key")),
                     responseFields(fieldWithPath("[]").description("An array of projects")).andWithPrefix(
-                        "[].", *projectDescriptor
+                        "[].",
+                        *projectDescriptor
                     )
                 )
             )
 
             //                .consumeWith(
             //                        document("attribute", responseFields(*attributeDescriptor)))
-            .jsonPath("$").isArray.jsonPath("$").value(hasSize(2), Collection::class.java)
-        //.jsonPath("$").value(hasSize(2), Collection::class.java).jsonPath("$[].name").value(
+            .jsonPath("$").isArray.jsonPath("$")
+            .value(
+                hasSize(2),
+                Collection::class.java
+            )
+        // .jsonPath("$").value(hasSize(2), Collection::class.java).jsonPath("$[].name").value(
         //      Matchers.arrayContainingInAnyOrder(setOf("asd", "ads2")))
     }
 }

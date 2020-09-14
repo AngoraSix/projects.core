@@ -21,10 +21,19 @@ class ProjectRouter(private val handler: ProjectHandler) {
 
         "/projects".nest {
             accept(APPLICATION_JSON).nest {
-                GET("/{id}", handler::getProject)
-                GET("/", handler::listProjects)
+                GET(
+                    "/{id}",
+                    handler::getProject
+                )
+                GET(
+                    "/",
+                    handler::listProjects
+                )
             }
-            POST("/", handler::createProject)
+            POST(
+                "/",
+                handler::createProject
+            )
         }
     }
 }

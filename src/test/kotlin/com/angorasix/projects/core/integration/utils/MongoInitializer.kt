@@ -21,19 +21,27 @@ const val DATE_TIME = "dateTime"
 const val CREATED_AT = "createdAt"
 
 private fun mapCreatedAt(fieldsMap: MutableMap<String, Any>): Map<String, Any> {
-    fieldsMap[DATE_TIME] = SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(fieldsMap[DATE_TIME] as String);
-    return fieldsMap;
+    fieldsMap[DATE_TIME] = SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(fieldsMap[DATE_TIME] as String)
+    return fieldsMap
 }
 
 suspend fun initializeMongodb(
-    jsonFile: String, template: ReactiveMongoTemplate, mapper: ObjectMapper
+    jsonFile: String,
+    template: ReactiveMongoTemplate,
+    mapper: ObjectMapper
 ) {
     val file: File = ClassPathResource(jsonFile).file
-    val dataEntries: Collection<MutableMap<String, Any>> = mapper.readValue(file.inputStream());
+    val dataEntries: Collection<MutableMap<String, Any>> = mapper.readValue(file.inputStream())
 
-    dataEntries.asFlow().map { entry ->
-        entry[CREATED_AT] = mapCreatedAt(entry[CREATED_AT] as MutableMap<String, Any>)
-        val document = Document(entry);
-        template.insert(document, "project").block()
-    }.collect()
+    dataEntries.asFlow()
+        .map { entry ->
+            entry[CREATED_AT] = mapCreatedAt(entry[CREATED_AT] as MutableMap<String, Any>)
+            val document = Document(entry)
+            template.insert(
+                document,
+                "project"
+            )
+                .block()
+        }
+        .collect()
 }

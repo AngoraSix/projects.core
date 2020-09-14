@@ -22,19 +22,26 @@ class MongoConfigUnitTest {
         )
 
         // handled conversions
-        Assertions.assertThat(conversionsOutput.getCustomWriteTarget(ZonedDateTime::class.java).get().name)
+        Assertions.assertThat(
+            conversionsOutput.getCustomWriteTarget(ZonedDateTime::class.java)
+                .get().name
+        )
             .isEqualTo("org.bson.Document")
         Assertions.assertThat(
             conversionsOutput.hasCustomReadTarget(
-                Document::class.java, ZonedDateTime::class.java
+                Document::class.java,
+                ZonedDateTime::class.java
             )
-        ).isTrue()
+        )
+            .isTrue()
         // not handled conversions
         Assertions.assertThat(conversionsOutput.getCustomWriteTarget(Document::class.java)).isEmpty
         Assertions.assertThat(
             conversionsOutput.hasCustomReadTarget(
-                Document::class.java, LocalDateTime::class.java
+                Document::class.java,
+                LocalDateTime::class.java
             )
-        ).isFalse()
+        )
+            .isFalse()
     }
 }

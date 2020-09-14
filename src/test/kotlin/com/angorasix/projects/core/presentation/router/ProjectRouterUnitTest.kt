@@ -29,22 +29,40 @@ class ProjectRouterUnitTest {
     @Throws(Exception::class)
     fun `Given Project router - When expected APIs requested - Then router routes correctly`() = runBlockingTest {
         val outputRouter = router.projectRouterFunction()
-        val mockedRequest = MockServerHttpRequest.get("/mocked");
-        val mockedExchange = MockServerWebExchange.builder(mockedRequest).build();
-        val getAllProjectsRequest = builder().uri(URI("/projects")).exchange(mockedExchange).build()
-        val getSingleProjectRequest = builder().uri(URI("/projects/1")).exchange(mockedExchange).build()
-        val getCreateProjectRequest =
-            builder().method(HttpMethod.POST).uri(URI("/projects")).exchange(mockedExchange).body(
-                ProjectDto("testProjectId", "testProjectName", emptyList(), emptyList(), null)
+        val mockedRequest = MockServerHttpRequest.get("/mocked")
+        val mockedExchange = MockServerWebExchange.builder(mockedRequest)
+            .build()
+        val getAllProjectsRequest = builder().uri(URI("/projects"))
+            .exchange(mockedExchange)
+            .build()
+        val getSingleProjectRequest = builder().uri(URI("/projects/1"))
+            .exchange(mockedExchange)
+            .build()
+        val getCreateProjectRequest = builder().method(HttpMethod.POST)
+            .uri(URI("/projects"))
+            .exchange(mockedExchange)
+            .body(
+                ProjectDto(
+                    "testProjectId",
+                    "testProjectName",
+                    emptyList(),
+                    emptyList(),
+                    null
+                )
             )
-        val invalidRequest = builder().uri(URI("/invalid-path")).exchange(mockedExchange).build()
-        // if routes don't match, they will throw an exception as with the invalid Route; no need to assert anything
-        outputRouter.route(getAllProjectsRequest).awaitSingle()
-        outputRouter.route(getSingleProjectRequest).awaitSingle();
-        outputRouter.route(getCreateProjectRequest).awaitSingle();
+        val invalidRequest = builder().uri(URI("/invalid-path"))
+            .exchange(mockedExchange)
+            .build()
+        // if routes don't match, they will throw an exception as with the invalid Route no need to assert anything
+        outputRouter.route(getAllProjectsRequest)
+            .awaitSingle()
+        outputRouter.route(getSingleProjectRequest)
+            .awaitSingle()
+        outputRouter.route(getCreateProjectRequest)
+            .awaitSingle()
         // disabled until junit-jupiter 5.7.0 is released and included to starter dependency
         //        assertThrows<NoSuchElementException> {
-        //            outputRouter.route(invalidRequest).awaitSingle();
+        //            outputRouter.route(invalidRequest).awaitSingle()
         //        }
     }
 }

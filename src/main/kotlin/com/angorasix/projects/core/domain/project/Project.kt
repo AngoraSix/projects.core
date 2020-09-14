@@ -32,12 +32,17 @@ data class Project @PersistenceConstructor private constructor(
      * @param zone - the `ZoneId` used to indicate the createdAt timestamp
      */
     constructor(
-        name: String, creatorId: String, zone: ZoneId?
+        name: String,
+        creatorId: String,
+        zone: ZoneId?
     ) : this(
         null,
         name,
         mutableSetOf<Attribute<*>>(),
-        ZonedDateTime.now(Optional.ofNullable<ZoneId>(zone).orElse(ZoneId.systemDefault())),
+        ZonedDateTime.now(
+            Optional.ofNullable<ZoneId>(zone)
+                .orElse(ZoneId.systemDefault())
+        ),
         emptySet(),
         creatorId
     )
