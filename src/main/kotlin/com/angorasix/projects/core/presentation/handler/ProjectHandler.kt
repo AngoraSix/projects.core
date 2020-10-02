@@ -33,26 +33,9 @@ class ProjectHandler(private val service: ProjectService) {
      */
     suspend fun listProjects(request: ServerRequest): ServerResponse {
         val projects = service.findProjects()
-            .map { convertProjectToDto(it) } // .map { convertToDto(it) }
+            .map { convertProjectToDto(it) }
         return ok().contentType(MediaType.APPLICATION_JSON)
             .bodyAndAwait(projects)
-    }
-
-    /**
-     * Handler for the Create Projects endpoint, to create a new Project entity.
-     *
-     * @param request - HTTP `ServerRequest` object
-     * @return the `ServerResponse`
-     */
-    suspend fun createProject(request: ServerRequest): ServerResponse {
-        //        // TODO: obtain project and Zone info
-        val project = convertProjectToDomainObject(request.awaitBody<ProjectDto>())
-        val outputProject = convertProjectToDto(service.createProject(project))
-        // TODO HATEOAS for location header
-        return created(URI.create("http://localhost:8080/gertest")).contentType(MediaType.APPLICATION_JSON)
-            .bodyValueAndAwait(
-                outputProject
-            )
     }
 
     /**
@@ -66,28 +49,40 @@ class ProjectHandler(private val service: ProjectService) {
         return service.findSingleProject(projectId)
             ?.let {
                 val outputProject = convertProjectToDto(it)
-                // TODO HATEOAS for location header
                 ok().contentType(MediaType.APPLICATION_JSON)
                     .bodyValueAndAwait(outputProject)
             } ?: ServerResponse.notFound()
             .buildAndAwait()
-        //        return ok().contentType(MediaType.APPLICATION_JSON).bodyValueAndAwait(ProjectDto("asd2", "asd22", "asd2"))
+    }
+
+    /**
+     * Handler for the Create Projects endpoint, to create a new Project entity.
+     *
+     * @param request - HTTP `ServerRequest` object
+     * @return the `ServerResponse`
+     */
+    suspend fun createProject(request: ServerRequest): ServerResponse {
+        val project = convertProjectToDomainObject(request.awaitBody<ProjectDto>())
+        val outputProject = convertProjectToDto(service.createProject(project))
+        return created(URI.create("http://localhost:8080/gertest")).contentType(MediaType.APPLICATION_JSON)
+            .bodyValueAndAwait(
+                outputProject
+            )
     }
 
     companion object {
-        // TODO: revisit these converters
         private fun convertProjectToDto(project: Project): ProjectDto {
             return ProjectDto(
                 project.id,
                 project.name,
                 project.attributes.map { convertAttributeToDto(it) },
                 project.requirements.map { convertAttributeToDto(it) },
-                project.creatorId
+                project.creatorId,
+                project.createdAt
             )
         }
 
         private fun convertProjectToDomainObject(projectDto: ProjectDto): Project {
-            // TODO manage ZoneId and contributor
             return Project(
                 projectDto.name ?: throw IllegalArgumentException("name expected"),
                 "id-test",

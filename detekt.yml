@@ -1,0 +1,7 @@
+empty-blocks:
+  EmptyFunctionBlock:
+    excludes: ['**/*ApplicationTest.kt']
+
+performance:
+  SpreadOperator:
+    excludes: ['**/ProjectsCoreApplication.kt', '**/test/**DocsIntegrationTest.kt']

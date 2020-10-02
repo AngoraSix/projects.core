@@ -69,6 +69,7 @@ class ProjectHandlerUnitTest {
                 "mockedInputProjectName",
                 emptyList(),
                 emptyList(),
+                null,
                 null
             )
             val mockedRequest: ServerRequest = MockServerRequest.builder()

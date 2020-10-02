@@ -1,0 +1,2 @@
+[*IntegrationTest.{kt,kts}]
+disabled_rules=indent

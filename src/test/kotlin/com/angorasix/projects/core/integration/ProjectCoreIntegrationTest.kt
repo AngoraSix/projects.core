@@ -5,33 +5,19 @@ import com.angorasix.projects.core.integration.utils.IntegrationProperties
 import com.angorasix.projects.core.integration.utils.initializeMongodb
 import com.fasterxml.jackson.databind.ObjectMapper
 import kotlinx.coroutines.runBlocking
+import org.hamcrest.Matchers.contains
+import org.hamcrest.Matchers.hasItems
 import org.hamcrest.Matchers.hasSize
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.context.ApplicationContext
-import org.springframework.core.ParameterizedTypeReference
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.http.MediaType
-import org.springframework.restdocs.RestDocumentationContextProvider
-import org.springframework.restdocs.RestDocumentationExtension
-import org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessResponse
-import org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint
-import org.springframework.restdocs.payload.FieldDescriptor
-import org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath
-import org.springframework.restdocs.payload.PayloadDocumentation.responseFields
-import org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath
-import org.springframework.restdocs.webtestclient.WebTestClientRestDocumentation.document
-import org.springframework.restdocs.webtestclient.WebTestClientRestDocumentation.documentationConfiguration
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.web.reactive.server.WebTestClient
 
-inline fun <reified T> typeReference() = object : ParameterizedTypeReference<T>() {}
-
-@ExtendWith(RestDocumentationExtension::class)
 @SpringBootTest(
     classes = [ProjectsCoreApplication::class],
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
@@ -41,38 +27,12 @@ inline fun <reified T> typeReference() = object : ParameterizedTypeReference<T>(
 class ProjectCoreIntegrationTest(
     @Autowired val mongoTemplate: ReactiveMongoTemplate,
     @Autowired val mapper: ObjectMapper,
-    @Autowired val properties: IntegrationProperties
+    @Autowired val properties: IntegrationProperties,
+    @Autowired val webTestClient: WebTestClient
 ) {
 
-    private lateinit var webTestClient: WebTestClient
-
-    var attributeDescriptor = arrayOf<FieldDescriptor>(
-        fieldWithPath("key").description("Key identifier for the attribute"),
-        fieldWithPath("value").description("The value for the particular attribute")
-    )
-
-    var projectDescriptor = arrayOf<FieldDescriptor>(
-        fieldWithPath("name").description("Name of the project"),
-        fieldWithPath("id").description("Project identifier"),
-        fieldWithPath("creatorId").description("Contributor identifier"),
-        subsectionWithPath("attributes[]").description("Array of the attributes that characterize the project"),
-        subsectionWithPath("requirements[]").description("Array of the attributes that are required for the project")
-        //            PayloadDocumentation.beneathPath("attributes[]").withSubsectionId("attribute")//.description("Array of the attributes that characterize the project").
-    )
-    //            fieldWithPath("attributeName").description("Array of the attributes that characterize the project").andWithPrefix("[].", attributeDescriptor),
-    //            fieldWithPath("id").description("Project identifier"))
-
     @BeforeEach
-    fun setUp(
-        applicationContext: ApplicationContext,
-        restDocumentation: RestDocumentationContextProvider
-    ) = runBlocking {
-        webTestClient = WebTestClient.bindToApplicationContext(applicationContext)
-            .configureClient()
-            .filter(
-                documentationConfiguration(restDocumentation)
-            )
-            .build()
+    fun setUp() = runBlocking {
         initializeMongodb(
             properties.mongodb.baseJsonFile,
             mongoTemplate,
@@ -87,30 +47,59 @@ class ProjectCoreIntegrationTest(
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus().isOk.expectBody()
-            //                .consumeWith(document("project",
-            //                responseFields(fieldWithPath("[]").description("An array of projects")).andWithPrefix("[].",
-            //                        *projectDescriptor)))
-
-            .consumeWith(
-                document(
-                    "project",
-                    preprocessResponse(prettyPrint()),
-                    //                        responseFields(beneathPath("[].attributes").withSubsectionId("attribute"), *attributeDescriptor),//fieldWithPath("key").description("Attribute id key")),
-                    responseFields(fieldWithPath("[]").description("An array of projects")).andWithPrefix(
-                        "[].",
-                        *projectDescriptor
+            // @formatter:off
+            .jsonPath("$").isArray.jsonPath("$")
+                .value(
+                    hasSize(2),
+                    Collection::class.java
+                )
+            .jsonPath("$..name")
+                .value(
+                    hasItems(
+                        "Angora Sustainable",
+                        "A Local Project"
                     )
                 )
-            )
-
-            //                .consumeWith(
-            //                        document("attribute", responseFields(*attributeDescriptor)))
-            .jsonPath("$").isArray.jsonPath("$")
-            .value(
-                hasSize(2),
-                Collection::class.java
-            )
-        // .jsonPath("$").value(hasSize(2), Collection::class.java).jsonPath("$[].name").value(
-        //      Matchers.arrayContainingInAnyOrder(setOf("asd", "ads2")))
+            .jsonPath("$..creatorId")
+                .value(
+                    hasItems(
+                        "rozagerardo",
+                        "mockUserId"
+                    )
+                )
+            .jsonPath("$..attributes..key")
+                .value(
+                    hasItems(
+                        "category",
+                        "industry",
+                        "location"
+                    )
+                )
+            .jsonPath("$[?(@.id == '1')].creatorId")
+                .value(contains("rozagerardo"))
+            .jsonPath("$[?(@.id == '1')].name")
+                .value(contains("Angora Sustainable"))
+            .jsonPath("$[?(@.id == '1')].attributes.length()")
+                .isEqualTo(5)
+            .jsonPath("$[?(@.id == '1')].requirements[?(@.key == 'technology')].value")
+                .value(contains("Kotlin"))
+            // Project 2
+            .jsonPath("$[?(@.id == '2')].name")
+                .value(contains("A Local Project"))
+            .jsonPath("$[?(@.id == '2')].creatorId")
+                .value(contains("mockUserId"))
+            .jsonPath("$[?(@.id == '2')].createdAt")
+                .value(
+                    contains(
+                        "2020-09-01T00:00:00-03:00"
+                    )
+                )
+            .jsonPath("$[?(@.id == '2')].attributes.length()")
+                .isEqualTo(3)
+            .jsonPath("$[?(@.id == '2')].attributes[?(@.key == 'location')].value")
+                .value(contains("Argentina/Cordoba/Cordoba"))
+            .jsonPath("$[?(@.id == '2')].requirements.length()")
+                .isEqualTo(2)
+            // @formatter:on
     }
 }
