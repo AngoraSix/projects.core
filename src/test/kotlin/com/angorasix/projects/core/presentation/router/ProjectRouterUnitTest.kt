@@ -8,6 +8,7 @@ import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.http.HttpMethod
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest
@@ -32,14 +33,14 @@ class ProjectRouterUnitTest {
         val mockedRequest = MockServerHttpRequest.get("/mocked")
         val mockedExchange = MockServerWebExchange.builder(mockedRequest)
             .build()
-        val getAllProjectsRequest = builder().uri(URI("/projects"))
+        val getAllProjectsRequest = builder().uri(URI("/projects/"))
             .exchange(mockedExchange)
             .build()
         val getSingleProjectRequest = builder().uri(URI("/projects/1"))
             .exchange(mockedExchange)
             .build()
         val getCreateProjectRequest = builder().method(HttpMethod.POST)
-            .uri(URI("/projects"))
+            .uri(URI("/projects/"))
             .exchange(mockedExchange)
             .body(
                 ProjectDto(
@@ -62,8 +63,9 @@ class ProjectRouterUnitTest {
         outputRouter.route(getCreateProjectRequest)
             .awaitSingle()
         // disabled until junit-jupiter 5.7.0 is released and included to starter dependency
-        //        assertThrows<NoSuchElementException> {
-        //            outputRouter.route(invalidRequest).awaitSingle()
-        //        }
+        assertThrows<NoSuchElementException> {
+            outputRouter.route(invalidRequest)
+                .awaitSingle()
+        }
     }
 }

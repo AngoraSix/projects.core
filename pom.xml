@@ -31,6 +31,12 @@
             <artifactId>spring-cloud-starter</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- check if necessary with newer versions https://github.com/Playtika/testcontainers-spring-boot/issues/562 -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-bootstrap</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>com.playtika.testcontainers</groupId>
             <artifactId>embedded-mongodb</artifactId>
@@ -38,6 +44,7 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
 
     <dependencyManagement>
         <dependencies>

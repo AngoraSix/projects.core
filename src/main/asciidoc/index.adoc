@@ -1,21 +1,46 @@
-= Angorasix Projects Core server
+= Angorasix - Projects Core
 
-GET Projects using cURL:
+[[get-project]]
+== GET Single Project
 
-include::{snippets}/project/curl-request.adoc[]
+[discrete]
+=== Request:
 
-HTTP request:
+include::{snippets}/project-single/http-request.adoc[]
+include::{snippets}/project-single/path-parameters.adoc[]
 
-include::{snippets}/project/http-request.adoc[]
+=== Response:
 
-Request body:
+include::{snippets}/project-single/http-response.adoc[]
+include::{snippets}/project-single/response-fields.adoc[]
 
-include::{snippets}/project/request-body.adoc[]
+[[list-projects]]
+== GET Projects List
 
-HTTP response:
+=== Request:
 
-include::{snippets}/project/http-response.adoc[]
+include::{snippets}/project-list/http-request.adoc[]
 
-Response body:
+=== Response:
 
-include::{snippets}/project/response-body.adoc[]
+include::{snippets}/project-list/http-response.adoc[]
+include::{snippets}/project-list/response-fields.adoc[]
+
+[[create-project]]
+== POST New Project
+
+=== Request:
+
+include::{snippets}/project-create/http-request.adoc[]
+include::{snippets}/project-create/request-fields.adoc[]
+
+=== Response:
+
+include::{snippets}/project-create/http-response.adoc[]
+include::{snippets}/project-create/response-fields.adoc[]
+
+== Commons:
+
+=== Attribute:
+
+include::{snippets}/project-list/response-fields-attribute.adoc[]

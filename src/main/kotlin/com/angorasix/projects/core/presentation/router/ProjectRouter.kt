@@ -1,5 +1,6 @@
 package com.angorasix.projects.core.presentation.router
 
+import com.angorasix.projects.core.presentation.filter.headerFilterFunction
 import com.angorasix.projects.core.presentation.handler.ProjectHandler
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.web.reactive.function.server.RouterFunction
@@ -29,11 +30,12 @@ class ProjectRouter(private val handler: ProjectHandler) {
                     "/",
                     handler::listProjects
                 )
+                POST(
+                    "/",
+                    handler::createProject
+                )
             }
-            POST(
-                "/",
-                handler::createProject
-            )
         }
+        filter(::headerFilterFunction)
     }
 }

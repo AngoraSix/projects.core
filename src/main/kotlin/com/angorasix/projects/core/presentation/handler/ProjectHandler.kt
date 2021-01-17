@@ -32,6 +32,7 @@ class ProjectHandler(private val service: ProjectService) {
      * @return the `ServerResponse`
      */
     suspend fun listProjects(request: ServerRequest): ServerResponse {
+        println(request.attributes())
         val projects = service.findProjects()
             .map { convertProjectToDto(it) }
         return ok().contentType(MediaType.APPLICATION_JSON)

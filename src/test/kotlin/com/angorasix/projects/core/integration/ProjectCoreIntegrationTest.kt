@@ -3,12 +3,17 @@ package com.angorasix.projects.core.integration
 import com.angorasix.projects.core.ProjectsCoreApplication
 import com.angorasix.projects.core.integration.utils.IntegrationProperties
 import com.angorasix.projects.core.integration.utils.initializeMongodb
+import com.angorasix.projects.core.presentation.dto.AttributeDto
+import com.angorasix.projects.core.presentation.dto.ProjectDto
 import com.fasterxml.jackson.databind.ObjectMapper
 import kotlinx.coroutines.runBlocking
+import org.hamcrest.Matchers.allOf
 import org.hamcrest.Matchers.contains
+import org.hamcrest.Matchers.greaterThanOrEqualTo
 import org.hamcrest.Matchers.hasItems
-import org.hamcrest.Matchers.hasSize
-import org.junit.jupiter.api.BeforeEach
+import org.hamcrest.Matchers.not
+import org.hamcrest.Matchers.notNullValue
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.context.properties.EnableConfigurationProperties
@@ -17,6 +22,8 @@ import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.http.MediaType
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.web.reactive.server.WebTestClient
+import reactor.core.publisher.Mono
+import java.time.ZonedDateTime
 
 @SpringBootTest(
     classes = [ProjectsCoreApplication::class],
@@ -31,7 +38,7 @@ class ProjectCoreIntegrationTest(
     @Autowired val webTestClient: WebTestClient
 ) {
 
-    @BeforeEach
+    @BeforeAll
     fun setUp() = runBlocking {
         initializeMongodb(
             properties.mongodb.baseJsonFile,
@@ -41,17 +48,15 @@ class ProjectCoreIntegrationTest(
     }
 
     @Test
-    fun `Given persisted projects - When request existing project - Then Ok response`() {
+    fun `Given persisted projects - When request projects list - Then Ok response with projects`() {
         webTestClient.get()
-            .uri("/projects")
+            .uri("/projects/")
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
-            .expectStatus().isOk.expectBody()
-            // @formatter:off
-            .jsonPath("$").isArray.jsonPath("$")
+            .expectStatus().isOk.expectBody() // @formatter:off
+            .jsonPath("$").isArray.jsonPath("$.length()")
                 .value(
-                    hasSize(2),
-                    Collection::class.java
+                    greaterThanOrEqualTo(2)
                 )
             .jsonPath("$..name")
                 .value(
@@ -101,5 +106,63 @@ class ProjectCoreIntegrationTest(
             .jsonPath("$[?(@.id == '2')].requirements.length()")
                 .isEqualTo(2)
             // @formatter:on
+    }
+
+    @Test
+    fun `Given persisted projects - When request existing project - Then Ok response with two persisted projects`() {
+        webTestClient.get()
+            .uri("/projects/1")
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus().isOk.expectBody() // @formatter:off
+            .jsonPath("$.name")
+                .isEqualTo("Angora Sustainable")
+            .jsonPath("$.creatorId")
+                .isEqualTo("rozagerardo")
+            .jsonPath("$.attributes.length()")
+                .isEqualTo(5)
+            .jsonPath("$.requirements[?(@.key == 'technology')].value")
+                .value(contains("Kotlin"))
+            .jsonPath("$.createdAt")
+                .isEqualTo("2020-08-09T00:23:00-03:00")
+        // @formatter:on
+    }
+
+    @Test
+    fun `Given Project and Angorasix Header - When create new Project - Then Created`() {
+        val newProject = ProjectDto(
+            "id1",
+            "name1",
+            listOf(
+                AttributeDto(
+                    "attribute1Key",
+                    "attribute1Value"
+                )
+            ),
+            listOf(
+                AttributeDto(
+                    "requirement1Key",
+                    "requirement1Value"
+                )
+            ),
+            null,
+            ZonedDateTime.now()
+        )
+        webTestClient.post()
+            .uri("/projects/")
+            .accept(MediaType.APPLICATION_JSON)
+            .body(
+                Mono.just(newProject),
+                ProjectDto::class.java
+            )
+            .exchange()
+            .expectStatus().isCreated.expectBody() // @formatter:off
+            .jsonPath("$.name").isEqualTo("name1")
+            .jsonPath("$.creatorId").isEqualTo("id-test")
+            .jsonPath("$.attributes").isEmpty
+            .jsonPath("$.id").value(allOf(not("id1"), notNullValue()))
+            .jsonPath("$.requirements.length()").isEqualTo(0)
+            .jsonPath("$.createdAt").exists()
+        // @formatter:on
     }
 }

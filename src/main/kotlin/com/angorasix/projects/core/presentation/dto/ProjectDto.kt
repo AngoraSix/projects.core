@@ -9,4 +9,14 @@ data class ProjectDto(
     var requirements: Collection<AttributeDto>?,
     var creatorId: String?,
     var createdAt: ZonedDateTime?
-)
+) {
+
+    constructor(name: String) : this(
+        null,
+        name,
+        emptyList(),
+        emptyList(),
+        null,
+        null
+    )
+}
