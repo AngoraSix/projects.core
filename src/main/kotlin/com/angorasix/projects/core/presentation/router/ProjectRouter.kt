@@ -27,11 +27,11 @@ class ProjectRouter(private val handler: ProjectHandler) {
                     handler::getProject
                 )
                 GET(
-                    "/",
+                    "",
                     handler::listProjects
                 )
                 POST(
-                    "/",
+                    "",
                     handler::createProject
                 )
             }

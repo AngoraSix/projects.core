@@ -11,10 +11,13 @@ data class ProjectDto(
     var createdAt: ZonedDateTime?
 ) {
 
-    constructor(name: String) : this(
+    constructor(
+        name: String,
+        attributes: Collection<AttributeDto> = mutableSetOf<AttributeDto>()
+    ) : this(
         null,
         name,
-        emptyList(),
+        attributes,
         emptyList(),
         null,
         null
