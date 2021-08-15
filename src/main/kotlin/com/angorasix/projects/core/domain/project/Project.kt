@@ -29,16 +29,18 @@ data class Project @PersistenceConstructor private constructor(
      *
      * @param name - the name of the Project, which will be used to generate the id
      * @param creator - a reference to the `Contributor` that created the `Project`
+     * @param attributes - a set of initial attributes
      * @param zone - the `ZoneId` used to indicate the createdAt timestamp
      */
     constructor(
         name: String,
         creatorId: String,
+        attributes: MutableCollection<Attribute<*>>?,
         zone: ZoneId?
     ) : this(
         null,
         name,
-        mutableSetOf<Attribute<*>>(),
+        attributes ?: mutableSetOf<Attribute<*>>(),
         ZonedDateTime.now(
             Optional.ofNullable<ZoneId>(zone)
                 .orElse(ZoneId.systemDefault())

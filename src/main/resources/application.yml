@@ -2,7 +2,7 @@ context:
   initializer:
     classes: com.angorasix.projects.core.BeansInitializer
 server:
-  port: ${PORT:8090}
+  port: ${PORT:9082}
 
 spring:
   application:

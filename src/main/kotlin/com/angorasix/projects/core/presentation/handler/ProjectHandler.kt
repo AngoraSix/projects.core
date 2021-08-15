@@ -87,6 +87,7 @@ class ProjectHandler(private val service: ProjectService) {
             return Project(
                 projectDto.name ?: throw IllegalArgumentException("name expected"),
                 "id-test",
+                (projectDto.attributes?.map { convertAttributeToDomainObject(it) })?.toMutableSet(),
                 ZoneId.of("America/Argentina/Cordoba")
             )
         }
