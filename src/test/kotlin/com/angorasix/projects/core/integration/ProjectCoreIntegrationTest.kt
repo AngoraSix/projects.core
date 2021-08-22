@@ -109,11 +109,7 @@ class ProjectCoreIntegrationTest(
     }
 
     @Test
-    fun `Given persisted projects - When request existing project - Then Ok response with two persisted projects`() { // val asd = webTestClient.get()
-        //     .uri("/projects/1")
-        //     .accept(MediaType.APPLICATION_JSON)
-        //     .exchange().returnResult(Map.class)
-
+    fun `Given persisted projects - When request existing project - Then Ok response with two persisted projects`() {
         webTestClient.get()
             .uri("/projects/1")
             .accept(MediaType.APPLICATION_JSON)
@@ -163,9 +159,13 @@ class ProjectCoreIntegrationTest(
             .expectStatus().isCreated.expectBody() // @formatter:off
             .jsonPath("$.name").isEqualTo("name1")
             .jsonPath("$.creatorId").isEqualTo("id-test")
-            .jsonPath("$.attributes").isEmpty
+            .jsonPath("$.requirements.length()").isEqualTo(1)
+            .jsonPath("$.attributes[0].key").isEqualTo("attribute1Key")
+            .jsonPath("$.attributes[0].value").isEqualTo("attribute1Value")
             .jsonPath("$.id").value(allOf(not("id1"), notNullValue()))
-            .jsonPath("$.requirements.length()").isEqualTo(0)
+            .jsonPath("$.requirements.length()").isEqualTo(1)
+            .jsonPath("$.requirements[0].key").isEqualTo("requirement1Key")
+            .jsonPath("$.requirements[0].value").isEqualTo("requirement1Value")
             .jsonPath("$.createdAt").exists()
         // @formatter:on
     }

@@ -36,12 +36,14 @@ data class Project @PersistenceConstructor private constructor(
         creatorId: String,
         zone: ZoneId? = ZoneId.systemDefault(),
         attributes: MutableSet<Attribute<*>> = mutableSetOf(),
+        requirements: MutableSet<Attribute<*>> = mutableSetOf()
     ) : this(
         null,
         name,
         creatorId,
         ZonedDateTime.now(zone),
         attributes,
+        requirements
     )
 
     /**

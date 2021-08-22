@@ -8,6 +8,6 @@ package com.angorasix.projects.core.domain.attribute
  * @author rozagerardo
  */
 data class Attribute<P>(
+    val key: String,
     val value: P,
-    val key: String
 )

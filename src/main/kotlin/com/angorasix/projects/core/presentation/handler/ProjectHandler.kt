@@ -88,8 +88,8 @@ private fun Project.convertToDto(): ProjectDto {
 
 private fun Attribute<*>.convertToDto(): AttributeDto {
     return AttributeDto(
-        value as String,
-        key
+        key,
+        value.toString()
     )
 }
 
@@ -99,13 +99,15 @@ private fun ProjectDto.convertToDomain(): Project {
         "id-test",
         ZoneId.of("America/Argentina/Cordoba"),
         attributes.map { it.convertToDomain() }
+            .toMutableSet(),
+        requirements.map { it.convertToDomain() }
             .toMutableSet()
     )
 }
 
 private fun AttributeDto.convertToDomain(): Attribute<*> {
     return Attribute(
+        key,
         value,
-        key
     )
 }
