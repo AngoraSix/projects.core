@@ -109,8 +109,7 @@ class ProjectCoreIntegrationTest(
     }
 
     @Test
-    fun `Given persisted projects - When request existing project - Then Ok response with two persisted projects`() {
-        // val asd = webTestClient.get()
+    fun `Given persisted projects - When request existing project - Then Ok response with two persisted projects`() { // val asd = webTestClient.get()
         //     .uri("/projects/1")
         //     .accept(MediaType.APPLICATION_JSON)
         //     .exchange().returnResult(Map.class)
@@ -138,13 +137,13 @@ class ProjectCoreIntegrationTest(
         val newProject = ProjectDto(
             "id1",
             "name1",
-            listOf(
+            mutableSetOf(
                 AttributeDto(
                     "attribute1Key",
                     "attribute1Value"
                 )
             ),
-            listOf(
+            mutableSetOf(
                 AttributeDto(
                     "requirement1Key",
                     "requirement1Value"

@@ -1,7 +1,6 @@
 package com.angorasix.projects.core.presentation.handler
 
 import com.angorasix.projects.core.application.ProjectService
-import com.angorasix.projects.core.domain.attribute.Attribute
 import com.angorasix.projects.core.domain.project.Project
 import com.angorasix.projects.core.presentation.dto.ProjectDto
 import io.mockk.coEvery
@@ -45,7 +44,6 @@ class ProjectHandlerUnitTest {
         val mockedProject = Project(
             "mockedProjectName",
             "creator_id",
-            mutableSetOf<Attribute<*>>(),
             ZoneId.systemDefault()
         )
         val retrievedProject = flowOf(mockedProject)
@@ -69,18 +67,13 @@ class ProjectHandlerUnitTest {
             val mockedProjectDto = ProjectDto(
                 null,
                 "mockedInputProjectName",
-                emptyList(),
-                emptyList(),
-                null,
-                null
             )
             val mockedRequest: ServerRequest = MockServerRequest.builder()
                 .body(mono { mockedProjectDto })
             val mockedProject = Project(
                 "mockedProjectName",
                 "creator_id",
-                mutableSetOf<Attribute<*>>(),
-                ZoneId.systemDefault()
+                ZoneId.systemDefault(),
             )
             coEvery { service.createProject(ofType(Project::class)) } returns mockedProject
 
@@ -107,7 +100,6 @@ class ProjectHandlerUnitTest {
         val mockedProject = Project(
             "mockedProjectName",
             "creator_id",
-            mutableSetOf<Attribute<*>>(),
             ZoneId.systemDefault()
         )
         coEvery { service.findSingleProject(projectId) } returns mockedProject

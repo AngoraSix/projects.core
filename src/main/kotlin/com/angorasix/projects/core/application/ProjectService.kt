@@ -18,9 +18,7 @@ class ProjectService(private val repository: ProjectRepository) {
      *
      * @return [Flux] of [Project]
      */
-    fun findProjects(): Flow<Project> {
-        return repository.findAll()
-    }
+    fun findProjects(): Flow<Project> = repository.findAll()
 
     /**
      * Method to create a new [Project].
@@ -28,9 +26,7 @@ class ProjectService(private val repository: ProjectRepository) {
      * @param newProject [Project] to persist
      * @return a [Mono] with the persisted [Project]
      */
-    suspend fun createProject(newProject: Project): Project {
-        return repository.save(newProject)
-    }
+    suspend fun createProject(newProject: Project): Project = repository.save(newProject)
 
     /**
      * Method to update an existing [Project].
@@ -38,9 +34,7 @@ class ProjectService(private val repository: ProjectRepository) {
      * @param updatedProject the [Project] to be updated
      * @return a [Mono] with the persisted [Project]
      */
-    suspend fun updateProject(updatedProject: Project): Project {
-        return repository.save(updatedProject)
-    }
+    suspend fun updateProject(updatedProject: Project): Project = repository.save(updatedProject)
 
     /**
      * Method to find a single [Project] from an id.
@@ -48,7 +42,5 @@ class ProjectService(private val repository: ProjectRepository) {
      * @param projectId [Project] id
      * @return a [Mono] with the persisted [Project]
      */
-    suspend fun findSingleProject(projectId: String): Project? {
-        return repository.findById(projectId)
-    }
+    suspend fun findSingleProject(projectId: String): Project? = repository.findById(projectId)
 }

@@ -22,15 +22,13 @@ object ZonedDateTimeConvertersUtils {
     @ReadingConverter
     class ZonedDateTimeReaderConverter : Converter<Document?, ZonedDateTime?> {
         override fun convert(source: Document): ZonedDateTime? {
-            source?.let {
-                val dateTime = it.getDate(DATE_TIME)
-                val zoneId = it.getString(ZONE)
-                val zone = ZoneId.of(zoneId)
-                return ZonedDateTime.ofInstant(
-                    dateTime.toInstant(),
-                    zone
-                )
-            }
+            val dateTime = source.getDate(DATE_TIME)
+            val zoneId = source.getString(ZONE)
+            val zone = ZoneId.of(zoneId)
+            return ZonedDateTime.ofInstant(
+                dateTime.toInstant(),
+                zone
+            )
         }
     }
 
@@ -38,12 +36,10 @@ object ZonedDateTimeConvertersUtils {
     @WritingConverter
     class ZonedDateTimeWritingConverter : Converter<ZonedDateTime?, Document?> {
         override fun convert(source: ZonedDateTime): Document? {
-            source?.let {
-                val document = Document()
-                document[DATE_TIME] = Date.from(it.toInstant())
-                document[ZONE] = it.zone.id
-                return document
-            }
+            val document = Document()
+            document[DATE_TIME] = Date.from(source.toInstant())
+            document[ZONE] = source.zone.id
+            return document
         }
     }
 }
