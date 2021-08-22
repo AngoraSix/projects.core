@@ -31,13 +31,12 @@ class ProjectHandler(private val service: ProjectService) {
      * @param request - HTTP `ServerRequest` object
      * @return the `ServerResponse`
      */
-    suspend fun listProjects(request: ServerRequest): ServerResponse {
-        println(request.attributes())
-        val projects = service.findProjects()
-            .map { convertProjectToDto(it) }
-        return ok().contentType(MediaType.APPLICATION_JSON)
-            .bodyAndAwait(projects)
-    }
+    suspend fun listProjects(request: ServerRequest): ServerResponse = service.findProjects()
+        .map { it.convertToDto() }
+        .let {
+            ok().contentType(MediaType.APPLICATION_JSON)
+                .bodyAndAwait(it)
+        }
 
     /**
      * Handler for the Get Single Project endpoint, retrieving a Mono with the requested Project.
@@ -49,7 +48,7 @@ class ProjectHandler(private val service: ProjectService) {
         val projectId = request.pathVariable("id")
         return service.findSingleProject(projectId)
             ?.let {
-                val outputProject = convertProjectToDto(it)
+                val outputProject = it.convertToDto()
                 ok().contentType(MediaType.APPLICATION_JSON)
                     .bodyValueAndAwait(outputProject)
             } ?: ServerResponse.notFound()
@@ -63,47 +62,52 @@ class ProjectHandler(private val service: ProjectService) {
      * @return the `ServerResponse`
      */
     suspend fun createProject(request: ServerRequest): ServerResponse {
-        val project = convertProjectToDomainObject(request.awaitBody<ProjectDto>())
-        val outputProject = convertProjectToDto(service.createProject(project))
+        val project = request.awaitBody<ProjectDto>()
+            .convertToDomain()
+        val outputProject = service.createProject(project)
+            .convertToDto()
         return created(URI.create("http://localhost:8080/gertest")).contentType(MediaType.APPLICATION_JSON)
             .bodyValueAndAwait(
                 outputProject
             )
     }
+}
 
-    companion object {
-        private fun convertProjectToDto(project: Project): ProjectDto {
-            return ProjectDto(
-                project.id,
-                project.name,
-                project.attributes.map { convertAttributeToDto(it) },
-                project.requirements.map { convertAttributeToDto(it) },
-                project.creatorId,
-                project.createdAt
-            )
-        }
+private fun Project.convertToDto(): ProjectDto {
+    return ProjectDto(
+        id,
+        name,
+        attributes.map { it.convertToDto() }
+            .toMutableSet(),
+        requirements.map { it.convertToDto() }
+            .toMutableSet(),
+        creatorId,
+        createdAt
+    )
+}
 
-        private fun convertProjectToDomainObject(projectDto: ProjectDto): Project {
-            return Project(
-                projectDto.name ?: throw IllegalArgumentException("name expected"),
-                "id-test",
-                (projectDto.attributes?.map { convertAttributeToDomainObject(it) })?.toMutableSet(),
-                ZoneId.of("America/Argentina/Cordoba")
-            )
-        }
+private fun Attribute<*>.convertToDto(): AttributeDto {
+    return AttributeDto(
+        key,
+        value.toString()
+    )
+}
 
-        private fun convertAttributeToDto(attribute: Attribute<*>): AttributeDto {
-            return AttributeDto(
-                attribute.value as String,
-                attribute.key
-            )
-        }
+private fun ProjectDto.convertToDomain(): Project {
+    return Project(
+        name ?: throw IllegalArgumentException("Project name expected"),
+        "id-test",
+        ZoneId.of("America/Argentina/Cordoba"),
+        attributes.map { it.convertToDomain() }
+            .toMutableSet(),
+        requirements.map { it.convertToDomain() }
+            .toMutableSet()
+    )
+}
 
-        private fun convertAttributeToDomainObject(attributeDto: AttributeDto): Attribute<*> {
-            return Attribute(
-                attributeDto.value,
-                attributeDto.key
-            )
-        }
-    }
+private fun AttributeDto.convertToDomain(): Attribute<*> {
+    return Attribute(
+        key,
+        value,
+    )
 }

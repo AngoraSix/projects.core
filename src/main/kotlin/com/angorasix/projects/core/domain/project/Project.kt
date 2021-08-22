@@ -5,7 +5,6 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.PersistenceConstructor
 import java.time.ZoneId
 import java.time.ZonedDateTime
-import java.util.Optional
 
 /**
  * Project Aggregate Root.
@@ -18,35 +17,33 @@ import java.util.Optional
 data class Project @PersistenceConstructor private constructor(
     @field:Id val id: String?,
     var name: String,
-    var attributes: MutableCollection<Attribute<*>> = mutableSetOf<Attribute<*>>(),
+    val creatorId: String,
     val createdAt: ZonedDateTime,
-    var requirements: Collection<Attribute<*>> = mutableSetOf<Attribute<*>>(),
-    val creatorId: String
+    var attributes: MutableSet<Attribute<*>> = mutableSetOf<Attribute<*>>(),
+    var requirements: MutableSet<Attribute<*>> = mutableSetOf<Attribute<*>>(),
 ) {
 
     /**
      * The final constructor that sets all initial fields.
      *
      * @param name - the name of the Project, which will be used to generate the id
-     * @param creator - a reference to the `Contributor` that created the `Project`
-     * @param attributes - a set of initial attributes
+     * @param creatorId - a reference to the `Contributor` that created the `Project`
      * @param zone - the `ZoneId` used to indicate the createdAt timestamp
+     * @param attributes - a set of initial attributes
      */
     constructor(
         name: String,
         creatorId: String,
-        attributes: MutableCollection<Attribute<*>>?,
-        zone: ZoneId?
+        zone: ZoneId? = ZoneId.systemDefault(),
+        attributes: MutableSet<Attribute<*>> = mutableSetOf(),
+        requirements: MutableSet<Attribute<*>> = mutableSetOf()
     ) : this(
         null,
         name,
-        attributes ?: mutableSetOf<Attribute<*>>(),
-        ZonedDateTime.now(
-            Optional.ofNullable<ZoneId>(zone)
-                .orElse(ZoneId.systemDefault())
-        ),
-        emptySet(),
-        creatorId
+        creatorId,
+        ZonedDateTime.now(zone),
+        attributes,
+        requirements
     )
 
     /**

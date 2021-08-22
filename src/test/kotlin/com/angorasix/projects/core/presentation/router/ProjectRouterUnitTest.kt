@@ -46,10 +46,6 @@ class ProjectRouterUnitTest {
                 ProjectDto(
                     "testProjectId",
                     "testProjectName",
-                    emptyList(),
-                    emptyList(),
-                    null,
-                    null
                 )
             )
         val invalidRequest = builder().uri(URI("/invalid-path"))

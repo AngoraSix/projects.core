@@ -1,6 +1,5 @@
 package com.angorasix.projects.core.application
 
-import com.angorasix.projects.core.domain.attribute.Attribute
 import com.angorasix.projects.core.domain.project.Project
 import com.angorasix.projects.core.domain.project.ProjectRepository
 import io.mockk.coEvery
@@ -34,7 +33,6 @@ class ProjectServiceUnitTest {
         val mockedProject = Project(
             "mockedProjectName",
             "creator_id",
-            mutableSetOf<Attribute<*>>(),
             ZoneId.systemDefault()
         )
         coEvery { repository.findAll() } returns flowOf(mockedProject)
@@ -54,7 +52,6 @@ class ProjectServiceUnitTest {
         val mockedProject = Project(
             "mockedProjectName",
             "creator_id",
-            mutableSetOf<Attribute<*>>(),
             ZoneId.systemDefault()
         )
         coEvery { repository.findById(mockedProjectId) } returns mockedProject
@@ -69,13 +66,11 @@ class ProjectServiceUnitTest {
         val mockedProject = Project(
             "mockedProjectName",
             "creator_id",
-            mutableSetOf<Attribute<*>>(),
             ZoneId.systemDefault()
         )
         val savedProject = Project(
             "savedProjectName",
             "creator_id",
-            mutableSetOf<Attribute<*>>(),
             ZoneId.systemDefault()
         )
         coEvery { repository.save(mockedProject) } returns savedProject
@@ -90,13 +85,11 @@ class ProjectServiceUnitTest {
         val mockedProject = Project(
             "mockedProjectName",
             "creator_id",
-            mutableSetOf<Attribute<*>>(),
             ZoneId.systemDefault()
         )
         val updatedProject = Project(
             "updatedProjectName",
             "creator_id",
-            mutableSetOf<Attribute<*>>(),
             ZoneId.systemDefault()
         )
         coEvery { repository.save(mockedProject) } returns updatedProject
