@@ -1,7 +1,7 @@
 package com.angorasix.projects.core.presentation.handler
 
 import com.angorasix.projects.core.application.ProjectService
-import com.angorasix.projects.core.domain.attribute.Attribute
+import com.angorasix.projects.core.domain.project.Attribute
 import com.angorasix.projects.core.domain.project.Project
 import com.angorasix.projects.core.presentation.dto.AttributeDto
 import com.angorasix.projects.core.presentation.dto.ProjectDto

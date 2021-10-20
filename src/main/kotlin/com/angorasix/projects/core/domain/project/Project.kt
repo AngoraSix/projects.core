@@ -1,6 +1,5 @@
 package com.angorasix.projects.core.domain.project
 
-import com.angorasix.projects.core.domain.attribute.Attribute
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.PersistenceConstructor
 import java.time.ZoneId

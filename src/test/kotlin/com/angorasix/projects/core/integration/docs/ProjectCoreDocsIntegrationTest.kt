@@ -1,7 +1,7 @@
 package com.angorasix.projects.core.integration.docs
 
 import com.angorasix.projects.core.ProjectsCoreApplication
-import com.angorasix.projects.core.domain.attribute.Attribute
+import com.angorasix.projects.core.domain.project.Attribute
 import com.angorasix.projects.core.domain.project.Project
 import com.angorasix.projects.core.integration.utils.IntegrationProperties
 import com.angorasix.projects.core.integration.utils.initializeMongodb
