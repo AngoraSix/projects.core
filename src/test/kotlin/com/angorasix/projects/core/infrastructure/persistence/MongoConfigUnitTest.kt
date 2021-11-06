@@ -16,8 +16,8 @@ class MongoConfigUnitTest {
         val writerConverter = ZonedDateTimeConvertersUtils.ZonedDateTimeWritingConverter()
         val conversionsOutput = MongoCustomConversions(
             listOf(
-                ZonedDateTimeConvertersUtils.ZonedDateTimeReaderConverter(),
-                ZonedDateTimeConvertersUtils.ZonedDateTimeWritingConverter()
+                readerConverter,
+                writerConverter
             )
         )
 

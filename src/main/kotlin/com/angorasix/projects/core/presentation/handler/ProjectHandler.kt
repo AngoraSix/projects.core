@@ -31,12 +31,15 @@ class ProjectHandler(private val service: ProjectService) {
      * @param request - HTTP `ServerRequest` object
      * @return the `ServerResponse`
      */
-    suspend fun listProjects(request: ServerRequest): ServerResponse = service.findProjects()
-        .map { it.convertToDto() }
-        .let {
-            ok().contentType(MediaType.APPLICATION_JSON)
-                .bodyAndAwait(it)
-        }
+    suspend fun listProjects(
+        @Suppress("UNUSED_PARAMETER") request: ServerRequest
+    ): ServerResponse =
+        service.findProjects()
+            .map { it.convertToDto() }
+            .let {
+                ok().contentType(MediaType.APPLICATION_JSON)
+                    .bodyAndAwait(it)
+            }
 
     /**
      * Handler for the Get Single Project endpoint, retrieving a Mono with the requested Project.

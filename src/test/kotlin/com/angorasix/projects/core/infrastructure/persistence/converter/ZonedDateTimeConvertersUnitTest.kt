@@ -31,7 +31,7 @@ class ZonedDateTimeConvertersUnitTest {
         )
         val outputDocument = writingConverter.convert(inputZdt)
         assertThat<Any>(outputDocument!!["zone"]).isEqualTo("America/Argentina/Cordoba")
-        Assertions.assertThat(outputDocument!!.getDate("dateTime"))
+        Assertions.assertThat(outputDocument.getDate("dateTime"))
             .isEqualTo(
                 Date.from(
                     inputZdt.withZoneSameInstant(
@@ -57,7 +57,7 @@ class ZonedDateTimeConvertersUnitTest {
         )
         val outputDocument = writingConverter.convert(inputZdt)
         assertThat<Any>(outputDocument!!["zone"]).isEqualTo("Pacific/Auckland")
-        Assertions.assertThat(outputDocument!!.getDate("dateTime"))
+        Assertions.assertThat(outputDocument.getDate("dateTime"))
             .isEqualTo(
                 Date.from(
                     inputZdt.withZoneSameInstant(

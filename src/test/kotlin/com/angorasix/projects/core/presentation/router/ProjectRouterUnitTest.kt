@@ -28,6 +28,7 @@ class ProjectRouterUnitTest {
 
     @Test
     @Throws(Exception::class)
+    @kotlinx.coroutines.ExperimentalCoroutinesApi
     fun `Given Project router - When expected APIs requested - Then router routes correctly`() = runBlockingTest {
         val outputRouter = router.projectRouterFunction()
         val mockedRequest = MockServerHttpRequest.get("/mocked")

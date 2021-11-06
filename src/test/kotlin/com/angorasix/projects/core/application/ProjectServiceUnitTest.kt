@@ -29,6 +29,7 @@ class ProjectServiceUnitTest {
 
     @Test
     @Throws(Exception::class)
+    @kotlinx.coroutines.ExperimentalCoroutinesApi
     fun `given existing projects - when request find projects - then receive projects`() = runBlockingTest {
         val mockedProject = Project(
             "mockedProjectName",
@@ -47,6 +48,7 @@ class ProjectServiceUnitTest {
 
     @Test
     @Throws(Exception::class)
+    @kotlinx.coroutines.ExperimentalCoroutinesApi
     fun givenExistingProject_whenFindSingleProjects_thenServiceRetrievesMonoWithProject() = runBlockingTest {
         val mockedProjectId = "id1"
         val mockedProject = Project(
@@ -62,6 +64,7 @@ class ProjectServiceUnitTest {
 
     @Test
     @Throws(Exception::class)
+    @kotlinx.coroutines.ExperimentalCoroutinesApi
     fun whenCreateProject_thenServiceRetrieveSavedProject() = runBlockingTest {
         val mockedProject = Project(
             "mockedProjectName",
@@ -81,6 +84,7 @@ class ProjectServiceUnitTest {
 
     @Test
     @Throws(Exception::class)
+    @kotlinx.coroutines.ExperimentalCoroutinesApi
     fun whenUpdateProject_thenServiceRetrieveUpdatedProject() = runBlockingTest {
         val mockedProject = Project(
             "mockedProjectName",

@@ -35,7 +35,7 @@ suspend fun initializeMongodb(
 
     dataEntries.asFlow()
         .map { entry ->
-            entry[CREATED_AT] = mapCreatedAt(entry[CREATED_AT] as MutableMap<String, Any>)
+            entry[CREATED_AT] = mapCreatedAt(@Suppress("UNCHECKED_CAST") (entry[CREATED_AT] as MutableMap<String, Any>))
             val document = Document(entry)
             template.insert(
                 document,
