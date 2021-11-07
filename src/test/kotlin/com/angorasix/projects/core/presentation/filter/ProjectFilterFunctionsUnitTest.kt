@@ -21,6 +21,7 @@ public class ProjectFilterFunctionsUnitTest {
 
     @Test
     @Throws(Exception::class)
+    @kotlinx.coroutines.ExperimentalCoroutinesApi
     fun `Given request - When headerFilterFunction invoked - Then response contains attribute`() = runBlockingTest {
         val mockedRequest: ServerRequest = MockServerRequest.builder()
             .header(

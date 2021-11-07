@@ -1,7 +1,7 @@
 package com.angorasix.projects.core.presentation.handler
 
 import com.angorasix.projects.core.application.ProjectService
-import com.angorasix.projects.core.domain.attribute.Attribute
+import com.angorasix.projects.core.domain.project.Attribute
 import com.angorasix.projects.core.domain.project.Project
 import com.angorasix.projects.core.presentation.dto.AttributeDto
 import com.angorasix.projects.core.presentation.dto.ProjectDto
@@ -31,12 +31,15 @@ class ProjectHandler(private val service: ProjectService) {
      * @param request - HTTP `ServerRequest` object
      * @return the `ServerResponse`
      */
-    suspend fun listProjects(request: ServerRequest): ServerResponse = service.findProjects()
-        .map { it.convertToDto() }
-        .let {
-            ok().contentType(MediaType.APPLICATION_JSON)
-                .bodyAndAwait(it)
-        }
+    suspend fun listProjects(
+        @Suppress("UNUSED_PARAMETER") request: ServerRequest
+    ): ServerResponse =
+        service.findProjects()
+            .map { it.convertToDto() }
+            .let {
+                ok().contentType(MediaType.APPLICATION_JSON)
+                    .bodyAndAwait(it)
+            }
 
     /**
      * Handler for the Get Single Project endpoint, retrieving a Mono with the requested Project.

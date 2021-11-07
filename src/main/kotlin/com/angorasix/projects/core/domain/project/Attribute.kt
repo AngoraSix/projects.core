@@ -1,4 +1,4 @@
-package com.angorasix.projects.core.domain.attribute
+package com.angorasix.projects.core.domain.project
 
 /**
  * Value Object.

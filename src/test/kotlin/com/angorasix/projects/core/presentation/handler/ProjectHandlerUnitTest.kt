@@ -38,6 +38,7 @@ class ProjectHandlerUnitTest {
 
     @Test
     @Throws(Exception::class)
+    @kotlinx.coroutines.ExperimentalCoroutinesApi
     fun `Given existing projects - When list projects - Then handler retrieves Ok Response`() = runBlockingTest {
         val mockedRequest: ServerRequest = MockServerRequest.builder()
             .build()
@@ -52,7 +53,7 @@ class ProjectHandlerUnitTest {
         val outputResponse = handler.listProjects(mockedRequest)
 
         assertThat(outputResponse.statusCode()).isEqualTo(HttpStatus.OK)
-        val responseBody = (outputResponse as EntityResponse<Flow<ProjectDto>>).entity()
+        val responseBody = (@Suppress("UNCHECKED_CAST") (outputResponse as EntityResponse<Flow<ProjectDto>>)).entity()
         responseBody.collect {
             assertThat(it.name).isEqualTo("mockedProjectName")
             assertThat(it.creatorId).isEqualTo("creator_id")
@@ -80,7 +81,7 @@ class ProjectHandlerUnitTest {
             val outputResponse = handler.createProject(mockedRequest)
 
             assertThat(outputResponse.statusCode()).isEqualTo(HttpStatus.CREATED)
-            val responseBody = (outputResponse as EntityResponse<ProjectDto>).entity()
+            val responseBody = (@Suppress("UNCHECKED_CAST") (outputResponse as EntityResponse<ProjectDto>)).entity()
             assertThat(responseBody).isNotSameAs(mockedProjectDto)
             assertThat(responseBody.name).isEqualTo("mockedProjectName")
             assertThat(responseBody.creatorId).isEqualTo("creator_id")
@@ -89,6 +90,7 @@ class ProjectHandlerUnitTest {
 
     @Test
     @Throws(Exception::class)
+    @kotlinx.coroutines.ExperimentalCoroutinesApi
     fun `Given existing projects - When get project - Then handler retrieves Ok Response`() = runBlockingTest {
         val projectId = "projectId"
         val mockedRequest: ServerRequest = MockServerRequest.builder()
@@ -107,7 +109,7 @@ class ProjectHandlerUnitTest {
         val outputResponse = handler.getProject(mockedRequest)
 
         assertThat(outputResponse.statusCode()).isEqualTo(HttpStatus.OK)
-        val responseBody = (outputResponse as EntityResponse<ProjectDto>).entity()
+        val responseBody = @Suppress("UNCHECKED_CAST") (outputResponse as EntityResponse<ProjectDto>).entity()
         assertThat(responseBody.name).isEqualTo("mockedProjectName")
         assertThat(responseBody.creatorId).isEqualTo("creator_id")
         coVerify { service.findSingleProject(projectId) }
