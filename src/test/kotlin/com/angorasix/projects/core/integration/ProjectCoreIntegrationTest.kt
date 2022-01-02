@@ -50,7 +50,7 @@ class ProjectCoreIntegrationTest(
     @Test
     fun `Given persisted projects - When request projects list - Then Ok response with projects`() {
         webTestClient.get()
-            .uri("/projects/")
+            .uri("/projects-core/")
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus().isOk.expectBody() // @formatter:off
@@ -111,7 +111,7 @@ class ProjectCoreIntegrationTest(
     @Test
     fun `Given persisted projects - When request existing project - Then Ok response with two persisted projects`() {
         webTestClient.get()
-            .uri("/projects/1")
+            .uri("/projects-core/1")
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus().isOk.expectBody() // @formatter:off
@@ -149,7 +149,7 @@ class ProjectCoreIntegrationTest(
             ZonedDateTime.now()
         )
         webTestClient.post()
-            .uri("/projects/")
+            .uri("/projects-core/")
             .accept(MediaType.APPLICATION_JSON)
             .body(
                 Mono.just(newProject),

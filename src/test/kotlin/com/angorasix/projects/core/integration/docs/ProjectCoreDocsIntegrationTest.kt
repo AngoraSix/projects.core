@@ -130,7 +130,7 @@ class ProjectCoreDocsIntegrationTest(
         val newProject = ProjectDto("New Project Name")
         webTestClient.post()
             .uri(
-                "/projects/",
+                "/projects-core/",
             )
             .accept(MediaType.APPLICATION_JSON)
             .body(Mono.just(newProject))
@@ -152,7 +152,7 @@ class ProjectCoreDocsIntegrationTest(
     private fun executeAndDocumentGetSingleProjectRequest() {
         webTestClient.get()
             .uri(
-                "/projects/{projectId}",
+                "/projects-core/{projectId}",
                 1
             )
             .accept(MediaType.APPLICATION_JSON)
@@ -170,7 +170,7 @@ class ProjectCoreDocsIntegrationTest(
 
     private fun executeAndDocumentGetListProjectsRequest() {
         webTestClient.get()
-            .uri("/projects/")
+            .uri("/projects-core/")
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus().isOk.expectBody()
