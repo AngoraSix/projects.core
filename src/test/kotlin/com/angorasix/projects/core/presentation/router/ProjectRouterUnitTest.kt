@@ -34,14 +34,14 @@ class ProjectRouterUnitTest {
         val mockedRequest = MockServerHttpRequest.get("/mocked")
         val mockedExchange = MockServerWebExchange.builder(mockedRequest)
             .build()
-        val getAllProjectsRequest = builder().uri(URI("/projects/"))
+        val getAllProjectsRequest = builder().uri(URI("/projects-core/"))
             .exchange(mockedExchange)
             .build()
-        val getSingleProjectRequest = builder().uri(URI("/projects/1"))
+        val getSingleProjectRequest = builder().uri(URI("/projects-core/1"))
             .exchange(mockedExchange)
             .build()
         val getCreateProjectRequest = builder().method(HttpMethod.POST)
-            .uri(URI("/projects/"))
+            .uri(URI("/projects-core/"))
             .exchange(mockedExchange)
             .body(
                 ProjectDto(

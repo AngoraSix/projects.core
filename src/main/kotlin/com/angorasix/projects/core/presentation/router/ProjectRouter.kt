@@ -20,7 +20,7 @@ class ProjectRouter(private val handler: ProjectHandler) {
      */
     fun projectRouterFunction() = coRouter {
 
-        "/projects".nest {
+        "/projects-core".nest {
             accept(APPLICATION_JSON).nest {
                 GET(
                     "/{id}",
