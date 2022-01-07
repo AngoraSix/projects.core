@@ -3,6 +3,7 @@ package com.angorasix.projects.core.presentation.handler
 import com.angorasix.projects.core.application.ProjectService
 import com.angorasix.projects.core.domain.project.Attribute
 import com.angorasix.projects.core.domain.project.Project
+import com.angorasix.projects.core.infrastructure.config.ServiceConfigs
 import com.angorasix.projects.core.presentation.dto.AttributeDto
 import com.angorasix.projects.core.presentation.dto.ContributorHeaderDto
 import com.angorasix.projects.core.presentation.dto.ProjectDto
@@ -26,7 +27,9 @@ import java.util.*
  *
  * @author rozagerardo
  */
-class ProjectHandler(private val service: ProjectService, private val objectMapper: ObjectMapper) {
+class ProjectHandler(private val service: ProjectService,
+                     private val objectMapper: ObjectMapper,
+                     private val serviceConfigs: ServiceConfigs) {
 
 
     /**
@@ -71,7 +74,7 @@ class ProjectHandler(private val service: ProjectService, private val objectMapp
      */
     suspend fun createProject(request: ServerRequest): ServerResponse {
         val project = request.awaitBody<ProjectDto>()
-                .convertToDomain(extractContributorId(request, objectMapper))
+                .convertToDomain(extractContributorId(request, objectMapper, serviceConfigs.api.contributorHeader))
         val outputProject = service.createProject(project)
                 .convertToDto()
         return created(URI.create("http://localhost:8080/gertest")).contentType(MediaType.APPLICATION_JSON)
@@ -120,8 +123,8 @@ private fun AttributeDto.convertToDomain(): Attribute<*> {
     )
 }
 
-private fun extractContributorId(request: ServerRequest, objectMapper: ObjectMapper): String {
-    val contributorHeaderString = Base64.getUrlDecoder().decode(request.headers().header("A6-Contributor").first())
+private fun extractContributorId(request: ServerRequest, objectMapper: ObjectMapper, headerName: String): String {
+    val contributorHeaderString = Base64.getUrlDecoder().decode(request.headers().header(headerName).first())
     val contributorHeader = objectMapper.readValue(contributorHeaderString, ContributorHeaderDto::class.java)
     return contributorHeader.contributorId
 }

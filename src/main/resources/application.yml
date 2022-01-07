@@ -10,3 +10,7 @@ spring:
   data:
     mongodb:
       uri: ${MONGO_DB_URI:mongodb://localhost:27017/projects.core}
+
+configs:
+  api:
+    contributorHeader: ${A6_PROJECTS_CORE_CONTRIBUTORHEADER:A6-Contributor}
