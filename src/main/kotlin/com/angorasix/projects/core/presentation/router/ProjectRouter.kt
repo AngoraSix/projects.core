@@ -1,9 +1,12 @@
 package com.angorasix.projects.core.presentation.router
 
+import com.angorasix.projects.core.infrastructure.config.ServiceConfigs
 import com.angorasix.projects.core.presentation.filter.headerFilterFunction
 import com.angorasix.projects.core.presentation.handler.ProjectHandler
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.web.reactive.function.server.RouterFunction
+import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.coRouter
 
 /**
@@ -11,7 +14,9 @@ import org.springframework.web.reactive.function.server.coRouter
  *
  * @author rozagerardo
  */
-class ProjectRouter(private val handler: ProjectHandler) {
+class ProjectRouter(private val handler: ProjectHandler,
+                    private val objectMapper: ObjectMapper,
+                    private val serviceConfigs: ServiceConfigs) {
 
     /**
      * Main RouterFunction configuration for all endpoints related to Projects.
@@ -36,6 +41,8 @@ class ProjectRouter(private val handler: ProjectHandler) {
                 )
             }
         }
-        filter(::headerFilterFunction)
+        filter{ request, next ->
+            headerFilterFunction(request, next, serviceConfigs, objectMapper)
+        }
     }
 }

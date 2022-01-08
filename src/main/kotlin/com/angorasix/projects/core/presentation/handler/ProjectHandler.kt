@@ -10,6 +10,8 @@ import com.angorasix.projects.core.presentation.dto.ProjectDto
 import com.fasterxml.jackson.databind.ObjectMapper
 import kotlinx.coroutines.flow.map
 import org.springframework.http.MediaType
+import org.springframework.security.core.context.ReactiveSecurityContextHolder
+import org.springframework.security.core.context.SecurityContext
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.ServerResponse.created
@@ -27,9 +29,7 @@ import java.util.*
  *
  * @author rozagerardo
  */
-class ProjectHandler(private val service: ProjectService,
-                     private val objectMapper: ObjectMapper,
-                     private val serviceConfigs: ServiceConfigs) {
+class ProjectHandler(private val service: ProjectService) {
 
 
     /**
@@ -72,16 +72,17 @@ class ProjectHandler(private val service: ProjectService,
      * @param request - HTTP `ServerRequest` object
      * @return the `ServerResponse`
      */
-    suspend fun createProject(request: ServerRequest): ServerResponse {
+    suspend fun createProject(request: ServerRequest): ServerResponse = ReactiveSecurityContextHolder.getContext().map(SecurityContext::getAuthentication).map {
+        context ->
         val project = request.awaitBody<ProjectDto>()
-                .convertToDomain(extractContributorId(request, objectMapper, serviceConfigs.api.contributorHeader))
+                .convertToDomain("")
         val outputProject = service.createProject(project)
                 .convertToDto()
         return created(URI.create("http://localhost:8080/gertest")).contentType(MediaType.APPLICATION_JSON)
                 .bodyValueAndAwait(
                         outputProject
                 )
-    }
+    }.
 }
 
 private fun Project.convertToDto(): ProjectDto {
@@ -122,9 +123,9 @@ private fun AttributeDto.convertToDomain(): Attribute<*> {
             value,
     )
 }
-
-private fun extractContributorId(request: ServerRequest, objectMapper: ObjectMapper, headerName: String): String {
-    val contributorHeaderString = Base64.getUrlDecoder().decode(request.headers().header(headerName).first())
-    val contributorHeader = objectMapper.readValue(contributorHeaderString, ContributorHeaderDto::class.java)
-    return contributorHeader.contributorId
-}
+//
+//private fun extractContributorId(request: ServerRequest, objectMapper: ObjectMapper, headerName: String): String {
+//    val contributorHeaderString = Base64.getUrlDecoder().decode(request.headers().header(headerName).first())
+//    val contributorHeader = objectMapper.readValue(contributorHeaderString, ContributorHeaderDto::class.java)
+//    return contributorHeader.contributorId
+//}
