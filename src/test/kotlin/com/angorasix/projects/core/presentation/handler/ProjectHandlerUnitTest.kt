@@ -5,7 +5,6 @@ import com.angorasix.projects.core.domain.project.Project
 import com.angorasix.projects.core.infrastructure.config.ApiConfigs
 import com.angorasix.projects.core.infrastructure.config.ServiceConfigs
 import com.angorasix.projects.core.presentation.dto.ProjectDto
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.impl.annotations.MockK
@@ -34,16 +33,13 @@ class ProjectHandlerUnitTest {
     @MockK
     private lateinit var service: ProjectService
 
-    @MockK
-    private lateinit var objectMapper: ObjectMapper
-
     private lateinit var serviceConfigs: ServiceConfigs
 
     @BeforeEach
     fun init() {
         serviceConfigs = ServiceConfigs()
         serviceConfigs.api = ApiConfigs("MockedContributorHeader")
-        handler = ProjectHandler(service, objectMapper, serviceConfigs)
+        handler = ProjectHandler(service, serviceConfigs)
     }
 
     @Test

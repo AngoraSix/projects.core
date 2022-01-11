@@ -2,18 +2,16 @@ package com.angorasix.projects.core.presentation.handler
 
 import com.angorasix.projects.core.application.ProjectService
 import com.angorasix.projects.core.domain.project.Attribute
+import com.angorasix.projects.core.domain.project.ContributorDetails
 import com.angorasix.projects.core.domain.project.Project
 import com.angorasix.projects.core.infrastructure.config.ServiceConfigs
 import com.angorasix.projects.core.presentation.dto.AttributeDto
-import com.angorasix.projects.core.presentation.dto.ContributorHeaderDto
 import com.angorasix.projects.core.presentation.dto.ProjectDto
-import com.fasterxml.jackson.databind.ObjectMapper
 import kotlinx.coroutines.flow.map
 import org.springframework.http.MediaType
-import org.springframework.security.core.context.ReactiveSecurityContextHolder
-import org.springframework.security.core.context.SecurityContext
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
+import org.springframework.web.reactive.function.server.ServerResponse.badRequest
 import org.springframework.web.reactive.function.server.ServerResponse.created
 import org.springframework.web.reactive.function.server.ServerResponse.ok
 import org.springframework.web.reactive.function.server.awaitBody
@@ -22,14 +20,16 @@ import org.springframework.web.reactive.function.server.bodyValueAndAwait
 import org.springframework.web.reactive.function.server.buildAndAwait
 import java.net.URI
 import java.time.ZoneId
-import java.util.*
 
 /**
  * Project Handler (Controller) containing all handler functions related to Project endpoints.
  *
  * @author rozagerardo
  */
-class ProjectHandler(private val service: ProjectService) {
+class ProjectHandler(
+        private val service: ProjectService,
+        private val serviceConfigs: ServiceConfigs,
+) {
 
 
     /**
@@ -72,17 +72,21 @@ class ProjectHandler(private val service: ProjectService) {
      * @param request - HTTP `ServerRequest` object
      * @return the `ServerResponse`
      */
-    suspend fun createProject(request: ServerRequest): ServerResponse = ReactiveSecurityContextHolder.getContext().map(SecurityContext::getAuthentication).map {
-        context ->
-        val project = request.awaitBody<ProjectDto>()
-                .convertToDomain("")
-        val outputProject = service.createProject(project)
-                .convertToDto()
-        return created(URI.create("http://localhost:8080/gertest")).contentType(MediaType.APPLICATION_JSON)
-                .bodyValueAndAwait(
-                        outputProject
-                )
-    }.
+    suspend fun createProject(request: ServerRequest): ServerResponse {
+        val contributorDetails = request.attributes()[serviceConfigs.api.contributorHeader]
+        return if (contributorDetails is ContributorDetails) {
+            val project = request.awaitBody<ProjectDto>()
+                    .convertToDomain(contributorDetails.contributorId)
+            val outputProject = service.createProject(project)
+                    .convertToDto()
+            created(URI.create("http://localhost:8080/gertest")).contentType(MediaType.APPLICATION_JSON)
+                    .bodyValueAndAwait(
+                            outputProject
+                    )
+        } else {
+            badRequest().buildAndAwait()
+        }
+    }
 }
 
 private fun Project.convertToDto(): ProjectDto {
@@ -123,9 +127,3 @@ private fun AttributeDto.convertToDomain(): Attribute<*> {
             value,
     )
 }
-//
-//private fun extractContributorId(request: ServerRequest, objectMapper: ObjectMapper, headerName: String): String {
-//    val contributorHeaderString = Base64.getUrlDecoder().decode(request.headers().header(headerName).first())
-//    val contributorHeader = objectMapper.readValue(contributorHeaderString, ContributorHeaderDto::class.java)
-//    return contributorHeader.contributorId
-//}

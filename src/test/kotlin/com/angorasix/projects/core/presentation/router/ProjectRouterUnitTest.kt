@@ -1,7 +1,10 @@
 package com.angorasix.projects.core.presentation.router
 
+import com.angorasix.projects.core.infrastructure.config.ApiConfigs
+import com.angorasix.projects.core.infrastructure.config.ServiceConfigs
 import com.angorasix.projects.core.presentation.dto.ProjectDto
 import com.angorasix.projects.core.presentation.handler.ProjectHandler
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.reactive.awaitSingle
@@ -21,9 +24,16 @@ class ProjectRouterUnitTest {
 
     private lateinit var router: ProjectRouter
 
+    @MockK
+    private lateinit var objectMapper: ObjectMapper
+
+    private lateinit var serviceConfigs: ServiceConfigs
+
     @BeforeEach
     fun init(@MockK handler: ProjectHandler) {
-        router = ProjectRouter(handler)
+        serviceConfigs = ServiceConfigs()
+        serviceConfigs.api = ApiConfigs("MockedContributorHeader")
+        router = ProjectRouter(handler, objectMapper, serviceConfigs)
     }
 
     @Test
@@ -33,36 +43,36 @@ class ProjectRouterUnitTest {
         val outputRouter = router.projectRouterFunction()
         val mockedRequest = MockServerHttpRequest.get("/mocked")
         val mockedExchange = MockServerWebExchange.builder(mockedRequest)
-            .build()
+                .build()
         val getAllProjectsRequest = builder().uri(URI("/projects-core/"))
-            .exchange(mockedExchange)
-            .build()
+                .exchange(mockedExchange)
+                .build()
         val getSingleProjectRequest = builder().uri(URI("/projects-core/1"))
-            .exchange(mockedExchange)
-            .build()
+                .exchange(mockedExchange)
+                .build()
         val getCreateProjectRequest = builder().method(HttpMethod.POST)
-            .uri(URI("/projects-core/"))
-            .exchange(mockedExchange)
-            .body(
-                ProjectDto(
-                    "testProjectId",
-                    "testProjectName",
+                .uri(URI("/projects-core/"))
+                .exchange(mockedExchange)
+                .body(
+                        ProjectDto(
+                                "testProjectId",
+                                "testProjectName",
+                        )
                 )
-            )
         val invalidRequest = builder().uri(URI("/invalid-path"))
-            .exchange(mockedExchange)
-            .build()
+                .exchange(mockedExchange)
+                .build()
         // if routes don't match, they will throw an exception as with the invalid Route no need to assert anything
         outputRouter.route(getAllProjectsRequest)
-            .awaitSingle()
+                .awaitSingle()
         outputRouter.route(getSingleProjectRequest)
-            .awaitSingle()
+                .awaitSingle()
         outputRouter.route(getCreateProjectRequest)
-            .awaitSingle()
+                .awaitSingle()
         // disabled until junit-jupiter 5.7.0 is released and included to starter dependency
         assertThrows<NoSuchElementException> {
             outputRouter.route(invalidRequest)
-                .awaitSingle()
+                    .awaitSingle()
         }
     }
 }

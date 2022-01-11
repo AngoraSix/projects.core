@@ -4,9 +4,9 @@ import com.angorasix.projects.core.infrastructure.config.ServiceConfigs
 import com.angorasix.projects.core.presentation.filter.headerFilterFunction
 import com.angorasix.projects.core.presentation.handler.ProjectHandler
 import com.fasterxml.jackson.databind.ObjectMapper
+import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.web.reactive.function.server.RouterFunction
-import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.coRouter
 
 /**
@@ -26,23 +26,26 @@ class ProjectRouter(private val handler: ProjectHandler,
     fun projectRouterFunction() = coRouter {
 
         "/projects-core".nest {
+
+            method(HttpMethod.POST).nest{
+                filter { request, next ->
+                    headerFilterFunction(request, next, serviceConfigs, objectMapper)
+                }
+                POST("",
+                        handler::createProject
+                )
+            }
             accept(APPLICATION_JSON).nest {
                 GET(
-                    "/{id}",
-                    handler::getProject
+                        "/{id}",
+                        handler::getProject
                 )
                 GET(
-                    "",
-                    handler::listProjects
-                )
-                POST(
-                    "",
-                    handler::createProject
+                        "",
+                        handler::listProjects
                 )
             }
         }
-        filter{ request, next ->
-            headerFilterFunction(request, next, serviceConfigs, objectMapper)
-        }
+
     }
 }
