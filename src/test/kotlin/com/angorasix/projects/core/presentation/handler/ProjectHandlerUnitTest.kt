@@ -2,6 +2,8 @@ package com.angorasix.projects.core.presentation.handler
 
 import com.angorasix.projects.core.application.ProjectService
 import com.angorasix.projects.core.domain.project.Project
+import com.angorasix.projects.core.infrastructure.config.ApiConfigs
+import com.angorasix.projects.core.infrastructure.config.ServiceConfigs
 import com.angorasix.projects.core.presentation.dto.ProjectDto
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -31,9 +33,13 @@ class ProjectHandlerUnitTest {
     @MockK
     private lateinit var service: ProjectService
 
+    private lateinit var serviceConfigs: ServiceConfigs
+
     @BeforeEach
     fun init() {
-        handler = ProjectHandler(service)
+        serviceConfigs = ServiceConfigs()
+        serviceConfigs.api = ApiConfigs("MockedContributorHeader")
+        handler = ProjectHandler(service, serviceConfigs)
     }
 
     @Test
@@ -41,11 +47,11 @@ class ProjectHandlerUnitTest {
     @kotlinx.coroutines.ExperimentalCoroutinesApi
     fun `Given existing projects - When list projects - Then handler retrieves Ok Response`() = runBlockingTest {
         val mockedRequest: ServerRequest = MockServerRequest.builder()
-            .build()
+                .build()
         val mockedProject = Project(
-            "mockedProjectName",
-            "creator_id",
-            ZoneId.systemDefault()
+                "mockedProjectName",
+                "creator_id",
+                ZoneId.systemDefault()
         )
         val retrievedProject = flowOf(mockedProject)
         coEvery { service.findProjects() } returns retrievedProject
@@ -64,29 +70,29 @@ class ProjectHandlerUnitTest {
     @Test
     @Throws(Exception::class)
     fun `Given request with project - When create project - Then handler retrieves Created`() =
-        runBlocking { // = runBlockingTest { // until we resolve why service.createProject is hanging https://github.com/Kotlin/kotlinx.coroutines/issues/1204
-            val mockedProjectDto = ProjectDto(
-                null,
-                "mockedInputProjectName",
-            )
-            val mockedRequest: ServerRequest = MockServerRequest.builder()
-                .body(mono { mockedProjectDto })
-            val mockedProject = Project(
-                "mockedProjectName",
-                "creator_id",
-                ZoneId.systemDefault(),
-            )
-            coEvery { service.createProject(ofType(Project::class)) } returns mockedProject
+            runBlocking { // = runBlockingTest { // until we resolve why service.createProject is hanging https://github.com/Kotlin/kotlinx.coroutines/issues/1204
+                val mockedProjectDto = ProjectDto(
+                        null,
+                        "mockedInputProjectName",
+                )
+                val mockedRequest: ServerRequest = MockServerRequest.builder()
+                        .body(mono { mockedProjectDto })
+                val mockedProject = Project(
+                        "mockedProjectName",
+                        "creator_id",
+                        ZoneId.systemDefault(),
+                )
+                coEvery { service.createProject(ofType(Project::class)) } returns mockedProject
 
-            val outputResponse = handler.createProject(mockedRequest)
+                val outputResponse = handler.createProject(mockedRequest)
 
-            assertThat(outputResponse.statusCode()).isEqualTo(HttpStatus.CREATED)
-            val responseBody = (@Suppress("UNCHECKED_CAST") (outputResponse as EntityResponse<ProjectDto>)).entity()
-            assertThat(responseBody).isNotSameAs(mockedProjectDto)
-            assertThat(responseBody.name).isEqualTo("mockedProjectName")
-            assertThat(responseBody.creatorId).isEqualTo("creator_id")
-            coVerify { service.createProject(ofType(Project::class)) }
-        }
+                assertThat(outputResponse.statusCode()).isEqualTo(HttpStatus.CREATED)
+                val responseBody = (@Suppress("UNCHECKED_CAST") (outputResponse as EntityResponse<ProjectDto>)).entity()
+                assertThat(responseBody).isNotSameAs(mockedProjectDto)
+                assertThat(responseBody.name).isEqualTo("mockedProjectName")
+                assertThat(responseBody.creatorId).isEqualTo("creator_id")
+                coVerify { service.createProject(ofType(Project::class)) }
+            }
 
     @Test
     @Throws(Exception::class)
@@ -94,15 +100,15 @@ class ProjectHandlerUnitTest {
     fun `Given existing projects - When get project - Then handler retrieves Ok Response`() = runBlockingTest {
         val projectId = "projectId"
         val mockedRequest: ServerRequest = MockServerRequest.builder()
-            .pathVariable(
-                "id",
-                projectId
-            )
-            .build()
+                .pathVariable(
+                        "id",
+                        projectId
+                )
+                .build()
         val mockedProject = Project(
-            "mockedProjectName",
-            "creator_id",
-            ZoneId.systemDefault()
+                "mockedProjectName",
+                "creator_id",
+                ZoneId.systemDefault()
         )
         coEvery { service.findSingleProject(projectId) } returns mockedProject
 

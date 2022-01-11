@@ -2,13 +2,16 @@ package com.angorasix.projects.core.presentation.handler
 
 import com.angorasix.projects.core.application.ProjectService
 import com.angorasix.projects.core.domain.project.Attribute
+import com.angorasix.projects.core.domain.project.ContributorDetails
 import com.angorasix.projects.core.domain.project.Project
+import com.angorasix.projects.core.infrastructure.config.ServiceConfigs
 import com.angorasix.projects.core.presentation.dto.AttributeDto
 import com.angorasix.projects.core.presentation.dto.ProjectDto
 import kotlinx.coroutines.flow.map
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
+import org.springframework.web.reactive.function.server.ServerResponse.badRequest
 import org.springframework.web.reactive.function.server.ServerResponse.created
 import org.springframework.web.reactive.function.server.ServerResponse.ok
 import org.springframework.web.reactive.function.server.awaitBody
@@ -23,7 +26,11 @@ import java.time.ZoneId
  *
  * @author rozagerardo
  */
-class ProjectHandler(private val service: ProjectService) {
+class ProjectHandler(
+        private val service: ProjectService,
+        private val serviceConfigs: ServiceConfigs,
+) {
+
 
     /**
      * Handler for the List Projects endpoint, retrieving a Flux including all persisted Projects.
@@ -32,14 +39,15 @@ class ProjectHandler(private val service: ProjectService) {
      * @return the `ServerResponse`
      */
     suspend fun listProjects(
-        @Suppress("UNUSED_PARAMETER") request: ServerRequest
-    ): ServerResponse =
-        service.findProjects()
-            .map { it.convertToDto() }
-            .let {
-                ok().contentType(MediaType.APPLICATION_JSON)
-                    .bodyAndAwait(it)
-            }
+            @Suppress("UNUSED_PARAMETER") request: ServerRequest
+    ): ServerResponse {
+        return service.findProjects()
+                .map { it.convertToDto() }
+                .let {
+                    ok().contentType(MediaType.APPLICATION_JSON)
+                            .bodyAndAwait(it)
+                }
+    }
 
     /**
      * Handler for the Get Single Project endpoint, retrieving a Mono with the requested Project.
@@ -50,12 +58,12 @@ class ProjectHandler(private val service: ProjectService) {
     suspend fun getProject(request: ServerRequest): ServerResponse {
         val projectId = request.pathVariable("id")
         return service.findSingleProject(projectId)
-            ?.let {
-                val outputProject = it.convertToDto()
-                ok().contentType(MediaType.APPLICATION_JSON)
-                    .bodyValueAndAwait(outputProject)
-            } ?: ServerResponse.notFound()
-            .buildAndAwait()
+                ?.let {
+                    val outputProject = it.convertToDto()
+                    ok().contentType(MediaType.APPLICATION_JSON)
+                            .bodyValueAndAwait(outputProject)
+                } ?: ServerResponse.notFound()
+                .buildAndAwait()
     }
 
     /**
@@ -65,52 +73,57 @@ class ProjectHandler(private val service: ProjectService) {
      * @return the `ServerResponse`
      */
     suspend fun createProject(request: ServerRequest): ServerResponse {
-        val project = request.awaitBody<ProjectDto>()
-            .convertToDomain()
-        val outputProject = service.createProject(project)
-            .convertToDto()
-        return created(URI.create("http://localhost:8080/gertest")).contentType(MediaType.APPLICATION_JSON)
-            .bodyValueAndAwait(
-                outputProject
-            )
+        val contributorDetails = request.attributes()[serviceConfigs.api.contributorHeader]
+        return if (contributorDetails is ContributorDetails) {
+            val project = request.awaitBody<ProjectDto>()
+                    .convertToDomain(contributorDetails.contributorId)
+            val outputProject = service.createProject(project)
+                    .convertToDto()
+            created(URI.create("http://localhost:8080/gertest")).contentType(MediaType.APPLICATION_JSON)
+                    .bodyValueAndAwait(
+                            outputProject
+                    )
+        } else {
+            badRequest().buildAndAwait()
+        }
     }
 }
 
 private fun Project.convertToDto(): ProjectDto {
     return ProjectDto(
-        id,
-        name,
-        attributes.map { it.convertToDto() }
-            .toMutableSet(),
-        requirements.map { it.convertToDto() }
-            .toMutableSet(),
-        creatorId,
-        createdAt
+            id,
+            name,
+            attributes.map { it.convertToDto() }
+                    .toMutableSet(),
+            requirements.map { it.convertToDto() }
+                    .toMutableSet(),
+            creatorId,
+            createdAt
     )
 }
 
 private fun Attribute<*>.convertToDto(): AttributeDto {
     return AttributeDto(
-        key,
-        value.toString()
+            key,
+            value.toString()
     )
 }
 
-private fun ProjectDto.convertToDomain(): Project {
+private fun ProjectDto.convertToDomain(contributorId: String): Project {
     return Project(
-        name ?: throw IllegalArgumentException("Project name expected"),
-        "id-test",
-        ZoneId.of("America/Argentina/Cordoba"),
-        attributes.map { it.convertToDomain() }
-            .toMutableSet(),
-        requirements.map { it.convertToDomain() }
-            .toMutableSet()
+            name ?: throw IllegalArgumentException("Project name expected"),
+            contributorId,
+            ZoneId.of("America/Argentina/Cordoba"),
+            attributes.map { it.convertToDomain() }
+                    .toMutableSet(),
+            requirements.map { it.convertToDomain() }
+                    .toMutableSet()
     )
 }
 
 private fun AttributeDto.convertToDomain(): Attribute<*> {
     return Attribute(
-        key,
-        value,
+            key,
+            value,
     )
 }
