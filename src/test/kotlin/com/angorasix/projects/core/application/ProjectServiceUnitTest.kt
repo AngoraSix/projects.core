@@ -2,6 +2,7 @@ package com.angorasix.projects.core.application
 
 import com.angorasix.projects.core.domain.project.Project
 import com.angorasix.projects.core.domain.project.ProjectRepository
+import com.angorasix.projects.core.infrastructure.queryfilters.ListProjectsFilter
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.impl.annotations.MockK
@@ -38,7 +39,7 @@ class ProjectServiceUnitTest {
         )
         coEvery { repository.findAll() } returns flowOf(mockedProject)
 
-        val outputProjects = service.findProjects()
+        val outputProjects = service.findProjects(ListProjectsFilter())
 
         outputProjects.collect {
             assertThat<Project>(it).isSameAs(mockedProject)

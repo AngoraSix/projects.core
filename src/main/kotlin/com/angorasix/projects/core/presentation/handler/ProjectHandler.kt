@@ -5,10 +5,12 @@ import com.angorasix.projects.core.domain.project.Attribute
 import com.angorasix.projects.core.domain.project.ContributorDetails
 import com.angorasix.projects.core.domain.project.Project
 import com.angorasix.projects.core.infrastructure.config.ServiceConfigs
+import com.angorasix.projects.core.infrastructure.queryfilters.ListProjectsFilter
 import com.angorasix.projects.core.presentation.dto.AttributeDto
 import com.angorasix.projects.core.presentation.dto.ProjectDto
 import kotlinx.coroutines.flow.map
 import org.springframework.http.MediaType
+import org.springframework.util.MultiValueMap
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.ServerResponse.badRequest
@@ -41,7 +43,7 @@ class ProjectHandler(
     suspend fun listProjects(
             @Suppress("UNUSED_PARAMETER") request: ServerRequest
     ): ServerResponse {
-        return service.findProjects()
+        return service.findProjects(request.queryParams().toQueryFilter())
                 .map { it.convertToDto() }
                 .let {
                     ok().contentType(MediaType.APPLICATION_JSON)
@@ -126,4 +128,8 @@ private fun AttributeDto.convertToDomain(): Attribute<*> {
             key,
             value,
     )
+}
+
+private fun MultiValueMap<String, String>.toQueryFilter(): ListProjectsFilter {
+    return ListProjectsFilter(get("ids")?.flatMap { it.split(",") })
 }
