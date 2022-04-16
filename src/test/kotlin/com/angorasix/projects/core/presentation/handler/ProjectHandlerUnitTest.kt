@@ -4,6 +4,7 @@ import com.angorasix.projects.core.application.ProjectService
 import com.angorasix.projects.core.domain.project.Project
 import com.angorasix.projects.core.infrastructure.config.ApiConfigs
 import com.angorasix.projects.core.infrastructure.config.ServiceConfigs
+import com.angorasix.projects.core.infrastructure.queryfilters.ListProjectsFilter
 import com.angorasix.projects.core.presentation.dto.ProjectDto
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -54,7 +55,7 @@ class ProjectHandlerUnitTest {
                 ZoneId.systemDefault()
         )
         val retrievedProject = flowOf(mockedProject)
-        coEvery { service.findProjects() } returns retrievedProject
+        coEvery { service.findProjects(ListProjectsFilter()) } returns retrievedProject
 
         val outputResponse = handler.listProjects(mockedRequest)
 
@@ -64,7 +65,7 @@ class ProjectHandlerUnitTest {
             assertThat(it.name).isEqualTo("mockedProjectName")
             assertThat(it.creatorId).isEqualTo("creator_id")
         }
-        coVerify { service.findProjects() }
+        coVerify { service.findProjects(ListProjectsFilter()) }
     }
 
     @Test

@@ -2,6 +2,7 @@ package com.angorasix.projects.core.application
 
 import com.angorasix.projects.core.domain.project.Project
 import com.angorasix.projects.core.domain.project.ProjectRepository
+import com.angorasix.projects.core.infrastructure.queryfilters.ListProjectsFilter
 import kotlinx.coroutines.flow.Flow
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -18,7 +19,7 @@ class ProjectService(private val repository: ProjectRepository) {
      *
      * @return [Flux] of [Project]
      */
-    fun findProjects(): Flow<Project> = repository.findAll()
+    fun findProjects(filter: ListProjectsFilter): Flow<Project> = filter.ids?.let { repository.findAllById(it) } ?: repository.findAll()
 
     /**
      * Method to create a new [Project].
