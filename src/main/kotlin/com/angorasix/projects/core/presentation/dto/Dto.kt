@@ -18,6 +18,7 @@ data class ProjectDto(
         var attributes: MutableSet<AttributeDto> = mutableSetOf(),
         var requirements: MutableSet<AttributeDto> = mutableSetOf(),
         var creatorId: String? = null,
+        var adminId: String? = null,
         var createdAt: ZonedDateTime? = null
 ) {
 

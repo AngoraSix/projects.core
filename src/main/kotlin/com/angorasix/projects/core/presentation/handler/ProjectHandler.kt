@@ -100,6 +100,7 @@ private fun Project.convertToDto(): ProjectDto {
             requirements.map { it.convertToDto() }
                     .toMutableSet(),
             creatorId,
+            adminId,
             createdAt
     )
 }
@@ -114,6 +115,7 @@ private fun Attribute<*>.convertToDto(): AttributeDto {
 private fun ProjectDto.convertToDomain(contributorId: String): Project {
     return Project(
             name ?: throw IllegalArgumentException("Project name expected"),
+            contributorId,
             contributorId,
             ZoneId.of("America/Argentina/Cordoba"),
             attributes.map { it.convertToDomain() }

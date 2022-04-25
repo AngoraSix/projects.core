@@ -35,6 +35,7 @@ class ProjectServiceUnitTest {
         val mockedProject = Project(
             "mockedProjectName",
             "creator_id",
+                "creator_id",
             ZoneId.systemDefault()
         )
         coEvery { repository.findAll() } returns flowOf(mockedProject)
@@ -55,6 +56,7 @@ class ProjectServiceUnitTest {
         val mockedProject = Project(
             "mockedProjectName",
             "creator_id",
+                "creator_id",
             ZoneId.systemDefault()
         )
         coEvery { repository.findById(mockedProjectId) } returns mockedProject
@@ -70,11 +72,13 @@ class ProjectServiceUnitTest {
         val mockedProject = Project(
             "mockedProjectName",
             "creator_id",
+                "creator_id",
             ZoneId.systemDefault()
         )
         val savedProject = Project(
             "savedProjectName",
             "creator_id",
+                "creator_id",
             ZoneId.systemDefault()
         )
         coEvery { repository.save(mockedProject) } returns savedProject
@@ -90,11 +94,13 @@ class ProjectServiceUnitTest {
         val mockedProject = Project(
             "mockedProjectName",
             "creator_id",
+                "creator_id",
             ZoneId.systemDefault()
         )
         val updatedProject = Project(
             "updatedProjectName",
             "creator_id",
+                "creator_id",
             ZoneId.systemDefault()
         )
         coEvery { repository.save(mockedProject) } returns updatedProject

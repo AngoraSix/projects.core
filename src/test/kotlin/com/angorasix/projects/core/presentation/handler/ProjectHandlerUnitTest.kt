@@ -52,6 +52,7 @@ class ProjectHandlerUnitTest {
         val mockedProject = Project(
                 "mockedProjectName",
                 "creator_id",
+                "creator_id",
                 ZoneId.systemDefault()
         )
         val retrievedProject = flowOf(mockedProject)
@@ -81,6 +82,7 @@ class ProjectHandlerUnitTest {
                 val mockedProject = Project(
                         "mockedProjectName",
                         "creator_id",
+                        "creator_id",
                         ZoneId.systemDefault(),
                 )
                 coEvery { service.createProject(ofType(Project::class)) } returns mockedProject
@@ -108,6 +110,7 @@ class ProjectHandlerUnitTest {
                 .build()
         val mockedProject = Project(
                 "mockedProjectName",
+                "creator_id",
                 "creator_id",
                 ZoneId.systemDefault()
         )
