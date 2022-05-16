@@ -7,6 +7,7 @@ import com.angorasix.projects.core.domain.project.Project
 import com.angorasix.projects.core.infrastructure.config.ServiceConfigs
 import com.angorasix.projects.core.infrastructure.queryfilters.ListProjectsFilter
 import com.angorasix.projects.core.presentation.dto.AttributeDto
+import com.angorasix.projects.core.presentation.dto.IsAdminDto
 import com.angorasix.projects.core.presentation.dto.ProjectDto
 import kotlinx.coroutines.flow.map
 import org.springframework.http.MediaType
@@ -66,6 +67,27 @@ class ProjectHandler(
                             .bodyValueAndAwait(outputProject)
                 } ?: ServerResponse.notFound()
                 .buildAndAwait()
+    }
+
+    /**
+     * Handler for the Get Single Project endpoint, retrieving a Mono with the requested Project.
+     *
+     * @param request - HTTP `ServerRequest` object
+     * @return the `ServerResponse`
+     */
+    suspend fun validateAdminUser(request: ServerRequest): ServerResponse {
+        val contributorDetails = request.attributes()[serviceConfigs.api.contributorHeader]
+        val projectId = request.pathVariable("id")
+        return if (contributorDetails is ContributorDetails) {
+            service.findSingleProject(projectId)
+                    ?.let {
+                        val result = it.adminId == contributorDetails.contributorId
+                        ok().contentType(MediaType.APPLICATION_JSON)
+                                .bodyValueAndAwait(IsAdminDto(result))
+                    } ?: ServerResponse.notFound().buildAndAwait()
+        } else {
+            badRequest().buildAndAwait()
+        }
     }
 
     /**
