@@ -100,7 +100,7 @@ class ProjectHandler(
         val contributorDetails = request.attributes()[serviceConfigs.api.contributorHeader]
         return if (contributorDetails is ContributorDetails) {
             val project = request.awaitBody<ProjectDto>()
-                    .convertToDomain(contributorDetails.contributorId)
+                    .convertToDomain(contributorDetails.contributorId, contributorDetails.contributorId)
             val outputProject = service.createProject(project)
                     .convertToDto()
             created(URI.create("http://localhost:8080/gertest")).contentType(MediaType.APPLICATION_JSON)
@@ -110,6 +110,24 @@ class ProjectHandler(
         } else {
             badRequest().buildAndAwait()
         }
+    }
+
+    /**
+     * Handler for the Update Project endpoint, retrieving a Mono with the updated Project.
+     *
+     * @param request - HTTP `ServerRequest` object
+     * @return the `ServerResponse`
+     */
+    suspend fun updateProject(request: ServerRequest): ServerResponse {
+        val projectId = request.pathVariable("id")
+        val updateProjectData = request.awaitBody<ProjectDto>().let { it.convertToDomain(it.creatorId ?: "", it.adminId ?: "") }
+        return service.updateProject(projectId, updateProjectData)
+                ?.let {
+                    val outputProject = it.convertToDto()
+                    ok().contentType(MediaType.APPLICATION_JSON)
+                            .bodyValueAndAwait(outputProject)
+                } ?: ServerResponse.notFound()
+                .buildAndAwait()
     }
 }
 
@@ -134,11 +152,11 @@ private fun Attribute<*>.convertToDto(): AttributeDto {
     )
 }
 
-private fun ProjectDto.convertToDomain(contributorId: String): Project {
+private fun ProjectDto.convertToDomain(contributorId: String, adminId: String): Project {
     return Project(
             name ?: throw IllegalArgumentException("Project name expected"),
             contributorId,
-            contributorId,
+            adminId,
             ZoneId.of("America/Argentina/Cordoba"),
             attributes.map { it.convertToDomain() }
                     .toMutableSet(),
