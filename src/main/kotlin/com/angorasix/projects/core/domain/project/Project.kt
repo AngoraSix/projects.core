@@ -14,12 +14,13 @@ import java.time.ZonedDateTime
  * @author rozagerardo
  */
 data class Project @PersistenceConstructor private constructor(
-    @field:Id val id: String?,
-    var name: String,
-    val creatorId: String,
-    val createdAt: ZonedDateTime,
-    var attributes: MutableSet<Attribute<*>> = mutableSetOf<Attribute<*>>(),
-    var requirements: MutableSet<Attribute<*>> = mutableSetOf<Attribute<*>>(),
+        @field:Id val id: String?,
+        var name: String,
+        val creatorId: String,
+        val adminId: String?,
+        val createdAt: ZonedDateTime,
+        var attributes: MutableSet<Attribute<*>> = mutableSetOf<Attribute<*>>(),
+        var requirements: MutableSet<Attribute<*>> = mutableSetOf<Attribute<*>>(),
 ) {
 
     /**
@@ -31,18 +32,20 @@ data class Project @PersistenceConstructor private constructor(
      * @param attributes - a set of initial attributes
      */
     constructor(
-        name: String,
-        creatorId: String,
-        zone: ZoneId? = ZoneId.systemDefault(),
-        attributes: MutableSet<Attribute<*>> = mutableSetOf(),
-        requirements: MutableSet<Attribute<*>> = mutableSetOf()
+            name: String,
+            creatorId: String,
+            adminId: String,
+            zone: ZoneId? = ZoneId.systemDefault(),
+            attributes: MutableSet<Attribute<*>> = mutableSetOf(),
+            requirements: MutableSet<Attribute<*>> = mutableSetOf()
     ) : this(
-        null,
-        name,
-        creatorId,
-        ZonedDateTime.now(zone),
-        attributes,
-        requirements
+            null,
+            name,
+            creatorId,
+            adminId,
+            ZonedDateTime.now(zone),
+            attributes,
+            requirements
     )
 
     /**

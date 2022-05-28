@@ -35,6 +35,23 @@ class ProjectRouter(private val handler: ProjectHandler,
                         handler::createProject
                 )
             }
+            method(HttpMethod.PUT).nest{
+                filter { request, next ->
+                    headerFilterFunction(request, next, serviceConfigs, objectMapper)
+                }
+                PUT("/{id}",
+                        handler::updateProject
+                )
+            }
+            method(HttpMethod.GET).nest{
+                filter { request, next ->
+                    headerFilterFunction(request, next, serviceConfigs, objectMapper)
+                }
+                GET(
+                        "/{id}/isAdmin",
+                        handler::validateAdminUser
+                )
+            }
             accept(APPLICATION_JSON).nest {
                 GET(
                         "/{id}",
