@@ -8,4 +8,5 @@ package com.angorasix.projects.core.infrastructure.queryfilters
  */
 data class ListProjectsFilter(
         val ids: Collection<String>? = null,
+        val adminId: String? = null
 )

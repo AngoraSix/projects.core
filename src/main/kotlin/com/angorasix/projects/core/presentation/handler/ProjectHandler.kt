@@ -173,5 +173,5 @@ private fun AttributeDto.convertToDomain(): Attribute<*> {
 }
 
 private fun MultiValueMap<String, String>.toQueryFilter(): ListProjectsFilter {
-    return ListProjectsFilter(get("ids")?.flatMap { it.split(",") })
+    return ListProjectsFilter(get("ids")?.flatMap { it.split(",") }, getFirst("adminId"))
 }
