@@ -19,7 +19,7 @@ class ProjectService(private val repository: ProjectRepository) {
      *
      * @return [Flux] of [Project]
      */
-    fun findProjects(filter: ListProjectsFilter): Flow<Project> = filter.ids?.let { repository.findAllById(it) } ?: repository.findAll()
+    fun findProjects(filter: ListProjectsFilter): Flow<Project> = repository.findUsingFilter(filter)
 
     /**
      * Method to create a new [Project].
