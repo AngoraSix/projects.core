@@ -1,5 +1,6 @@
 package com.angorasix.projects.core.domain.project
 
+import com.angorasix.commons.domain.RequestingContributor
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.PersistenceConstructor
 import java.time.ZoneId
@@ -56,4 +57,6 @@ data class Project @PersistenceConstructor private constructor(
     fun addAttribute(attribute: Attribute<*>) {
         attributes.add(attribute)
     }
+
+    fun canEdit(requestingContributor: RequestingContributor): Boolean = adminId == requestingContributor.id
 }

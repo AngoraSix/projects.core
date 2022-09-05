@@ -1,5 +1,6 @@
 package com.angorasix.projects.core.presentation.dto
 
+import org.springframework.hateoas.RepresentationModel
 import java.time.ZonedDateTime
 
 /**
@@ -20,8 +21,7 @@ data class ProjectDto(
         var creatorId: String? = null,
         var adminId: String? = null,
         var createdAt: ZonedDateTime? = null
-) {
-
+) : RepresentationModel<ProjectDto>() {
     constructor(
             name: String,
             attributes: MutableSet<AttributeDto> = mutableSetOf<AttributeDto>()
@@ -32,10 +32,10 @@ data class ProjectDto(
     )
 }
 
-data class ContributorHeaderDto(
-        var contributorId: String,
-        var attributes: Map<String, String> = mutableMapOf(),
-)
+//data class ContributorHeaderDto(
+//        var contributorId: String,
+//        var attributes: Map<String, String> = mutableMapOf(),
+//)
 
 data class IsAdminDto(
         val isAdmin: Boolean,

@@ -2,8 +2,7 @@ package com.angorasix.projects.core.presentation.handler
 
 import com.angorasix.projects.core.application.ProjectService
 import com.angorasix.projects.core.domain.project.Project
-import com.angorasix.projects.core.infrastructure.config.ApiConfigs
-import com.angorasix.projects.core.infrastructure.config.ServiceConfigs
+import com.angorasix.projects.core.infrastructure.config.api.ApiConfigs
 import com.angorasix.projects.core.infrastructure.queryfilters.ListProjectsFilter
 import com.angorasix.projects.core.presentation.dto.ProjectDto
 import io.mockk.coEvery
@@ -34,13 +33,12 @@ class ProjectHandlerUnitTest {
     @MockK
     private lateinit var service: ProjectService
 
-    private lateinit var serviceConfigs: ServiceConfigs
+    private lateinit var apiConfigs: ApiConfigs
 
     @BeforeEach
     fun init() {
-        serviceConfigs = ServiceConfigs()
-        serviceConfigs.api = ApiConfigs("MockedContributorHeader")
-        handler = ProjectHandler(service, serviceConfigs)
+        apiConfigs = ApiConfigs()//"MockedContributorHeader")
+        handler = ProjectHandler(service, apiConfigs)
     }
 
     @Test

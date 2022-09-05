@@ -1,7 +1,6 @@
 package com.angorasix.projects.core.presentation.router
 
-import com.angorasix.projects.core.infrastructure.config.ApiConfigs
-import com.angorasix.projects.core.infrastructure.config.ServiceConfigs
+import com.angorasix.projects.core.infrastructure.config.api.ApiConfigs
 import com.angorasix.projects.core.presentation.dto.ProjectDto
 import com.angorasix.projects.core.presentation.handler.ProjectHandler
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -27,13 +26,12 @@ class ProjectRouterUnitTest {
     @MockK
     private lateinit var objectMapper: ObjectMapper
 
-    private lateinit var serviceConfigs: ServiceConfigs
+    private lateinit var apiConfigs: ApiConfigs
 
     @BeforeEach
     fun init(@MockK handler: ProjectHandler) {
-        serviceConfigs = ServiceConfigs()
-        serviceConfigs.api = ApiConfigs("MockedContributorHeader")
-        router = ProjectRouter(handler, objectMapper, serviceConfigs)
+        apiConfigs = ApiConfigs()//"MockedContributorHeader")
+        router = ProjectRouter(handler, objectMapper, apiConfigs)
     }
 
     @Test

@@ -1,8 +1,8 @@
 package com.angorasix.projects.core.presentation.filter
 
-import com.angorasix.projects.core.domain.project.ContributorDetails
-import com.angorasix.projects.core.infrastructure.config.ServiceConfigs
-import com.angorasix.projects.core.presentation.dto.ContributorHeaderDto
+import com.angorasix.commons.domain.RequestingContributor
+import com.angorasix.commons.presentation.dto.ContributorHeaderDto
+import com.angorasix.projects.core.infrastructure.config.api.ApiConfigs
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.server.ServerRequest
@@ -19,15 +19,16 @@ import java.util.*
 suspend fun headerFilterFunction(
         request: ServerRequest,
         next: suspend (ServerRequest) -> ServerResponse,
-        serviceConfigs: ServiceConfigs,
-        objectMapper: ObjectMapper
+        apiConfigs: ApiConfigs,
+        objectMapper: ObjectMapper,
+        anonymousRequestAllowed: Boolean = false
 ): ServerResponse {
-    request.headers().header(serviceConfigs.api.contributorHeader).firstOrNull()?.let {
+    request.headers().header(apiConfigs.headers.contributor).firstOrNull()?.let {
         val contributorHeaderString = Base64.getUrlDecoder().decode(it)
         val contributorHeader = objectMapper.readValue(contributorHeaderString, ContributorHeaderDto::class.java)
-        val contributorToken = ContributorDetails(contributorHeader.contributorId, contributorHeader.attributes)
-        request.attributes()[serviceConfigs.api.contributorHeader] = contributorToken
+        val requestingContributorToken = RequestingContributor(contributorHeader.contributorId, contributorHeader.projectAdmin)
+        request.attributes()[apiConfigs.headers.contributor] = requestingContributorToken
         return next(request)
     }
-    return status(HttpStatus.UNAUTHORIZED).buildAndAwait();
+    return if (anonymousRequestAllowed) next(request) else status(HttpStatus.UNAUTHORIZED).buildAndAwait();
 }

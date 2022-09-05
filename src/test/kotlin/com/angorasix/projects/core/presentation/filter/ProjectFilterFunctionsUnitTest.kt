@@ -1,7 +1,6 @@
 package com.angorasix.projects.core.presentation.filter
 
-import com.angorasix.projects.core.infrastructure.config.ApiConfigs
-import com.angorasix.projects.core.infrastructure.config.ServiceConfigs
+import com.angorasix.projects.core.infrastructure.config.api.ApiConfigs
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
@@ -24,47 +23,27 @@ import org.springframework.web.reactive.function.server.buildAndAwait
 @ExtendWith(MockKExtension::class)
 public class ProjectFilterFunctionsUnitTest {
 
-    @MockK
-    private lateinit var objectMapper: ObjectMapper
+    @MockK private lateinit var objectMapper: ObjectMapper
 
-    private lateinit var serviceConfigs: ServiceConfigs
+    private lateinit var apiConfigs: ApiConfigs
 
     @BeforeEach
     fun init() {
-        serviceConfigs = ServiceConfigs()
-        serviceConfigs.api = ApiConfigs("MockedContributorHeader")
+        apiConfigs = ApiConfigs()
     }
 
     @Test
     @Throws(Exception::class)
     @kotlinx.coroutines.ExperimentalCoroutinesApi
     fun `Given request - When headerFilterFunction invoked - Then response contains attribute`() = runBlockingTest {
-        val mockedRequest: ServerRequest = MockServerRequest.builder()
-                .header(
-                        "Angorasix-API",
-                        "value1"
-                )
-                .build()
+        val mockedRequest: ServerRequest = MockServerRequest.builder().header("Angorasix-API", "value1").build()
         val next: suspend (request: ServerRequest) -> ServerResponse = {
-            ServerResponse.ok()
-                    .buildAndAwait()
+            ServerResponse.ok().buildAndAwait()
         }
 
-        val outputResponse = headerFilterFunction(
-                mockedRequest,
-                next,
-                serviceConfigs,
-                objectMapper
-        )
+        val outputResponse = headerFilterFunction(mockedRequest, next, apiConfigs, objectMapper)
 
-        AssertionsForClassTypes.assertThat(outputResponse.statusCode())
-                .isEqualTo(HttpStatus.OK)
-        assertThat(mockedRequest.attributes()).hasEntrySatisfying(
-                "ger1",
-                Condition(
-                        { (it as Collection<*>).contains("value1") },
-                        "Request attribute contains ger1 entry"
-                )
-        )
+        AssertionsForClassTypes.assertThat(outputResponse.statusCode()).isEqualTo(HttpStatus.OK)
+        assertThat(mockedRequest.attributes()).hasEntrySatisfying("ger1", Condition({ (it as Collection<*>).contains("value1") }, "Request attribute contains ger1 entry"))
     }
 }

@@ -1,11 +1,9 @@
 package com.angorasix.projects.core.presentation.router
 
-import com.angorasix.projects.core.infrastructure.config.ServiceConfigs
+import com.angorasix.projects.core.infrastructure.config.api.ApiConfigs
 import com.angorasix.projects.core.presentation.filter.headerFilterFunction
 import com.angorasix.projects.core.presentation.handler.ProjectHandler
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.springframework.http.HttpMethod
-import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.web.reactive.function.server.RouterFunction
 import org.springframework.web.reactive.function.server.coRouter
 
@@ -16,7 +14,7 @@ import org.springframework.web.reactive.function.server.coRouter
  */
 class ProjectRouter(private val handler: ProjectHandler,
                     private val objectMapper: ObjectMapper,
-                    private val serviceConfigs: ServiceConfigs) {
+                    private val apiConfigs: ApiConfigs) {
 
     /**
      * Main RouterFunction configuration for all endpoints related to Projects.
@@ -24,45 +22,43 @@ class ProjectRouter(private val handler: ProjectHandler,
      * @return the [RouterFunction] with all the routes for Projects
      */
     fun projectRouterFunction() = coRouter {
-
-        "/projects-core".nest {
-
-            method(HttpMethod.POST).nest{
+        apiConfigs.basePaths.projectsCore.nest {
+            path(apiConfigs.routes.validateAdminUser.path).nest {
                 filter { request, next ->
-                    headerFilterFunction(request, next, serviceConfigs, objectMapper)
+                    headerFilterFunction(request, next, apiConfigs, objectMapper)
                 }
-                POST("",
-                        handler::createProject
-                )
+                method(apiConfigs.routes.validateAdminUser.method, handler::validateAdminUser)
             }
-            method(HttpMethod.PUT).nest{
-                filter { request, next ->
-                    headerFilterFunction(request, next, serviceConfigs, objectMapper)
+            apiConfigs.routes.baseByIdCrudRoute.nest {
+                method(apiConfigs.routes.updateProject.method).nest {
+                    filter { request, next ->
+                        headerFilterFunction(request, next, apiConfigs, objectMapper)
+                    }
+                    method(apiConfigs.routes.updateProject.method, handler::updateProject)
                 }
-                PUT("/{id}",
-                        handler::updateProject
-                )
-            }
-            method(HttpMethod.GET).nest{
-                filter { request, next ->
-                    headerFilterFunction(request, next, serviceConfigs, objectMapper)
+                method(apiConfigs.routes.getProject.method).nest {
+                    filter { request, next ->
+                        headerFilterFunction(request, next, apiConfigs, objectMapper, true)
+                    }
+                    method(apiConfigs.routes.getProject.method, handler::getProject)
                 }
-                GET(
-                        "/{id}/isAdmin",
-                        handler::validateAdminUser
-                )
             }
-            accept(APPLICATION_JSON).nest {
-                GET(
-                        "/{id}",
-                        handler::getProject
-                )
-                GET(
-                        "",
-                        handler::listProjects
-                )
+            apiConfigs.routes.baseListCrudRoute.nest {
+                path(apiConfigs.routes.baseListCrudRoute).nest {
+                    method(apiConfigs.routes.createProject.method).nest {
+                        filter { request, next ->
+                            headerFilterFunction(request, next, apiConfigs, objectMapper)
+                        }
+                        method(apiConfigs.routes.createProject.method, handler::createProject)
+                    }
+                    method(apiConfigs.routes.listProjects.method).nest {
+                        filter { request, next ->
+                            headerFilterFunction(request, next, apiConfigs, objectMapper, true)
+                        }
+                        method(apiConfigs.routes.listProjects.method, handler::listProjects)
+                    }
+                }
             }
         }
-
     }
 }
