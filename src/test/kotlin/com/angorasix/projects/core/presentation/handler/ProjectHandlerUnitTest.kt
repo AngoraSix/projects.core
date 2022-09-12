@@ -202,17 +202,18 @@ class ProjectHandlerUnitTest {
     @Test
     @Throws(Exception::class)
     @kotlinx.coroutines.ExperimentalCoroutinesApi
-    fun `Given existing projects - When get project - Then handler retrieves Ok Response`() =
+    fun `Given existing projects - When get project for non Admin contributor - Then handler retrieves Ok Response without Edit link`() =
         runBlockingTest {
             val projectId = "projectId"
-
+            val mockedRequestingContributor = RequestingContributor("mockedId")
             val mockedExchange =
                 MockServerWebExchange.from(MockServerHttpRequest.get("/id1-mocked").build())
             val mockedRequest: ServerRequest =
-                MockServerRequest.builder().pathVariable("id", projectId).exchange(mockedExchange)
-                    .build()
+                MockServerRequest.builder()
+                    .attribute(headerConfigs.contributor, mockedRequestingContributor)
+                    .pathVariable("id", projectId).exchange(mockedExchange).build()
             val mockedProject =
-                Project("mockedProjectName", "creator_id", "creator_id", ZoneId.systemDefault())
+                Project("mockedProjectName", "creator_id", "otherId", ZoneId.systemDefault())
             coEvery { service.findSingleProject(projectId) } returns mockedProject
 
             val outputResponse = handler.getProject(mockedRequest)
@@ -223,6 +224,39 @@ class ProjectHandlerUnitTest {
                 (outputResponse as EntityResponse<ProjectDto>).entity()
             assertThat(responseBody.name).isEqualTo("mockedProjectName")
             assertThat(responseBody.creatorId).isEqualTo("creator_id")
+            assertThat(responseBody.links.hasSize(1)).isTrue()
+            assertThat(responseBody.links.getLink("updateProject")).isEmpty
+            coVerify { service.findSingleProject(projectId) }
+        }
+
+    @Test
+    @Throws(Exception::class)
+    @kotlinx.coroutines.ExperimentalCoroutinesApi
+    fun `Given existing projects - When get project for Admin Contributor - Then handler retrieves Ok Response with Edit link`() =
+        runBlockingTest {
+            val projectId = "projectId"
+            val mockedRequestingContributor = RequestingContributor("mockedId")
+
+            val mockedExchange =
+                MockServerWebExchange.from(MockServerHttpRequest.get("/id1-mocked").build())
+            val mockedRequest: ServerRequest =
+                MockServerRequest.builder()
+                    .attribute(headerConfigs.contributor, mockedRequestingContributor)
+                    .pathVariable("id", projectId).exchange(mockedExchange).build()
+            val mockedProject =
+                Project("mockedProjectName", "creator_id", "mockedId", ZoneId.systemDefault())
+            coEvery { service.findSingleProject(projectId) } returns mockedProject
+
+            val outputResponse = handler.getProject(mockedRequest)
+
+            assertThat(outputResponse.statusCode()).isEqualTo(HttpStatus.OK)
+            val responseBody =
+                @Suppress("UNCHECKED_CAST")
+                (outputResponse as EntityResponse<ProjectDto>).entity()
+            assertThat(responseBody.name).isEqualTo("mockedProjectName")
+            assertThat(responseBody.creatorId).isEqualTo("creator_id")
+            assertThat(responseBody.links.hasSize(2)).isTrue()
+            assertThat(responseBody.links.getLink("updateProject")).isNotNull
             coVerify { service.findSingleProject(projectId) }
         }
 
