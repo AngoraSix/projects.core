@@ -9,6 +9,7 @@ import com.angorasix.projects.core.infrastructure.config.configurationproperty.a
 import com.angorasix.projects.core.infrastructure.config.configurationproperty.api.Route
 import com.angorasix.projects.core.infrastructure.config.configurationproperty.api.RoutesConfigs
 import com.angorasix.projects.core.infrastructure.queryfilters.ListProjectsFilter
+import com.angorasix.projects.core.presentation.dto.IsAdminDto
 import com.angorasix.projects.core.presentation.dto.ProjectDto
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -222,6 +223,70 @@ class ProjectHandlerUnitTest {
                 (outputResponse as EntityResponse<ProjectDto>).entity()
             assertThat(responseBody.name).isEqualTo("mockedProjectName")
             assertThat(responseBody.creatorId).isEqualTo("creator_id")
+            coVerify { service.findSingleProject(projectId) }
+        }
+
+    @Test
+    @Throws(Exception::class)
+    @kotlinx.coroutines.ExperimentalCoroutinesApi
+    fun `Given contributor - When get project with admin contributor - Then handler retrieves Ok Response`() =
+        runBlockingTest {
+            val projectId = "projectId"
+            val mockedRequestingContributor = RequestingContributor("mockedId")
+            val mockedExchange = MockServerWebExchange.from(
+                MockServerHttpRequest.get(routeConfigs.validateAdminUser.path).build(),
+            )
+            val mockedRequest: ServerRequest = MockServerRequest.builder()
+                .attribute(headerConfigs.contributor, mockedRequestingContributor)
+                .pathVariable("id", projectId)
+                .exchange(mockedExchange).build()
+            val mockedProject = Project(
+                "mockedProjectName",
+                "creator_id",
+                "mockedId",
+                ZoneId.systemDefault(),
+            )
+            coEvery { service.findSingleProject(projectId) } returns mockedProject
+
+            val outputResponse = handler.validateAdminUser(mockedRequest)
+
+            assertThat(outputResponse.statusCode()).isEqualTo(HttpStatus.OK)
+            val response = @Suppress("UNCHECKED_CAST")
+            outputResponse as EntityResponse<IsAdminDto>
+            val responseBody = response.entity()
+            assertThat(responseBody.isAdmin).isTrue()
+            coVerify { service.findSingleProject(projectId) }
+        }
+
+    @Test
+    @Throws(Exception::class)
+    @kotlinx.coroutines.ExperimentalCoroutinesApi
+    fun `Given contributor - When get project admin not matching contributor - Then handler retrieves Ok Response with false value`() =
+        runBlockingTest {
+            val projectId = "projectId"
+            val mockedRequestingContributor = RequestingContributor("mockedId")
+            val mockedExchange = MockServerWebExchange.from(
+                MockServerHttpRequest.get(routeConfigs.validateAdminUser.path).build(),
+            )
+            val mockedRequest: ServerRequest = MockServerRequest.builder()
+                .attribute(headerConfigs.contributor, mockedRequestingContributor)
+                .pathVariable("id", projectId)
+                .exchange(mockedExchange).build()
+            val mockedProject = Project(
+                "mockedProjectName",
+                "creator_id",
+                "otherId",
+                ZoneId.systemDefault(),
+            )
+            coEvery { service.findSingleProject(projectId) } returns mockedProject
+
+            val outputResponse = handler.validateAdminUser(mockedRequest)
+
+            assertThat(outputResponse.statusCode()).isEqualTo(HttpStatus.OK)
+            val response = @Suppress("UNCHECKED_CAST")
+            outputResponse as EntityResponse<IsAdminDto>
+            val responseBody = response.entity()
+            assertThat(responseBody.isAdmin).isFalse()
             coVerify { service.findSingleProject(projectId) }
         }
 }
