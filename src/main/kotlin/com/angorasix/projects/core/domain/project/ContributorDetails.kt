@@ -7,6 +7,6 @@ package com.angorasix.projects.core.domain.project
  * @author rozagerardo
  */
 data class ContributorDetails(
-        var contributorId: String,
-        var attributes: Map<String, String> = mutableMapOf(),
+    var contributorId: String,
+    var attributes: Map<String, String> = mutableMapOf(),
 )

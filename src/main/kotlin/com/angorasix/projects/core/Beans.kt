@@ -14,8 +14,8 @@ val beans = beans {
         MongoCustomConversions(
             listOf(
                 ref<ZonedDateTimeConvertersUtils.ZonedDateTimeReaderConverter>(),
-                ref<ZonedDateTimeConvertersUtils.ZonedDateTimeWritingConverter>()
-            )
+                ref<ZonedDateTimeConvertersUtils.ZonedDateTimeWritingConverter>(),
+            ),
         )
     }
     bean<ProjectService>()

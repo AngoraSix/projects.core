@@ -45,21 +45,21 @@ import java.time.Duration
 @ExtendWith(RestDocumentationExtension::class)
 @SpringBootTest(
     classes = [ProjectsCoreApplication::class],
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
 )
 @TestPropertySource(locations = ["classpath:integration-application.properties"])
 @EnableConfigurationProperties(IntegrationProperties::class)
 class ProjectCoreDocsIntegrationTest(
     @Autowired val mongoTemplate: ReactiveMongoTemplate,
     @Autowired val mapper: ObjectMapper,
-    @Autowired val properties: IntegrationProperties
+    @Autowired val properties: IntegrationProperties,
 ) {
 
     private lateinit var webTestClient: WebTestClient
 
     var attributeDescriptor = arrayOf<FieldDescriptor>(
         fieldWithPath("key").description("Key identifier for the attribute"),
-        fieldWithPath("value").description("The value for the particular attribute")
+        fieldWithPath("value").description("The value for the particular attribute"),
     )
 
     var projectDescriptor = arrayOf<FieldDescriptor>(
@@ -70,7 +70,7 @@ class ProjectCoreDocsIntegrationTest(
         subsectionWithPath("attributes[]").type(ArrayOfFieldType(Attribute::class.simpleName))
             .description("Array of the attributes that characterize the project"),
         subsectionWithPath("requirements[]").type(ArrayOfFieldType(Attribute::class.simpleName))
-            .description("Array of the attributes that are required for the project")
+            .description("Array of the attributes that are required for the project"),
     )
 
     var projectPostBodyDescriptor = arrayOf<FieldDescriptor>(
@@ -79,44 +79,29 @@ class ProjectCoreDocsIntegrationTest(
         fieldWithPath("creatorId").ignored(),
         fieldWithPath("createdAt").ignored(),
         subsectionWithPath("attributes[]").ignored(),
-        subsectionWithPath("requirements[]").ignored()
+        subsectionWithPath("requirements[]").ignored(),
     )
 
     @BeforeAll
     fun setUpDb() = runBlocking {
-        initializeMongodb(
-            properties.mongodb.baseJsonFile,
-            mongoTemplate,
-            mapper
-        )
+        initializeMongodb(properties.mongodb.baseJsonFile, mongoTemplate, mapper)
     }
 
     @BeforeEach
     fun setUpWebClient(
         applicationContext: ApplicationContext,
-        restDocumentation: RestDocumentationContextProvider
+        restDocumentation: RestDocumentationContextProvider,
     ) = runBlocking {
-        webTestClient = WebTestClient.bindToApplicationContext(applicationContext)
-            .configureClient()
+        webTestClient = WebTestClient.bindToApplicationContext(applicationContext).configureClient()
             .responseTimeout(Duration.ofMillis(30000))
-            .filter(
-                documentationConfiguration(restDocumentation)
-            )
-            .filter(ExchangeFilterFunction.ofRequestProcessor { clientRequest ->
-                println(
-                    "Request: ${clientRequest.method()} ${clientRequest.url()}"
-                )
-                clientRequest.headers()
-                    .forEach { name, values ->
-                        values.forEach { value ->
-                            println(
-                                "$name=$value",
-                            )
-                        }
-                    }
-                Mono.just(clientRequest)
-            })
-            .build()
+            .filter(documentationConfiguration(restDocumentation)).filter(
+                ExchangeFilterFunction.ofRequestProcessor { clientRequest ->
+                    println("Request: ${clientRequest.method()} ${clientRequest.url()}")
+                    clientRequest.headers()
+                        .forEach { name, values -> values.forEach { value -> println("$name=$value") } }
+                    Mono.just(clientRequest)
+                },
+            ).build()
     }
 
     @Test
@@ -128,70 +113,50 @@ class ProjectCoreDocsIntegrationTest(
 
     private fun executeAndDocumentPostCreateProjectRequest() {
         val newProject = ProjectDto("New Project Name")
-        webTestClient.post()
-            .uri(
-                "/projects-core/",
-            )
-            .accept(MediaType.APPLICATION_JSON)
-            .body(Mono.just(newProject))
-            .exchange()
-            .expectStatus().isCreated.expectBody()
-            .consumeWith(
+        webTestClient.post().uri(
+            "/projects-core/",
+        ).accept(MediaType.APPLICATION_JSON).body(Mono.just(newProject)).exchange()
+            .expectStatus().isCreated.expectBody().consumeWith(
                 document(
                     "project-create",
                     preprocessResponse(prettyPrint()),
                     requestFields(*projectPostBodyDescriptor),
                     responseFields(*projectDescriptor),
                     responseHeaders(
-                        headerWithName(HttpHeaders.LOCATION).description("URL of the newly created project")
-                    )
-                )
+                        headerWithName(HttpHeaders.LOCATION).description("URL of the newly created project"),
+                    ),
+                ),
             )
     }
 
     private fun executeAndDocumentGetSingleProjectRequest() {
-        webTestClient.get()
-            .uri(
-                "/projects-core/{projectId}",
-                1
-            )
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus().isOk.expectBody()
+        webTestClient.get().uri("/projects-core/{projectId}", 1)
+            .accept(MediaType.APPLICATION_JSON).exchange().expectStatus().isOk.expectBody()
             .consumeWith(
                 document(
                     "project-single",
                     preprocessResponse(prettyPrint()),
                     pathParameters(parameterWithName("projectId").description("The Project id")),
-                    responseFields(*projectDescriptor)
-                )
+                    responseFields(*projectDescriptor),
+                ),
             )
     }
 
     private fun executeAndDocumentGetListProjectsRequest() {
-        webTestClient.get()
-            .uri("/projects-core/")
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus().isOk.expectBody()
-            .consumeWith(
+        webTestClient.get().uri("/projects-core/").accept(MediaType.APPLICATION_JSON).exchange()
+            .expectStatus().isOk.expectBody().consumeWith(
                 document(
                     "project-list",
                     preprocessResponse(prettyPrint()),
                     responseFields(
                         fieldWithPath("[]").type(ArrayOfFieldType(Project::class.simpleName))
-                            .description("An array of projects")
-                    ).andWithPrefix(
+                            .description("An array of projects"),
+                    ).andWithPrefix("[].", *projectDescriptor),
+                    responseFields(beneathPath("[].attributes[]").withSubsectionId("attribute")).andWithPrefix(
                         "[].",
-                        *projectDescriptor
+                        *attributeDescriptor,
                     ),
-                    responseFields(
-                        beneathPath("[].attributes[]").withSubsectionId("attribute")
-                    ).andWithPrefix(
-                        "[].",
-                        *attributeDescriptor
-                    )
-                )
+                ),
             )
     }
 

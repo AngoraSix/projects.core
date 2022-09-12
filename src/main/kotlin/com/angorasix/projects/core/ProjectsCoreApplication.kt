@@ -17,5 +17,5 @@ class ProjectsCoreApplication
  * @param args java args
  */
 fun main(args: Array<String>) {
-    runApplication<ProjectsCoreApplication>(*args)
+    runApplication<ProjectsCoreApplication>(args = args)
 }

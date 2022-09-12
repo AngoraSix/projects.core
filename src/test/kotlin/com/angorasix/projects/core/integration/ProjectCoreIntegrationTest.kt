@@ -27,7 +27,7 @@ import java.time.ZonedDateTime
 
 @SpringBootTest(
     classes = [ProjectsCoreApplication::class],
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
 )
 @TestPropertySource(locations = ["classpath:integration-application.properties"])
 @EnableConfigurationProperties(IntegrationProperties::class)
@@ -35,7 +35,7 @@ class ProjectCoreIntegrationTest(
     @Autowired val mongoTemplate: ReactiveMongoTemplate,
     @Autowired val mapper: ObjectMapper,
     @Autowired val properties: IntegrationProperties,
-    @Autowired val webTestClient: WebTestClient
+    @Autowired val webTestClient: WebTestClient,
 ) {
 
     @BeforeAll
@@ -43,7 +43,7 @@ class ProjectCoreIntegrationTest(
         initializeMongodb(
             properties.mongodb.baseJsonFile,
             mongoTemplate,
-            mapper
+            mapper,
         )
     }
 
@@ -55,57 +55,57 @@ class ProjectCoreIntegrationTest(
             .exchange()
             .expectStatus().isOk.expectBody() // @formatter:off
             .jsonPath("$").isArray.jsonPath("$.length()")
-                .value(
-                    greaterThanOrEqualTo(2)
-                )
+            .value(
+                greaterThanOrEqualTo(2),
+            )
             .jsonPath("$..name")
-                .value(
-                    hasItems(
-                        "Angora Sustainable",
-                        "A Local Project"
-                    )
-                )
+            .value(
+                hasItems(
+                    "Angora Sustainable",
+                    "A Local Project",
+                ),
+            )
             .jsonPath("$..creatorId")
-                .value(
-                    hasItems(
-                        "rozagerardo",
-                        "mockUserId"
-                    )
-                )
+            .value(
+                hasItems(
+                    "rozagerardo",
+                    "mockUserId",
+                ),
+            )
             .jsonPath("$..attributes..key")
-                .value(
-                    hasItems(
-                        "category",
-                        "industry",
-                        "location"
-                    )
-                )
+            .value(
+                hasItems(
+                    "category",
+                    "industry",
+                    "location",
+                ),
+            )
             .jsonPath("$[?(@.id == '1')].creatorId")
-                .value(contains("rozagerardo"))
+            .value(contains("rozagerardo"))
             .jsonPath("$[?(@.id == '1')].name")
-                .value(contains("Angora Sustainable"))
+            .value(contains("Angora Sustainable"))
             .jsonPath("$[?(@.id == '1')].attributes.length()")
-                .isEqualTo(5)
+            .isEqualTo(5)
             .jsonPath("$[?(@.id == '1')].requirements[?(@.key == 'technology')].value")
-                .value(contains("Kotlin"))
+            .value(contains("Kotlin"))
             // Project 2
             .jsonPath("$[?(@.id == '2')].name")
-                .value(contains("A Local Project"))
+            .value(contains("A Local Project"))
             .jsonPath("$[?(@.id == '2')].creatorId")
-                .value(contains("mockUserId"))
+            .value(contains("mockUserId"))
             .jsonPath("$[?(@.id == '2')].createdAt")
-                .value(
-                    contains(
-                        "2020-09-01T00:00:00-03:00"
-                    )
-                )
+            .value(
+                contains(
+                    "2020-09-01T00:00:00-03:00",
+                ),
+            )
             .jsonPath("$[?(@.id == '2')].attributes.length()")
-                .isEqualTo(3)
+            .isEqualTo(3)
             .jsonPath("$[?(@.id == '2')].attributes[?(@.key == 'location')].value")
-                .value(contains("Argentina/Cordoba/Cordoba"))
+            .value(contains("Argentina/Cordoba/Cordoba"))
             .jsonPath("$[?(@.id == '2')].requirements.length()")
-                .isEqualTo(2)
-            // @formatter:on
+            .isEqualTo(2)
+        // @formatter:on
     }
 
     @Test
@@ -116,15 +116,15 @@ class ProjectCoreIntegrationTest(
             .exchange()
             .expectStatus().isOk.expectBody() // @formatter:off
             .jsonPath("$.name")
-                .isEqualTo("Angora Sustainable")
+            .isEqualTo("Angora Sustainable")
             .jsonPath("$.creatorId")
-                .isEqualTo("rozagerardo")
+            .isEqualTo("rozagerardo")
             .jsonPath("$.attributes.length()")
-                .isEqualTo(5)
+            .isEqualTo(5)
             .jsonPath("$.requirements[?(@.key == 'technology')].value")
-                .value(contains("Kotlin"))
+            .value(contains("Kotlin"))
             .jsonPath("$.createdAt")
-                .isEqualTo("2020-08-09T00:23:00-03:00")
+            .isEqualTo("2020-08-09T00:23:00-03:00")
         // @formatter:on
     }
 
@@ -136,25 +136,25 @@ class ProjectCoreIntegrationTest(
             mutableSetOf(
                 AttributeDto(
                     "attribute1Key",
-                    "attribute1Value"
-                )
+                    "attribute1Value",
+                ),
             ),
             mutableSetOf(
                 AttributeDto(
                     "requirement1Key",
-                    "requirement1Value"
-                )
+                    "requirement1Value",
+                ),
             ),
             null,
-                null,
-            ZonedDateTime.now()
+            null,
+            ZonedDateTime.now(),
         )
         webTestClient.post()
             .uri("/projects-core/")
             .accept(MediaType.APPLICATION_JSON)
             .body(
                 Mono.just(newProject),
-                ProjectDto::class.java
+                ProjectDto::class.java,
             )
             .exchange()
             .expectStatus().isCreated.expectBody() // @formatter:off

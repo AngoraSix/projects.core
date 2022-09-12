@@ -36,7 +36,7 @@ class ProjectService(private val repository: ProjectRepository) {
      * @return a [Mono] with the persisted [Project]
      */
     suspend fun updateProject(projectId: String, updateData: Project): Project? =
-            repository.findById(projectId)?.updateWithData(updateData)?.let { repository.save(it) }
+        repository.findById(projectId)?.updateWithData(updateData)?.let { repository.save(it) }
 
     /**
      * Method to find a single [Project] from an id.
@@ -47,9 +47,9 @@ class ProjectService(private val repository: ProjectRepository) {
     suspend fun findSingleProject(projectId: String): Project? = repository.findById(projectId)
 
     private fun Project.updateWithData(other: Project): Project {
-        this.name = other.name;
-        this.attributes = other.attributes;
+        this.name = other.name
+        this.attributes = other.attributes
         this.requirements = other.requirements
-        return this;
+        return this
     }
 }
