@@ -1,11 +1,11 @@
 package com.angorasix.projects.core.presentation.router
 
-import com.angorasix.projects.core.infrastructure.config.ServiceConfigs
-import com.angorasix.projects.core.presentation.filter.headerFilterFunction
+import com.angorasix.commons.presentation.filter.checkRequestingContributor
+import com.angorasix.commons.presentation.filter.extractRequestingContributor
+import com.angorasix.projects.core.infrastructure.config.configurationproperty.api.ApiConfigs
 import com.angorasix.projects.core.presentation.handler.ProjectHandler
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.springframework.http.HttpMethod
-import org.springframework.http.MediaType.APPLICATION_JSON
+import org.springframework.web.reactive.function.server.CoRouterFunctionDsl
 import org.springframework.web.reactive.function.server.RouterFunction
 import org.springframework.web.reactive.function.server.coRouter
 
@@ -14,9 +14,11 @@ import org.springframework.web.reactive.function.server.coRouter
  *
  * @author rozagerardo
  */
-class ProjectRouter(private val handler: ProjectHandler,
-                    private val objectMapper: ObjectMapper,
-                    private val serviceConfigs: ServiceConfigs) {
+class ProjectRouter(
+    private val handler: ProjectHandler,
+    private val objectMapper: ObjectMapper,
+    private val apiConfigs: ApiConfigs,
+) {
 
     /**
      * Main RouterFunction configuration for all endpoints related to Projects.
@@ -24,45 +26,78 @@ class ProjectRouter(private val handler: ProjectHandler,
      * @return the [RouterFunction] with all the routes for Projects
      */
     fun projectRouterFunction() = coRouter {
-
-        "/projects-core".nest {
-
-            method(HttpMethod.POST).nest{
-                filter { request, next ->
-                    headerFilterFunction(request, next, serviceConfigs, objectMapper)
-                }
-                POST("",
-                        handler::createProject
+        apiConfigs.basePaths.projectsCore.nest {
+            filter { request, next ->
+                extractRequestingContributor(
+                    request,
+                    next,
+                    apiConfigs.headers.contributor,
+                    objectMapper,
                 )
             }
-            method(HttpMethod.PUT).nest{
-                filter { request, next ->
-                    headerFilterFunction(request, next, serviceConfigs, objectMapper)
-                }
-                PUT("/{id}",
-                        handler::updateProject
-                )
+            defineValidateAdminUserEndpoint()
+            apiConfigs.routes.baseByIdCrudRoute.nest {
+                defineUpdateProjectEndpoint()
+                defineGetProjectEndpoint()
             }
-            method(HttpMethod.GET).nest{
-                filter { request, next ->
-                    headerFilterFunction(request, next, serviceConfigs, objectMapper)
-                }
-                GET(
-                        "/{id}/isAdmin",
-                        handler::validateAdminUser
-                )
-            }
-            accept(APPLICATION_JSON).nest {
-                GET(
-                        "/{id}",
-                        handler::getProject
-                )
-                GET(
-                        "",
-                        handler::listProjects
-                )
+            apiConfigs.routes.baseListCrudRoute.nest {
+                defineCreateProjectEndpoint()
+                defineListProjectsEndpoint()
             }
         }
+    }
 
+    private fun CoRouterFunctionDsl.defineValidateAdminUserEndpoint() {
+        path(apiConfigs.routes.validateAdminUser.path).nest {
+            filter { request, next ->
+                checkRequestingContributor(
+                    request,
+                    next,
+                    apiConfigs.headers.contributor,
+                    true,
+                )
+            }
+            method(apiConfigs.routes.validateAdminUser.method, handler::validateAdminUser)
+        }
+    }
+
+    private fun CoRouterFunctionDsl.defineUpdateProjectEndpoint() {
+        method(apiConfigs.routes.updateProject.method).nest {
+            filter { request, next ->
+                checkRequestingContributor(
+                    request,
+                    next,
+                    apiConfigs.headers.contributor,
+                    true,
+                )
+            }
+            method(apiConfigs.routes.updateProject.method, handler::updateProject)
+        }
+    }
+
+    private fun CoRouterFunctionDsl.defineGetProjectEndpoint() {
+        method(apiConfigs.routes.getProject.method).nest {
+            method(apiConfigs.routes.getProject.method, handler::getProject)
+        }
+    }
+
+    private fun CoRouterFunctionDsl.defineCreateProjectEndpoint() {
+        method(apiConfigs.routes.createProject.method).nest {
+            filter { request, next ->
+                checkRequestingContributor(
+                    request,
+                    next,
+                    apiConfigs.headers.contributor,
+                    true,
+                )
+            }
+            method(apiConfigs.routes.createProject.method, handler::createProject)
+        }
+    }
+
+    private fun CoRouterFunctionDsl.defineListProjectsEndpoint() {
+        method(apiConfigs.routes.listProjects.method).nest {
+            method(apiConfigs.routes.listProjects.method, handler::listProjects)
+        }
     }
 }

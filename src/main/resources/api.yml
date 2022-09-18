@@ -1,0 +1,39 @@
+configs:
+  api:
+    headers:
+      contributor: ${A6_PROJECTS_CORE_CONTRIBUTORHEADER:A6-Contributor}
+    basePaths:
+      projectsCore: "/projects-core"
+    routes:
+      baseListCrudRoute: ""
+      baseByIdCrudRoute: "/{id}"
+      createProject:
+        name: projectCreate
+        basePaths:
+          - ${configs.api.basePaths.projectsCore}
+        method: POST
+        path: ${configs.api.routes.baseListCrudRoute}
+      updateProject:
+        name: updateProject
+        basePaths:
+          - ${configs.api.basePaths.projectsCore}
+        method: PUT
+        path: ${configs.api.routes.baseByIdCrudRoute}
+      validateAdminUser:
+        name: validateAdminUser
+        basePaths:
+          - ${configs.api.basePaths.projectsCore}
+        method: GET
+        path: "/{id}/isAdmin"
+      getProject:
+        name: getProject
+        basePaths:
+          - ${configs.api.basePaths.projectsCore}
+        method: GET
+        path: ${configs.api.routes.baseByIdCrudRoute}
+      listProjects:
+        name: listProjects
+        basePaths:
+          - ${configs.api.basePaths.projectsCore}
+        method: GET
+        path: ${configs.api.routes.baseListCrudRoute}

@@ -1,61 +1,65 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>com.angorasix</groupId>
-        <artifactId>parent-pom-kotlin</artifactId>
-        <version>0.1.1-SNAPSHOT</version>
-        <relativePath>../../parent-pom-kotlin</relativePath>
-    </parent>
-    <artifactId>projects.core</artifactId>
-    <name>projects.core</name>
-    <description>Projects Core Service</description>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <artifactId>projects.core</artifactId>
+  <dependencies>
+    <dependency>
+      <artifactId>spring-boot-starter-data-mongodb-reactive</artifactId>
+      <groupId>org.springframework.boot</groupId>
+    </dependency>
+    <dependency>
+      <artifactId>spring-boot-starter-webflux</artifactId>
+      <groupId>org.springframework.boot</groupId>
+    </dependency>
+    <dependency>
+      <artifactId>spring-cloud-starter</artifactId>
+      <groupId>org.springframework.cloud</groupId>
+      <scope>test</scope>
+    </dependency>
 
-    <properties>
-        <jacoco-coverage.class.line.min>0.20</jacoco-coverage.class.line.min>
-        <jacoco-coverage.class.branch.min>0.20</jacoco-coverage.class.branch.min>
-    </properties>
+    <dependency>
+      <artifactId>commons.core</artifactId>
+      <groupId>com.angorasix</groupId>
+      <version>0.1.1-SNAPSHOT</version>
+    </dependency>
 
+    <!-- check if necessary with newer versions https://github.com/Playtika/testcontainers-spring-boot/issues/562 -->
+    <dependency>
+      <artifactId>spring-cloud-starter-bootstrap</artifactId>
+      <groupId>org.springframework.cloud</groupId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <artifactId>embedded-mongodb</artifactId>
+      <groupId>com.playtika.testcontainers</groupId>
+      <version>${playtika.testcontainers.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+  <dependencyManagement>
     <dependencies>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-mongodb-reactive</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-webflux</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-      <!-- check if necessary with newer versions https://github.com/Playtika/testcontainers-spring-boot/issues/562 -->
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-bootstrap</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.playtika.testcontainers</groupId>
-            <artifactId>embedded-mongodb</artifactId>
-            <version>${playtika.testcontainers.version}</version>
-            <scope>test</scope>
-        </dependency>
+      <dependency>
+        <artifactId>spring-cloud-dependencies</artifactId>
+        <groupId>org.springframework.cloud</groupId>
+        <scope>import</scope>
+        <type>pom</type>
+        <version>${spring-cloud.version}</version>
+      </dependency>
     </dependencies>
+  </dependencyManagement>
+  <description>Projects Core Service</description>
+  <modelVersion>4.0.0</modelVersion>
 
+  <name>projects.core</name>
+  <parent>
+    <artifactId>parent-pom-spring-kotlin</artifactId>
+    <groupId>com.angorasix</groupId>
+    <version>0.1.1-SNAPSHOT</version>
+  </parent>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.springframework.cloud</groupId>
-                <artifactId>spring-cloud-dependencies</artifactId>
-                <version>${spring-cloud.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
+  <properties>
+    <jacoco-coverage.class.branch.min>0.50</jacoco-coverage.class.branch.min>
+    <jacoco-coverage.class.line.min>0.50</jacoco-coverage.class.line.min>
+  </properties>
 </project>

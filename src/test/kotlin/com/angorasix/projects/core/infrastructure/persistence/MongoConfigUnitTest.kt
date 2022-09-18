@@ -17,31 +17,31 @@ class MongoConfigUnitTest {
         val conversionsOutput = MongoCustomConversions(
             listOf(
                 readerConverter,
-                writerConverter
-            )
+                writerConverter,
+            ),
         )
 
         // handled conversions
         Assertions.assertThat(
             conversionsOutput.getCustomWriteTarget(ZonedDateTime::class.java)
-                .get().name
+                .get().name,
         )
             .isEqualTo("org.bson.Document")
         Assertions.assertThat(
             conversionsOutput.hasCustomReadTarget(
                 Document::class.java,
-                ZonedDateTime::class.java
-            )
+                ZonedDateTime::class.java,
+            ),
         )
-            .isTrue()
+            .isTrue
         // not handled conversions
         Assertions.assertThat(conversionsOutput.getCustomWriteTarget(Document::class.java)).isEmpty
         Assertions.assertThat(
             conversionsOutput.hasCustomReadTarget(
                 Document::class.java,
-                LocalDateTime::class.java
-            )
+                LocalDateTime::class.java,
+            ),
         )
-            .isFalse()
+            .isFalse
     }
 }

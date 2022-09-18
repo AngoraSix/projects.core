@@ -6,8 +6,7 @@ import org.bson.Document
 import org.junit.jupiter.api.Test
 import java.time.ZoneId
 import java.time.ZonedDateTime
-import java.util.Date
-import java.util.HashMap
+import java.util.*
 
 class ZonedDateTimeConvertersUnitTest {
     private val writingConverter = ZonedDateTimeConvertersUtils.ZonedDateTimeWritingConverter()
@@ -27,7 +26,7 @@ class ZonedDateTimeConvertersUnitTest {
             0,
             0,
             0,
-            ZoneId.of("America/Argentina/Cordoba")
+            ZoneId.of("America/Argentina/Cordoba"),
         )
         val outputDocument = writingConverter.convert(inputZdt)
         assertThat<Any>(outputDocument!!["zone"]).isEqualTo("America/Argentina/Cordoba")
@@ -35,10 +34,10 @@ class ZonedDateTimeConvertersUnitTest {
             .isEqualTo(
                 Date.from(
                     inputZdt.withZoneSameInstant(
-                        ZoneId.of("UTC")
+                        ZoneId.of("UTC"),
                     )
-                        .toInstant()
-                )
+                        .toInstant(),
+                ),
             )
     }
 
@@ -53,7 +52,7 @@ class ZonedDateTimeConvertersUnitTest {
             0,
             0,
             0,
-            ZoneId.of("Pacific/Auckland")
+            ZoneId.of("Pacific/Auckland"),
         )
         val outputDocument = writingConverter.convert(inputZdt)
         assertThat<Any>(outputDocument!!["zone"]).isEqualTo("Pacific/Auckland")
@@ -61,10 +60,10 @@ class ZonedDateTimeConvertersUnitTest {
             .isEqualTo(
                 Date.from(
                     inputZdt.withZoneSameInstant(
-                        ZoneId.of("UTC")
+                        ZoneId.of("UTC"),
                     )
-                        .toInstant()
-                )
+                        .toInstant(),
+                ),
             )
     }
 
@@ -79,13 +78,13 @@ class ZonedDateTimeConvertersUnitTest {
             0,
             0,
             0,
-            ZoneId.of("America/Argentina/Cordoba")
+            ZoneId.of("America/Argentina/Cordoba"),
         )
         val inputDocumentMap: MutableMap<String, Any> = HashMap()
         inputDocumentMap["zone"] = "America/Argentina/Cordoba"
         inputDocumentMap["dateTime"] = Date.from(
             baseZdt.withZoneSameInstant(ZoneId.of("UTC"))
-                .toInstant()
+                .toInstant(),
         )
         val inputDocument = Document(inputDocumentMap)
         val outputTdz = readerConverter.convert(inputDocument)

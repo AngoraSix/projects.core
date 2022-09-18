@@ -1,5 +1,6 @@
 package com.angorasix.projects.core.domain.project
 
+import com.angorasix.commons.domain.RequestingContributor
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.PersistenceConstructor
 import java.time.ZoneId
@@ -14,13 +15,13 @@ import java.time.ZonedDateTime
  * @author rozagerardo
  */
 data class Project @PersistenceConstructor private constructor(
-        @field:Id val id: String?,
-        var name: String,
-        val creatorId: String,
-        val adminId: String?,
-        val createdAt: ZonedDateTime,
-        var attributes: MutableSet<Attribute<*>> = mutableSetOf<Attribute<*>>(),
-        var requirements: MutableSet<Attribute<*>> = mutableSetOf<Attribute<*>>(),
+    @field:Id val id: String?,
+    var name: String,
+    val creatorId: String,
+    val adminId: String?,
+    val createdAt: ZonedDateTime,
+    var attributes: MutableSet<Attribute<*>> = mutableSetOf<Attribute<*>>(),
+    var requirements: MutableSet<Attribute<*>> = mutableSetOf<Attribute<*>>(),
 ) {
 
     /**
@@ -32,20 +33,20 @@ data class Project @PersistenceConstructor private constructor(
      * @param attributes - a set of initial attributes
      */
     constructor(
-            name: String,
-            creatorId: String,
-            adminId: String,
-            zone: ZoneId? = ZoneId.systemDefault(),
-            attributes: MutableSet<Attribute<*>> = mutableSetOf(),
-            requirements: MutableSet<Attribute<*>> = mutableSetOf()
+        name: String,
+        creatorId: String,
+        adminId: String,
+        zone: ZoneId? = ZoneId.systemDefault(),
+        attributes: MutableSet<Attribute<*>> = mutableSetOf(),
+        requirements: MutableSet<Attribute<*>> = mutableSetOf(),
     ) : this(
-            null,
-            name,
-            creatorId,
-            adminId,
-            ZonedDateTime.now(zone),
-            attributes,
-            requirements
+        null,
+        name,
+        creatorId,
+        adminId,
+        ZonedDateTime.now(zone),
+        attributes,
+        requirements,
     )
 
     /**
@@ -56,4 +57,7 @@ data class Project @PersistenceConstructor private constructor(
     fun addAttribute(attribute: Attribute<*>) {
         attributes.add(attribute)
     }
+
+    fun canEdit(requestingContributor: RequestingContributor): Boolean =
+        adminId == requestingContributor.id
 }
