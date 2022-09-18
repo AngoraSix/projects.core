@@ -3,9 +3,11 @@ package com.angorasix.projects.core.integration.docs
 import com.angorasix.projects.core.ProjectsCoreApplication
 import com.angorasix.projects.core.domain.project.Attribute
 import com.angorasix.projects.core.domain.project.Project
+import com.angorasix.projects.core.infrastructure.config.configurationproperty.api.ApiConfigs
 import com.angorasix.projects.core.integration.utils.IntegrationProperties
 import com.angorasix.projects.core.integration.utils.initializeMongodb
 import com.angorasix.projects.core.presentation.dto.ProjectDto
+import com.angorasix.projects.core.utils.mockRequestingContributorHeader
 import com.fasterxml.jackson.databind.ObjectMapper
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.BeforeAll
@@ -17,12 +19,16 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.ApplicationContext
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
+import org.springframework.data.mongodb.core.query.Criteria
+import org.springframework.data.mongodb.core.query.Query
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.restdocs.RestDocumentationContextProvider
 import org.springframework.restdocs.RestDocumentationExtension
 import org.springframework.restdocs.headers.HeaderDocumentation.headerWithName
 import org.springframework.restdocs.headers.HeaderDocumentation.responseHeaders
+import org.springframework.restdocs.hypermedia.HypermediaDocumentation.linkWithRel
+import org.springframework.restdocs.hypermedia.HypermediaDocumentation.links
 import org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessResponse
 import org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint
 import org.springframework.restdocs.payload.FieldDescriptor
@@ -53,6 +59,7 @@ class ProjectCoreDocsIntegrationTest(
     @Autowired val mongoTemplate: ReactiveMongoTemplate,
     @Autowired val mapper: ObjectMapper,
     @Autowired val properties: IntegrationProperties,
+    @Autowired val apiConfigs: ApiConfigs,
 ) {
 
     private lateinit var webTestClient: WebTestClient
@@ -66,20 +73,24 @@ class ProjectCoreDocsIntegrationTest(
         fieldWithPath("name").description("Name of the project"),
         fieldWithPath("id").description("Project identifier"),
         fieldWithPath("creatorId").description("Contributor identifier"),
+        fieldWithPath("adminId").optional().description("Identifier of the Admin Contributor"),
         fieldWithPath("createdAt").description("Date in which the project was created"),
         subsectionWithPath("attributes[]").type(ArrayOfFieldType(Attribute::class.simpleName))
             .description("Array of the attributes that characterize the project"),
         subsectionWithPath("requirements[]").type(ArrayOfFieldType(Attribute::class.simpleName))
             .description("Array of the attributes that are required for the project"),
+        subsectionWithPath("links").description("HATEOAS links"),
     )
 
     var projectPostBodyDescriptor = arrayOf<FieldDescriptor>(
         fieldWithPath("name").description("Name of the project"),
         fieldWithPath("id").ignored(),
         fieldWithPath("creatorId").ignored(),
+        fieldWithPath("adminId").ignored(),
         fieldWithPath("createdAt").ignored(),
         subsectionWithPath("attributes[]").ignored(),
         subsectionWithPath("requirements[]").ignored(),
+        fieldWithPath("links[]").ignored(),
     )
 
     @BeforeAll
@@ -113,9 +124,12 @@ class ProjectCoreDocsIntegrationTest(
 
     private fun executeAndDocumentPostCreateProjectRequest() {
         val newProject = ProjectDto("New Project Name")
-        webTestClient.post().uri(
-            "/projects-core/",
-        ).accept(MediaType.APPLICATION_JSON).body(Mono.just(newProject)).exchange()
+        webTestClient.post()
+            .uri("/projects-core/")
+            .accept(MediaType.APPLICATION_JSON)
+            .header(apiConfigs.headers.contributor, mockRequestingContributorHeader())
+            .body(Mono.just(newProject))
+            .exchange()
             .expectStatus().isCreated.expectBody().consumeWith(
                 document(
                     "project-create",
@@ -125,12 +139,20 @@ class ProjectCoreDocsIntegrationTest(
                     responseHeaders(
                         headerWithName(HttpHeaders.LOCATION).description("URL of the newly created project"),
                     ),
+                    links(
+                        linkWithRel("self").description("The self link"),
+                        linkWithRel("updateProject").description("Link to edit operation"),
+                    ),
                 ),
             )
     }
 
     private fun executeAndDocumentGetSingleProjectRequest() {
-        webTestClient.get().uri("/projects-core/{projectId}", 1)
+        val initElementQuery = Query()
+        initElementQuery.addCriteria(Criteria.where("name").`is`("Angora Sustainable"))
+        val elementId = mongoTemplate.findOne(initElementQuery, Project::class.java).block()?.id
+
+        webTestClient.get().uri("/projects-core/{projectId}", elementId)
             .accept(MediaType.APPLICATION_JSON).exchange().expectStatus().isOk.expectBody()
             .consumeWith(
                 document(
@@ -138,6 +160,9 @@ class ProjectCoreDocsIntegrationTest(
                     preprocessResponse(prettyPrint()),
                     pathParameters(parameterWithName("projectId").description("The Project id")),
                     responseFields(*projectDescriptor),
+                    links(
+                        linkWithRel("self").description("The self link"),
+                    ),
                 ),
             )
     }

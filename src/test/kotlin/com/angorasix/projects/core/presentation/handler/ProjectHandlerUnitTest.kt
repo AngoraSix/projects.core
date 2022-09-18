@@ -135,7 +135,7 @@ class ProjectHandlerUnitTest {
 
     @Test
     @Throws(Exception::class)
-    fun `Given request with project and no RequestingContributor - When create project - Then handler retrieves Created`() =
+    fun `Given request with project and no RequestingContributor - When create project - Then handler retrieves Bad Request`() =
         runBlocking { // = runBlockingTest { // until we resolve why service.createProject is hanging https://github.com/Kotlin/kotlinx.coroutines/issues/1204
             val mockedProjectDto = ProjectDto(
                 null,
@@ -263,7 +263,7 @@ class ProjectHandlerUnitTest {
     @Test
     @Throws(Exception::class)
     @kotlinx.coroutines.ExperimentalCoroutinesApi
-    fun `Given contributor - When get project with admin contributor - Then handler retrieves Ok Response`() =
+    fun `Given contributor - When check if Requesting Contributor is Admin of project - Then handler retrieves Ok Response`() =
         runBlockingTest {
             val projectId = "projectId"
             val mockedRequestingContributor = RequestingContributor("mockedId")

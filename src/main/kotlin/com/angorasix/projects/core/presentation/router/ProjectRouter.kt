@@ -1,6 +1,7 @@
 package com.angorasix.projects.core.presentation.router
 
-import com.angorasix.commons.presentation.filter.resolveRequestingContributor
+import com.angorasix.commons.presentation.filter.checkRequestingContributor
+import com.angorasix.commons.presentation.filter.extractRequestingContributor
 import com.angorasix.projects.core.infrastructure.config.configurationproperty.api.ApiConfigs
 import com.angorasix.projects.core.presentation.handler.ProjectHandler
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -26,6 +27,14 @@ class ProjectRouter(
      */
     fun projectRouterFunction() = coRouter {
         apiConfigs.basePaths.projectsCore.nest {
+            filter { request, next ->
+                extractRequestingContributor(
+                    request,
+                    next,
+                    apiConfigs.headers.contributor,
+                    objectMapper,
+                )
+            }
             defineValidateAdminUserEndpoint()
             apiConfigs.routes.baseByIdCrudRoute.nest {
                 defineUpdateProjectEndpoint()
@@ -41,11 +50,11 @@ class ProjectRouter(
     private fun CoRouterFunctionDsl.defineValidateAdminUserEndpoint() {
         path(apiConfigs.routes.validateAdminUser.path).nest {
             filter { request, next ->
-                resolveRequestingContributor(
+                checkRequestingContributor(
                     request,
                     next,
                     apiConfigs.headers.contributor,
-                    objectMapper,
+                    true,
                 )
             }
             method(apiConfigs.routes.validateAdminUser.method, handler::validateAdminUser)
@@ -55,11 +64,11 @@ class ProjectRouter(
     private fun CoRouterFunctionDsl.defineUpdateProjectEndpoint() {
         method(apiConfigs.routes.updateProject.method).nest {
             filter { request, next ->
-                resolveRequestingContributor(
+                checkRequestingContributor(
                     request,
                     next,
                     apiConfigs.headers.contributor,
-                    objectMapper,
+                    true,
                 )
             }
             method(apiConfigs.routes.updateProject.method, handler::updateProject)
@@ -68,15 +77,6 @@ class ProjectRouter(
 
     private fun CoRouterFunctionDsl.defineGetProjectEndpoint() {
         method(apiConfigs.routes.getProject.method).nest {
-            filter { request, next ->
-                resolveRequestingContributor(
-                    request,
-                    next,
-                    apiConfigs.headers.contributor,
-                    objectMapper,
-                    true,
-                )
-            }
             method(apiConfigs.routes.getProject.method, handler::getProject)
         }
     }
@@ -84,11 +84,11 @@ class ProjectRouter(
     private fun CoRouterFunctionDsl.defineCreateProjectEndpoint() {
         method(apiConfigs.routes.createProject.method).nest {
             filter { request, next ->
-                resolveRequestingContributor(
+                checkRequestingContributor(
                     request,
                     next,
                     apiConfigs.headers.contributor,
-                    objectMapper,
+                    true,
                 )
             }
             method(apiConfigs.routes.createProject.method, handler::createProject)
@@ -97,15 +97,6 @@ class ProjectRouter(
 
     private fun CoRouterFunctionDsl.defineListProjectsEndpoint() {
         method(apiConfigs.routes.listProjects.method).nest {
-            filter { request, next ->
-                resolveRequestingContributor(
-                    request,
-                    next,
-                    apiConfigs.headers.contributor,
-                    objectMapper,
-                    true,
-                )
-            }
             method(apiConfigs.routes.listProjects.method, handler::listProjects)
         }
     }

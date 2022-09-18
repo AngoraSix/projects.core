@@ -1,6 +1,5 @@
 [
   {
-    "_id": "1",
     "name": "Angora Sustainable",
     "creatorId": "rozagerardo",
     "createdAt": {
@@ -37,7 +36,6 @@
     ]
   },
   {
-    "_id": "2",
     "name": "A Local Project",
     "creatorId": "mockUserId",
     "createdAt": {

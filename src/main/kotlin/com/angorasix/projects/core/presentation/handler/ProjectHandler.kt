@@ -121,8 +121,15 @@ class ProjectHandler(private val service: ProjectService, private val apiConfigs
     suspend fun updateProject(request: ServerRequest): ServerResponse {
         val requestingContributor = request.attributes()[apiConfigs.headers.contributor]
         val projectId = request.pathVariable("id")
-        val updateProjectData = request.awaitBody<ProjectDto>().let {
-            it.convertToDomain(it.creatorId ?: "", it.adminId ?: "")
+        val updateProjectData = try {
+            request.awaitBody<ProjectDto>().let {
+                it.convertToDomain(it.creatorId ?: "", it.adminId ?: "")
+            }
+        } catch (e: IllegalArgumentException) {
+            return resolveBadRequest(
+                e.message ?: "Incorrect Project body",
+                "Project Presentation",
+            )
         }
         return service.updateProject(projectId, updateProjectData)?.let {
             val outputProject = it.convertToDto(
