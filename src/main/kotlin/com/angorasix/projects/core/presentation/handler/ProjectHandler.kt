@@ -12,11 +12,11 @@ import com.angorasix.projects.core.presentation.dto.AttributeDto
 import com.angorasix.projects.core.presentation.dto.IsAdminDto
 import com.angorasix.projects.core.presentation.dto.ProjectDto
 import kotlinx.coroutines.flow.map
+import org.springframework.hateoas.IanaLinkRelations
 import org.springframework.hateoas.Link
 import org.springframework.hateoas.MediaTypes
 import org.springframework.hateoas.mediatype.Affordances
 import org.springframework.http.HttpMethod
-import org.springframework.http.MediaType
 import org.springframework.util.MultiValueMap
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
@@ -106,7 +106,9 @@ class ProjectHandler(private val service: ProjectService, private val apiConfigs
                 .convertToDomain(requestingContributor.id, requestingContributor.id)
             val outputProject = service.createProject(project)
                 .convertToDto(requestingContributor, apiConfigs, request)
-            created(URI.create("http://localhost:8080/gertest")).contentType(MediaTypes.HAL_FORMS_JSON)
+            created(URI.create(outputProject.links.getRequiredLink(IanaLinkRelations.SELF).href)).contentType(
+                MediaTypes.HAL_FORMS_JSON,
+            )
                 .bodyValueAndAwait(outputProject)
         } else {
             resolveBadRequest("Invalid Contributor Header", "Contributor Header")
