@@ -12,6 +12,7 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.jupiter.api.BeforeEach
@@ -26,6 +27,7 @@ import org.springframework.web.reactive.function.server.EntityResponse
 import java.net.URI
 
 @ExtendWith(MockKExtension::class)
+@ExperimentalCoroutinesApi
 class ProjectRouterUnitTest {
 
     private lateinit var router: ProjectRouter
@@ -60,7 +62,6 @@ class ProjectRouterUnitTest {
 
     @Test
     @Throws(Exception::class)
-    @kotlinx.coroutines.ExperimentalCoroutinesApi
     fun `Given Project router - When expected APIs requested - Then router routes correctly`() =
         runBlockingTest {
             val outputRouter = router.projectRouterFunction()

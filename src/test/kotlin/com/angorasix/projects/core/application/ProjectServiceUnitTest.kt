@@ -15,6 +15,7 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verifyAll
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runBlockingTest
@@ -25,6 +26,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import java.time.ZoneId
 
 @ExtendWith(MockKExtension::class)
+@ExperimentalCoroutinesApi
 class ProjectServiceUnitTest {
     private lateinit var service: ProjectService
 
@@ -38,7 +40,6 @@ class ProjectServiceUnitTest {
 
     @Test
     @Throws(Exception::class)
-    @kotlinx.coroutines.ExperimentalCoroutinesApi
     fun `given existing projects - when request find projects - then receive projects`() =
         runBlockingTest {
             val mockedProject = Project(
@@ -60,7 +61,6 @@ class ProjectServiceUnitTest {
 
     @Test
     @Throws(Exception::class)
-    @kotlinx.coroutines.ExperimentalCoroutinesApi
     fun givenExistingProject_whenFindSingleProjects_thenServiceRetrievesMonoWithProject() =
         runBlockingTest {
             val mockedProjectId = "id1"
@@ -78,7 +78,6 @@ class ProjectServiceUnitTest {
 
     @Test
     @Throws(Exception::class)
-    @kotlinx.coroutines.ExperimentalCoroutinesApi
     fun whenCreateProject_thenServiceRetrieveSavedProject() = runBlockingTest {
         val mockedProject = Project(
             "mockedProjectName",
@@ -100,7 +99,6 @@ class ProjectServiceUnitTest {
 
     @Test
     @Throws(Exception::class)
-    @kotlinx.coroutines.ExperimentalCoroutinesApi
     fun whenUpdateProject_thenServiceRetrieveSavedProject() = runBlockingTest {
         val mockedExistingProject = mockk<Project>()
         every {
@@ -142,7 +140,6 @@ class ProjectServiceUnitTest {
 
     @Test
     @Throws(Exception::class)
-    @kotlinx.coroutines.ExperimentalCoroutinesApi
     fun whenUpdateProject_thenServiceRetrieveUpdatedProject() = runBlockingTest {
         val mockedProject = Project(
             "mockedProjectName",

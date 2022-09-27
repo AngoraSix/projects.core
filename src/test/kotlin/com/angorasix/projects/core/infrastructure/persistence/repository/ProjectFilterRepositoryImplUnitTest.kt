@@ -8,6 +8,7 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -24,6 +25,7 @@ import reactor.core.publisher.Flux
  * @author rozagerardo
  */
 @ExtendWith(MockKExtension::class)
+@ExperimentalCoroutinesApi
 class ProjectFilterRepositoryImplUnitTest {
 
     private lateinit var filterRepoImpl: ProjectFilterRepositoryImpl
