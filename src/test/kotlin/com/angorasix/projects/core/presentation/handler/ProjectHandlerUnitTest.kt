@@ -16,6 +16,7 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOf
@@ -36,6 +37,7 @@ import org.springframework.web.reactive.function.server.ServerRequest
 import java.time.ZoneId
 
 @ExtendWith(MockKExtension::class)
+@ExperimentalCoroutinesApi
 class ProjectHandlerUnitTest {
 
     private lateinit var handler: ProjectHandler
@@ -72,7 +74,6 @@ class ProjectHandlerUnitTest {
 
     @Test
     @Throws(Exception::class)
-    @kotlinx.coroutines.ExperimentalCoroutinesApi
     fun `Given existing projects - When list projects - Then handler retrieves Ok Response`() =
         runBlockingTest {
             val mockedExchange = MockServerWebExchange.from(
@@ -201,7 +202,6 @@ class ProjectHandlerUnitTest {
 
     @Test
     @Throws(Exception::class)
-    @kotlinx.coroutines.ExperimentalCoroutinesApi
     fun `Given existing projects - When get project for non Admin contributor - Then handler retrieves Ok Response without Edit link`() =
         runBlockingTest {
             val projectId = "projectId"
@@ -231,7 +231,6 @@ class ProjectHandlerUnitTest {
 
     @Test
     @Throws(Exception::class)
-    @kotlinx.coroutines.ExperimentalCoroutinesApi
     fun `Given existing projects - When get project for Admin Contributor - Then handler retrieves Ok Response with Edit link`() =
         runBlockingTest {
             val projectId = "projectId"
@@ -262,7 +261,6 @@ class ProjectHandlerUnitTest {
 
     @Test
     @Throws(Exception::class)
-    @kotlinx.coroutines.ExperimentalCoroutinesApi
     fun `Given contributor - When check if Requesting Contributor is Admin of project - Then handler retrieves Ok Response`() =
         runBlockingTest {
             val projectId = "projectId"
@@ -294,7 +292,6 @@ class ProjectHandlerUnitTest {
 
     @Test
     @Throws(Exception::class)
-    @kotlinx.coroutines.ExperimentalCoroutinesApi
     fun `Given contributor - When get project admin not matching contributor - Then handler retrieves Ok Response with false value`() =
         runBlockingTest {
             val projectId = "projectId"
