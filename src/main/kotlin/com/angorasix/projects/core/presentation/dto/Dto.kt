@@ -1,5 +1,6 @@
 package com.angorasix.projects.core.presentation.dto
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import org.springframework.hateoas.RepresentationModel
 import java.time.ZonedDateTime
 
@@ -16,6 +17,8 @@ data class ProjectDto(
     var attributes: MutableSet<AttributeDto> = mutableSetOf(),
     var requirements: MutableSet<AttributeDto> = mutableSetOf(),
     var creatorId: String? = null,
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    var private: Boolean? = null,
     var adminId: String? = null,
     var createdAt: ZonedDateTime? = null,
 ) : RepresentationModel<ProjectDto>() {

@@ -44,9 +44,13 @@ class ProjectHandler(private val service: ProjectService, private val apiConfigs
      */
     suspend fun listProjects(@Suppress("UNUSED_PARAMETER") request: ServerRequest): ServerResponse {
         val requestingContributor = request.attributes()[apiConfigs.headers.contributor]
-        return service.findProjects(request.queryParams().toQueryFilter()).map {
+        return service.findProjects(
+            request.queryParams()
+                .toQueryFilter(),
+            requestingContributor as RequestingContributor?,
+        ).map {
             it.convertToDto(
-                requestingContributor as? RequestingContributor,
+                requestingContributor,
                 apiConfigs,
                 request,
             )
@@ -64,14 +68,15 @@ class ProjectHandler(private val service: ProjectService, private val apiConfigs
     suspend fun getProject(request: ServerRequest): ServerResponse {
         val requestingContributor = request.attributes()[apiConfigs.headers.contributor]
         val projectId = request.pathVariable("id")
-        return service.findSingleProject(projectId)?.let {
-            val outputProject = it.convertToDto(
-                requestingContributor as? RequestingContributor,
-                apiConfigs,
-                request,
-            )
-            ok().contentType(MediaTypes.HAL_FORMS_JSON).bodyValueAndAwait(outputProject)
-        } ?: resolveNotFound("Can't find Project", "Project")
+        return service.findSingleProject(projectId, requestingContributor as RequestingContributor?)
+            ?.let {
+                val outputProject = it.convertToDto(
+                    requestingContributor as? RequestingContributor,
+                    apiConfigs,
+                    request,
+                )
+                ok().contentType(MediaTypes.HAL_FORMS_JSON).bodyValueAndAwait(outputProject)
+            } ?: resolveNotFound("Can't find Project", "Project")
     }
 
     /**
@@ -84,7 +89,7 @@ class ProjectHandler(private val service: ProjectService, private val apiConfigs
         val requestingContributor = request.attributes()[apiConfigs.headers.contributor]
         val projectId = request.pathVariable("id")
         return if (requestingContributor is RequestingContributor) {
-            service.findSingleProject(projectId)?.let {
+            service.administeredProject(projectId, requestingContributor)?.let {
                 val result = it.adminId == requestingContributor.id
                 ok().contentType(MediaTypes.HAL_FORMS_JSON).bodyValueAndAwait(IsAdminDto(result))
             } ?: resolveNotFound("Can't find project", "Project")
@@ -134,14 +139,22 @@ class ProjectHandler(private val service: ProjectService, private val apiConfigs
                 "Project Presentation",
             )
         }
-        return service.updateProject(projectId, updateProjectData)?.let {
-            val outputProject = it.convertToDto(
-                requestingContributor as? RequestingContributor,
-                apiConfigs,
-                request,
-            )
-            ok().contentType(MediaTypes.HAL_FORMS_JSON).bodyValueAndAwait(outputProject)
-        } ?: resolveNotFound("Can't update this project", "Project")
+        return if (requestingContributor is RequestingContributor) {
+            service.updateProject(
+                projectId,
+                updateProjectData,
+                requestingContributor as RequestingContributor,
+            )?.let {
+                val outputProject = it.convertToDto(
+                    requestingContributor as? RequestingContributor,
+                    apiConfigs,
+                    request,
+                )
+                ok().contentType(MediaTypes.HAL_FORMS_JSON).bodyValueAndAwait(outputProject)
+            } ?: resolveNotFound("Can't update this project", "Project")
+        } else {
+            resolveBadRequest("Invalid Contributor Header", "Contributor Header")
+        }
     }
 }
 
@@ -152,6 +165,7 @@ private fun Project.convertToDto(): ProjectDto {
         attributes.map { it.convertToDto() }.toMutableSet(),
         requirements.map { it.convertToDto() }.toMutableSet(),
         creatorId,
+        private,
         adminId,
         createdAt,
     )
@@ -174,6 +188,7 @@ private fun ProjectDto.convertToDomain(contributorId: String, adminId: String): 
         contributorId,
         adminId,
         ZoneId.of("America/Argentina/Cordoba"),
+        private ?: false,
         attributes.map { it.convertToDomain() }.toMutableSet(),
         requirements.map { it.convertToDomain() }.toMutableSet(),
     )
@@ -220,5 +235,9 @@ private fun AttributeDto.convertToDomain(): Attribute<*> {
 }
 
 private fun MultiValueMap<String, String>.toQueryFilter(): ListProjectsFilter {
-    return ListProjectsFilter(get("ids")?.flatMap { it.split(",") }, getFirst("adminId"))
+    return ListProjectsFilter(
+        get("ids")?.flatMap { it.split(",") },
+        getFirst("adminId"),
+        getFirst("private")?.toBoolean(),
+    )
 }

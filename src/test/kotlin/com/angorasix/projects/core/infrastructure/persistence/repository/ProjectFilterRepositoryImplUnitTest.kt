@@ -17,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.data.mongodb.core.ReactiveMongoOperations
 import org.springframework.data.mongodb.core.query.Query
 import reactor.core.publisher.Flux
+import javax.swing.text.Document
 
 /**
  * <p>
@@ -42,18 +43,21 @@ class ProjectFilterRepositoryImplUnitTest {
 
     @Test
     @Throws(Exception::class)
-    fun `Given empty ProjectFilter - When findUsingFilter - Then find repo operation with empty query`() =
+    fun `Given empty ProjectFilter - When findUsingFilter - Then find repo operation filtering out private projects`() =
         runBlockingTest {
             val filter = ListProjectsFilter()
             val mockedFlux = mockk<Flux<Project>>()
             every { mongoOps.find(capture(slot), Project::class.java) } returns mockedFlux
 
-            filterRepoImpl.findUsingFilter(filter)
+            filterRepoImpl.findUsingFilter(filter, null)
 
             val capturedQuery = slot.captured
 
             verify { mongoOps.find(capturedQuery, Project::class.java) }
-            assertThat(capturedQuery.queryObject).isEmpty()
+            assertThat(capturedQuery.queryObject).containsKey("\$and")
+            assertThat(capturedQuery.queryObject["\$and"] as List<Map<String, Any>>)
+                .anyMatch { it.containsKey("adminId") }
+                .anyMatch { it["private"] == false }
         }
 
     @Test
@@ -64,11 +68,14 @@ class ProjectFilterRepositoryImplUnitTest {
             val mockedFlux = mockk<Flux<Project>>()
             every { mongoOps.find(capture(slot), Project::class.java) } returns mockedFlux
 
-            filterRepoImpl.findUsingFilter(filter)
+            filterRepoImpl.findUsingFilter(filter, null)
 
             val capturedQuery = slot.captured
 
             verify { mongoOps.find(capturedQuery, Project::class.java) }
-            assertThat(capturedQuery.queryObject).containsKey("_id").containsKey("adminId")
+            assertThat(capturedQuery.queryObject).containsKey("\$and").containsKey("_id")
+            assertThat(capturedQuery.queryObject["\$and"] as List<Map<String, Any>>).anyMatch {
+                it.containsKey("adminId")
+            }
         }
 }

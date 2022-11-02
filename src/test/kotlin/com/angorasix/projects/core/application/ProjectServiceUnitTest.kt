@@ -1,5 +1,6 @@
 package com.angorasix.projects.core.application
 
+import com.angorasix.commons.domain.RequestingContributor
 import com.angorasix.projects.core.domain.project.Attribute
 import com.angorasix.projects.core.domain.project.Project
 import com.angorasix.projects.core.domain.project.ProjectRepository
@@ -49,14 +50,14 @@ class ProjectServiceUnitTest {
                 ZoneId.systemDefault(),
             )
             val filter = ListProjectsFilter()
-            coEvery { repository.findUsingFilter(filter) } returns flowOf(mockedProject)
+            coEvery { repository.findUsingFilter(filter, null) } returns flowOf(mockedProject)
 
-            val outputProjects = service.findProjects(filter)
+            val outputProjects = service.findProjects(filter, null)
 
             outputProjects.collect {
                 assertThat<Project>(it).isSameAs(mockedProject)
             }
-            coVerify { repository.findUsingFilter(filter) }
+            coVerify { repository.findUsingFilter(filter, null) }
         }
 
     @Test
@@ -70,10 +71,20 @@ class ProjectServiceUnitTest {
                 "creator_id",
                 ZoneId.systemDefault(),
             )
-            coEvery { repository.findById(mockedProjectId) } returns mockedProject
-            val outputProject = service.findSingleProject(mockedProjectId)
+            coEvery {
+                repository.findByIdForContributor(
+                    ListProjectsFilter(listOf(mockedProjectId)),
+                    null,
+                )
+            } returns mockedProject
+            val outputProject = service.findSingleProject(mockedProjectId, null)
             assertThat(outputProject).isSameAs(mockedProject)
-            coVerify { repository.findById(mockedProjectId) }
+            coVerify {
+                repository.findByIdForContributor(
+                    ListProjectsFilter(listOf(mockedProjectId)),
+                    null,
+                )
+            }
         }
 
     @Test
@@ -100,6 +111,7 @@ class ProjectServiceUnitTest {
     @Test
     @Throws(Exception::class)
     fun whenUpdateProject_thenServiceRetrieveSavedProject() = runBlockingTest {
+        val mockedRequestingContributor = RequestingContributor("mockedId")
         val mockedExistingProject = mockk<Project>()
         every {
             mockedExistingProject.setProperty(Project::name.name) value "mockedUpdatedProjectName"
@@ -122,12 +134,21 @@ class ProjectServiceUnitTest {
             "creator_id",
             ZoneId.systemDefault(),
         )
-        coEvery { repository.findById("id1") } returns mockedExistingProject
+        coEvery {
+            repository.findByIdForContributor(
+                ListProjectsFilter(listOf("id1")),
+                mockedRequestingContributor,
+            )
+        } returns mockedExistingProject
         coEvery { repository.save(any()) } returns savedProject
-        val outputProject = service.updateProject("id1", mockedUpdateProject)
+        val outputProject =
+            service.updateProject("id1", mockedUpdateProject, mockedRequestingContributor)
         assertThat(outputProject).isSameAs(savedProject)
         coVerifyAll {
-            repository.findById("id1")
+            repository.findByIdForContributor(
+                ListProjectsFilter(listOf("id1")),
+                mockedRequestingContributor,
+            )
             repository.save(any())
         }
         verifyAll {
