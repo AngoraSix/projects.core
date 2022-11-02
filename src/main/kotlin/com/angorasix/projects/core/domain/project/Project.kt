@@ -20,6 +20,7 @@ data class Project @PersistenceConstructor private constructor(
     val creatorId: String,
     val adminId: String?,
     val createdAt: ZonedDateTime,
+    val private: Boolean = false,
     var attributes: MutableSet<Attribute<*>> = mutableSetOf<Attribute<*>>(),
     var requirements: MutableSet<Attribute<*>> = mutableSetOf<Attribute<*>>(),
 ) {
@@ -37,6 +38,7 @@ data class Project @PersistenceConstructor private constructor(
         creatorId: String,
         adminId: String,
         zone: ZoneId? = ZoneId.systemDefault(),
+        private: Boolean = false,
         attributes: MutableSet<Attribute<*>> = mutableSetOf(),
         requirements: MutableSet<Attribute<*>> = mutableSetOf(),
     ) : this(
@@ -45,6 +47,7 @@ data class Project @PersistenceConstructor private constructor(
         creatorId,
         adminId,
         ZonedDateTime.now(zone),
+        private,
         attributes,
         requirements,
     )

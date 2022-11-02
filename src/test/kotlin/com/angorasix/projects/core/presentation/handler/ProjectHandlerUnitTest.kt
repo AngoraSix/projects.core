@@ -84,7 +84,7 @@ class ProjectHandlerUnitTest {
             val mockedProject =
                 Project("mockedProjectName", "creator_id", "creator_id", ZoneId.systemDefault())
             val retrievedProject = flowOf(mockedProject)
-            coEvery { service.findProjects(ListProjectsFilter()) } returns retrievedProject
+            coEvery { service.findProjects(ListProjectsFilter(), null) } returns retrievedProject
 
             val outputResponse = handler.listProjects(mockedRequest)
 
@@ -96,7 +96,7 @@ class ProjectHandlerUnitTest {
                 assertThat(it.name).isEqualTo("mockedProjectName")
                 assertThat(it.creatorId).isEqualTo("creator_id")
             }
-            coVerify { service.findProjects(ListProjectsFilter()) }
+            coVerify { service.findProjects(ListProjectsFilter(), null) }
         }
 
     @Test
@@ -186,7 +186,13 @@ class ProjectHandlerUnitTest {
                 "creator_id",
                 ZoneId.systemDefault(),
             )
-            coEvery { service.updateProject("id1", ofType(Project::class)) } returns mockedProject
+            coEvery {
+                service.updateProject(
+                    "id1",
+                    ofType(Project::class),
+                    mockedRequestingContributor,
+                )
+            } returns mockedProject
 
             val outputResponse = handler.updateProject(mockedRequest)
 
@@ -197,7 +203,13 @@ class ProjectHandlerUnitTest {
             assertThat(responseBody).isNotSameAs(mockedProjectDto)
             assertThat(responseBody.name).isEqualTo("mockedProjectName")
             assertThat(responseBody.creatorId).isEqualTo("creator_id")
-            coVerify { service.updateProject("id1", ofType(Project::class)) }
+            coVerify {
+                service.updateProject(
+                    "id1",
+                    ofType(Project::class),
+                    mockedRequestingContributor,
+                )
+            }
         }
 
     @Test
@@ -214,7 +226,12 @@ class ProjectHandlerUnitTest {
                     .pathVariable("id", projectId).exchange(mockedExchange).build()
             val mockedProject =
                 Project("mockedProjectName", "creator_id", "otherId", ZoneId.systemDefault())
-            coEvery { service.findSingleProject(projectId) } returns mockedProject
+            coEvery {
+                service.findSingleProject(
+                    projectId,
+                    mockedRequestingContributor,
+                )
+            } returns mockedProject
 
             val outputResponse = handler.getProject(mockedRequest)
 
@@ -226,7 +243,7 @@ class ProjectHandlerUnitTest {
             assertThat(responseBody.creatorId).isEqualTo("creator_id")
             assertThat(responseBody.links.hasSize(1)).isTrue()
             assertThat(responseBody.links.getLink("updateProject")).isEmpty
-            coVerify { service.findSingleProject(projectId) }
+            coVerify { service.findSingleProject(projectId, mockedRequestingContributor) }
         }
 
     @Test
@@ -244,7 +261,12 @@ class ProjectHandlerUnitTest {
                     .pathVariable("id", projectId).exchange(mockedExchange).build()
             val mockedProject =
                 Project("mockedProjectName", "creator_id", "mockedId", ZoneId.systemDefault())
-            coEvery { service.findSingleProject(projectId) } returns mockedProject
+            coEvery {
+                service.findSingleProject(
+                    projectId,
+                    mockedRequestingContributor,
+                )
+            } returns mockedProject
 
             val outputResponse = handler.getProject(mockedRequest)
 
@@ -256,7 +278,7 @@ class ProjectHandlerUnitTest {
             assertThat(responseBody.creatorId).isEqualTo("creator_id")
             assertThat(responseBody.links.hasSize(2)).isTrue()
             assertThat(responseBody.links.getLink("updateProject")).isNotNull
-            coVerify { service.findSingleProject(projectId) }
+            coVerify { service.findSingleProject(projectId, mockedRequestingContributor) }
         }
 
     @Test
@@ -278,7 +300,12 @@ class ProjectHandlerUnitTest {
                 "mockedId",
                 ZoneId.systemDefault(),
             )
-            coEvery { service.findSingleProject(projectId) } returns mockedProject
+            coEvery {
+                service.findSingleProject(
+                    projectId,
+                    mockedRequestingContributor,
+                )
+            } returns mockedProject
 
             val outputResponse = handler.validateAdminUser(mockedRequest)
 
@@ -287,7 +314,7 @@ class ProjectHandlerUnitTest {
             outputResponse as EntityResponse<IsAdminDto>
             val responseBody = response.entity()
             assertThat(responseBody.isAdmin).isTrue()
-            coVerify { service.findSingleProject(projectId) }
+            coVerify { service.findSingleProject(projectId, mockedRequestingContributor) }
         }
 
     @Test
@@ -309,7 +336,12 @@ class ProjectHandlerUnitTest {
                 "otherId",
                 ZoneId.systemDefault(),
             )
-            coEvery { service.findSingleProject(projectId) } returns mockedProject
+            coEvery {
+                service.findSingleProject(
+                    projectId,
+                    mockedRequestingContributor,
+                )
+            } returns mockedProject
 
             val outputResponse = handler.validateAdminUser(mockedRequest)
 
@@ -318,6 +350,6 @@ class ProjectHandlerUnitTest {
             outputResponse as EntityResponse<IsAdminDto>
             val responseBody = response.entity()
             assertThat(responseBody.isAdmin).isFalse()
-            coVerify { service.findSingleProject(projectId) }
+            coVerify { service.findSingleProject(projectId, mockedRequestingContributor) }
         }
 }
