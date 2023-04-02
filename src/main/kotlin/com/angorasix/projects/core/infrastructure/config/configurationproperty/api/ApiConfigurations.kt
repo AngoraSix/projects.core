@@ -1,7 +1,6 @@
 package com.angorasix.projects.core.infrastructure.config.configurationproperty.api
 
 import org.springframework.boot.context.properties.ConfigurationProperties
-import org.springframework.boot.context.properties.ConstructorBinding
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
 
@@ -20,11 +19,11 @@ class ApiConfigs {
     lateinit var basePaths: BasePathConfigs
 }
 
-class HeadersConfigs @ConstructorBinding constructor(val contributor: String)
+class HeadersConfigs constructor(val contributor: String)
 
-class BasePathConfigs @ConstructorBinding constructor(val projectsCore: String)
+class BasePathConfigs constructor(val projectsCore: String)
 
-class RoutesConfigs @ConstructorBinding constructor(
+class RoutesConfigs constructor(
     val baseListCrudRoute: String,
     val baseByIdCrudRoute: String,
     val createProject: Route,

@@ -12,6 +12,7 @@ import com.angorasix.projects.core.presentation.dto.AttributeDto
 import com.angorasix.projects.core.presentation.dto.IsAdminDto
 import com.angorasix.projects.core.presentation.dto.ProjectDto
 import kotlinx.coroutines.flow.map
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.hateoas.IanaLinkRelations
 import org.springframework.hateoas.Link
 import org.springframework.hateoas.MediaTypes
@@ -34,7 +35,11 @@ import java.time.ZoneId
  *
  * @author rozagerardo
  */
-class ProjectHandler(private val service: ProjectService, private val apiConfigs: ApiConfigs) {
+class ProjectHandler(
+    private val service: ProjectService,
+    private val apiConfigs: ApiConfigs,
+    private val mongoTemplate: ReactiveMongoTemplate?,
+) {
 
     /**
      * Handler for the List Projects endpoint, retrieving a Flux including all persisted Projects.

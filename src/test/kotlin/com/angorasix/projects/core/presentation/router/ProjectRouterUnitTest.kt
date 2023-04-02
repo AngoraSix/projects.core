@@ -14,7 +14,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.reactor.awaitSingle
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -63,7 +63,7 @@ class ProjectRouterUnitTest {
     @Test
     @Throws(Exception::class)
     fun `Given Project router - When expected APIs requested - Then router routes correctly`() =
-        runBlockingTest {
+        runTest {
             val outputRouter = router.projectRouterFunction()
             val mockedRequest =
                 MockServerHttpRequest.get("mocked-any") // basePathsConfigs.projectsCore + routeConfigs.baseListCrudRoute + routeConfigs.listProjects.path)

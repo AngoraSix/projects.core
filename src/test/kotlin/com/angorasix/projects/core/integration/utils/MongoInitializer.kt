@@ -31,6 +31,7 @@ suspend fun initializeMongodb(
     template: ReactiveMongoTemplate,
     mapper: ObjectMapper,
 ) {
+    template.dropCollection("project").block()
     val file: File = ClassPathResource(jsonFile).file
     val dataEntries: Collection<MutableMap<String, Any>> = mapper.readValue(file.inputStream())
 

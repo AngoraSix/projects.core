@@ -16,7 +16,6 @@ import org.hamcrest.Matchers.greaterThanOrEqualTo
 import org.hamcrest.Matchers.hasItems
 import org.hamcrest.Matchers.not
 import org.hamcrest.Matchers.notNullValue
-import org.hamcrest.core.IsNull
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -25,6 +24,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
+import org.springframework.hateoas.MediaTypes
 import org.springframework.http.MediaType
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.web.reactive.server.WebTestClient
@@ -133,7 +133,7 @@ class ProjectCoreIntegrationTest(
             .jsonPath("$.createdAt")
             .isEqualTo("2020-08-09T00:23:00-03:00")
             .jsonPath("$.adminId")
-            .value(IsNull.nullValue())
+            .isEqualTo("rozagerardo")
 
         // @formatter:on
     }
@@ -162,7 +162,8 @@ class ProjectCoreIntegrationTest(
         )
         webTestClient.post()
             .uri("/projects-core/")
-            .accept(MediaType.APPLICATION_JSON)
+            .accept(MediaTypes.HAL_FORMS_JSON)
+            .contentType(MediaTypes.HAL_FORMS_JSON)
             .header(apiConfigs.headers.contributor, mockRequestingContributorHeader())
             .body(
                 Mono.just(newProject),

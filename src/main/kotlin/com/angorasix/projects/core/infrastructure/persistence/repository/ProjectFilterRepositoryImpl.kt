@@ -42,31 +42,38 @@ private fun ListProjectsFilter.toQuery(requestingContributor: RequestingContribu
     val requestingOwn =
         requestingContributor != null && (adminId == null || adminId == requestingContributor.id)
 
+    var othersCriteria: Criteria? = null
+    var ownCriteria: Criteria? = null
+
     if (requestingOthers) {
         if (private == true && !requestingOwn) {
             // we won't be retrieving any project in this case
             query.addCriteria(where("_id").`is`(null))
             return query
         }
-        query.addCriteria(
-            Criteria().andOperator(
-                adminId?.let { where("adminId").`is`(adminId) } ?: where("adminId").ne(requestingContributor?.id),
-                where("private").`is`(false),
+        othersCriteria = Criteria().andOperator(
+            adminId?.let { where("adminId").`is`(adminId) } ?: where("adminId").ne(
+                requestingContributor?.id,
             ),
+            where("private").`is`(false),
         )
     }
     if (requestingOwn) {
-        query.addCriteria(
-            private?.let {
-                Criteria().andOperator(
-                    where("adminId").`is`(requestingContributor?.id),
-                    where("private").`is`(private),
-                )
-            } ?: where("adminId").`is`(requestingContributor?.id),
-        )
+        ownCriteria = private?.let {
+            Criteria().andOperator(
+                where("adminId").`is`(requestingContributor?.id),
+                where("private").`is`(private),
+            )
+        } ?: where("adminId").`is`(requestingContributor?.id)
     }
+
+    if (requestingOthers && requestingOwn) {
+        query.addCriteria(Criteria().orOperator(othersCriteria, ownCriteria))
+    } else {
+        othersCriteria?.let { query.addCriteria(it) }
+        ownCriteria?.let { query.addCriteria(it) }
+    }
+
     ids?.let { query.addCriteria(where("_id").`in`(it)) }
     return query
 }
-
-

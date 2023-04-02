@@ -45,7 +45,7 @@ class ProjectService(private val repository: ProjectRepository) {
      * @param projectId [Project] id
      * @return a [Mono] with the persisted [Project]
      */
-    suspend fun findSingleProject(projectId: String, requestingContributor: RequestingContributor?): Project? = repository.findByIdForContributor(ListProjectsFilter(listOf(projectId), requestingContributor?.id), requestingContributor)
+    suspend fun findSingleProject(projectId: String, requestingContributor: RequestingContributor?): Project? = repository.findByIdForContributor(ListProjectsFilter(listOf(projectId)), requestingContributor)
 
     /**
      * Method to find a single [Project] from an id.
