@@ -1,7 +1,6 @@
 package com.angorasix.projects.core.presentation.handler
 
 import com.angorasix.commons.domain.RequestingContributor
-import com.angorasix.commons.infrastructure.presentation.error.ErrorResponseBody
 import com.angorasix.projects.core.application.ProjectService
 import com.angorasix.projects.core.domain.project.Project
 import com.angorasix.projects.core.infrastructure.config.configurationproperty.api.ApiConfigs
@@ -23,10 +22,13 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.reactor.mono
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.AssertionsForClassTypes.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.springframework.hateoas.EntityModel
+import org.springframework.hateoas.mediatype.problem.Problem
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest
@@ -69,13 +71,13 @@ class ProjectHandlerUnitTest {
     fun init() {
         every { apiConfigs.headers } returns headerConfigs
         every { apiConfigs.routes } returns routeConfigs
-        handler = ProjectHandler(service, apiConfigs)
+        handler = ProjectHandler(service, apiConfigs, null)
     }
 
     @Test
     @Throws(Exception::class)
     fun `Given existing projects - When list projects - Then handler retrieves Ok Response`() =
-        runBlockingTest {
+        runTest {
             val mockedExchange = MockServerWebExchange.from(
                 MockServerHttpRequest.get(routeConfigs.listProjects.path).build(),
             )
@@ -159,10 +161,11 @@ class ProjectHandlerUnitTest {
 
             assertThat(outputResponse.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST)
             val response = @Suppress("UNCHECKED_CAST")
-            outputResponse as EntityResponse<ErrorResponseBody>
+            outputResponse as EntityResponse<EntityModel<Problem.ExtendedProblem<Any>>>
             val responseBody = response.entity()
-            assertThat(responseBody.status).isEqualTo(400)
-            assertThat(responseBody.errorCode).isEqualTo("CONTRIBUTOR_HEADER_INVALID")
+            assertThat(responseBody.content?.status).isEqualTo(HttpStatus.BAD_REQUEST)
+            var properties = responseBody.content?.properties as Map<String, Any>?
+            assertThat(properties?.get("errorCode") as String).isEqualTo("CONTRIBUTOR_HEADER_INVALID")
             Unit
         }
 
@@ -301,7 +304,7 @@ class ProjectHandlerUnitTest {
                 ZoneId.systemDefault(),
             )
             coEvery {
-                service.findSingleProject(
+                service.administeredProject(
                     projectId,
                     mockedRequestingContributor,
                 )
@@ -314,7 +317,7 @@ class ProjectHandlerUnitTest {
             outputResponse as EntityResponse<IsAdminDto>
             val responseBody = response.entity()
             assertThat(responseBody.isAdmin).isTrue()
-            coVerify { service.findSingleProject(projectId, mockedRequestingContributor) }
+            coVerify { service.administeredProject(projectId, mockedRequestingContributor) }
         }
 
     @Test
@@ -337,7 +340,7 @@ class ProjectHandlerUnitTest {
                 ZoneId.systemDefault(),
             )
             coEvery {
-                service.findSingleProject(
+                service.administeredProject(
                     projectId,
                     mockedRequestingContributor,
                 )
@@ -350,6 +353,6 @@ class ProjectHandlerUnitTest {
             outputResponse as EntityResponse<IsAdminDto>
             val responseBody = response.entity()
             assertThat(responseBody.isAdmin).isFalse()
-            coVerify { service.findSingleProject(projectId, mockedRequestingContributor) }
+            coVerify { service.administeredProject(projectId, mockedRequestingContributor) }
         }
 }

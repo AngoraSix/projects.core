@@ -17,9 +17,8 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verifyAll
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.AssertionsForClassTypes.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -42,7 +41,7 @@ class ProjectServiceUnitTest {
     @Test
     @Throws(Exception::class)
     fun `given existing projects - when request find projects - then receive projects`() =
-        runBlockingTest {
+        runTest {
             val mockedProject = Project(
                 "mockedProjectName",
                 "creator_id",
@@ -63,7 +62,7 @@ class ProjectServiceUnitTest {
     @Test
     @Throws(Exception::class)
     fun givenExistingProject_whenFindSingleProjects_thenServiceRetrievesMonoWithProject() =
-        runBlockingTest {
+        runTest {
             val mockedProjectId = "id1"
             val mockedProject = Project(
                 "mockedProjectName",
@@ -89,7 +88,7 @@ class ProjectServiceUnitTest {
 
     @Test
     @Throws(Exception::class)
-    fun whenCreateProject_thenServiceRetrieveSavedProject() = runBlockingTest {
+    fun whenCreateProject_thenServiceRetrieveSavedProject() = runTest {
         val mockedProject = Project(
             "mockedProjectName",
             "creator_id",
@@ -110,7 +109,7 @@ class ProjectServiceUnitTest {
 
     @Test
     @Throws(Exception::class)
-    fun whenUpdateProject_thenServiceRetrieveSavedProject() = runBlockingTest {
+    fun whenUpdateProject_thenServiceRetrieveSavedProject() = runTest {
         val mockedRequestingContributor = RequestingContributor("mockedId")
         val mockedExistingProject = mockk<Project>()
         every {
@@ -136,7 +135,7 @@ class ProjectServiceUnitTest {
         )
         coEvery {
             repository.findByIdForContributor(
-                ListProjectsFilter(listOf("id1")),
+                ListProjectsFilter(listOf("id1"), "mockedId"),
                 mockedRequestingContributor,
             )
         } returns mockedExistingProject
@@ -146,8 +145,12 @@ class ProjectServiceUnitTest {
         assertThat(outputProject).isSameAs(savedProject)
         coVerifyAll {
             repository.findByIdForContributor(
-                ListProjectsFilter(listOf("id1")),
+                ListProjectsFilter(listOf("id1"), "mockedId"),
                 mockedRequestingContributor,
+            )
+            repository.findByIdForContributor(
+                ListProjectsFilter(listOf("id1"), null),
+                null,
             )
             repository.save(any())
         }
@@ -161,7 +164,7 @@ class ProjectServiceUnitTest {
 
     @Test
     @Throws(Exception::class)
-    fun whenUpdateProject_thenServiceRetrieveUpdatedProject() = runBlockingTest {
+    fun whenUpdateProject_thenServiceRetrieveUpdatedProject() = runTest {
         val mockedProject = Project(
             "mockedProjectName",
             "creator_id",

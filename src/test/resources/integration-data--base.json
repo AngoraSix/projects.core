@@ -2,6 +2,8 @@
   {
     "name": "Angora Sustainable",
     "creatorId": "rozagerardo",
+    "adminId": "rozagerardo",
+    "private": false,
     "createdAt": {
       "dateTime": "2020-08-09 00:23:00",
       "zone": "America/Argentina/Cordoba"
@@ -38,6 +40,76 @@
   {
     "name": "A Local Project",
     "creatorId": "mockUserId",
+    "adminId": "mockUserId",
+    "private": false,
+    "createdAt": {
+      "dateTime": "2020-09-01 00:00:00",
+      "zone": "America/Argentina/Cordoba"
+    },
+    "attributes": [
+      {
+        "value": "Social Care",
+        "key": "category"
+      },
+      {
+        "value": "Textile",
+        "key": "industry"
+      },
+      {
+        "value": "Argentina/Cordoba/Cordoba",
+        "key": "location"
+      }
+    ],
+    "requirements": [
+      {
+        "value": "Argentina/Cordoba/Cordoba",
+        "key": "location"
+      },
+      {
+        "value": "Apparel design",
+        "key": "skill"
+      }
+    ]
+  },
+  {
+    "name": "A Private Project",
+    "creatorId": "mockUserId",
+    "adminId": "mockUserId",
+    "private": true,
+    "createdAt": {
+      "dateTime": "2020-09-01 00:00:00",
+      "zone": "America/Argentina/Cordoba"
+    },
+    "attributes": [
+      {
+        "value": "Social Care",
+        "key": "category"
+      },
+      {
+        "value": "Textile",
+        "key": "industry"
+      },
+      {
+        "value": "Argentina/Cordoba/Cordoba",
+        "key": "location"
+      }
+    ],
+    "requirements": [
+      {
+        "value": "Argentina/Cordoba/Cordoba",
+        "key": "location"
+      },
+      {
+        "value": "Apparel design",
+        "key": "skill"
+      }
+    ]
+  },
+  {
+    "name": "An unassigned Project",
+    "creatorId": "mockUserId",
+    "adminId": null,
+    "private": false,
     "createdAt": {
       "dateTime": "2020-09-01 00:00:00",
       "zone": "America/Argentina/Cordoba"

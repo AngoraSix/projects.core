@@ -21,17 +21,20 @@ import org.springframework.context.ApplicationContext
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
+import org.springframework.hateoas.MediaTypes
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.restdocs.RestDocumentationContextProvider
 import org.springframework.restdocs.RestDocumentationExtension
 import org.springframework.restdocs.headers.HeaderDocumentation.headerWithName
 import org.springframework.restdocs.headers.HeaderDocumentation.responseHeaders
+import org.springframework.restdocs.hypermedia.HypermediaDocumentation.halLinks
 import org.springframework.restdocs.hypermedia.HypermediaDocumentation.linkWithRel
 import org.springframework.restdocs.hypermedia.HypermediaDocumentation.links
 import org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessResponse
 import org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint
 import org.springframework.restdocs.payload.FieldDescriptor
+import org.springframework.restdocs.payload.JsonFieldType
 import org.springframework.restdocs.payload.PayloadDocumentation.beneathPath
 import org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath
 import org.springframework.restdocs.payload.PayloadDocumentation.requestFields
@@ -79,7 +82,16 @@ class ProjectCoreDocsIntegrationTest(
             .description("Array of the attributes that characterize the project"),
         subsectionWithPath("requirements[]").type(ArrayOfFieldType(Attribute::class.simpleName))
             .description("Array of the attributes that are required for the project"),
-        subsectionWithPath("links").description("HATEOAS links"),
+
+        // until we resolve and unify the list and single response links, all will be marked as optional
+        subsectionWithPath("links").optional().description("HATEOAS links")
+            .type(JsonFieldType.ARRAY),
+        subsectionWithPath("_links").optional().description("HATEOAS links")
+            .type(JsonFieldType.OBJECT),
+        subsectionWithPath("_templates").optional()
+            .description("HATEOAS HAL-FORM links template info").type(
+                JsonFieldType.OBJECT,
+            ),
     )
 
     var projectPostBodyDescriptor = arrayOf<FieldDescriptor>(
@@ -126,7 +138,8 @@ class ProjectCoreDocsIntegrationTest(
         val newProject = ProjectDto("New Project Name")
         webTestClient.post()
             .uri("/projects-core/")
-            .accept(MediaType.APPLICATION_JSON)
+            .accept(MediaTypes.HAL_FORMS_JSON)
+            .contentType(MediaTypes.HAL_FORMS_JSON)
             .header(apiConfigs.headers.contributor, mockRequestingContributorHeader())
             .body(Mono.just(newProject))
             .exchange()
@@ -140,6 +153,7 @@ class ProjectCoreDocsIntegrationTest(
                         headerWithName(HttpHeaders.LOCATION).description("URL of the newly created project"),
                     ),
                     links(
+                        halLinks(),
                         linkWithRel("self").description("The self link"),
                         linkWithRel("updateProject").description("Link to edit operation"),
                     ),
@@ -161,6 +175,7 @@ class ProjectCoreDocsIntegrationTest(
                     pathParameters(parameterWithName("projectId").description("The Project id")),
                     responseFields(*projectDescriptor),
                     links(
+                        halLinks(),
                         linkWithRel("self").description("The self link"),
                     ),
                 ),
