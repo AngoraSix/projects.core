@@ -1,6 +1,6 @@
 package com.angorasix.projects.core.presentation.handler
 
-import com.angorasix.commons.domain.RequestingContributor
+import com.angorasix.commons.domain.SimpleContributor
 import com.angorasix.commons.infrastructure.presentation.error.resolveBadRequest
 import com.angorasix.commons.infrastructure.presentation.error.resolveNotFound
 import com.angorasix.projects.core.application.ProjectService
@@ -12,7 +12,6 @@ import com.angorasix.projects.core.presentation.dto.AttributeDto
 import com.angorasix.projects.core.presentation.dto.IsAdminDto
 import com.angorasix.projects.core.presentation.dto.ProjectDto
 import kotlinx.coroutines.flow.map
-import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.hateoas.IanaLinkRelations
 import org.springframework.hateoas.Link
 import org.springframework.hateoas.MediaTypes
@@ -38,7 +37,6 @@ import java.time.ZoneId
 class ProjectHandler(
     private val service: ProjectService,
     private val apiConfigs: ApiConfigs,
-    private val mongoTemplate: ReactiveMongoTemplate?,
 ) {
 
     /**
@@ -52,7 +50,7 @@ class ProjectHandler(
         return service.findProjects(
             request.queryParams()
                 .toQueryFilter(),
-            requestingContributor as RequestingContributor?,
+            requestingContributor as SimpleContributor?,
         ).map {
             it.convertToDto(
                 requestingContributor,
@@ -73,10 +71,10 @@ class ProjectHandler(
     suspend fun getProject(request: ServerRequest): ServerResponse {
         val requestingContributor = request.attributes()[apiConfigs.headers.contributor]
         val projectId = request.pathVariable("id")
-        return service.findSingleProject(projectId, requestingContributor as RequestingContributor?)
+        return service.findSingleProject(projectId, requestingContributor as SimpleContributor?)
             ?.let {
                 val outputProject = it.convertToDto(
-                    requestingContributor as? RequestingContributor,
+                    requestingContributor as? SimpleContributor,
                     apiConfigs,
                     request,
                 )
@@ -93,9 +91,9 @@ class ProjectHandler(
     suspend fun validateAdminUser(request: ServerRequest): ServerResponse {
         val requestingContributor = request.attributes()[apiConfigs.headers.contributor]
         val projectId = request.pathVariable("id")
-        return if (requestingContributor is RequestingContributor) {
+        return if (requestingContributor is SimpleContributor) {
             service.administeredProject(projectId, requestingContributor)?.let {
-                val result = it.adminId == requestingContributor.id
+                val result = it.isAdministeredBy(requestingContributor)
                 ok().contentType(MediaTypes.HAL_FORMS_JSON).bodyValueAndAwait(IsAdminDto(result))
             } ?: resolveNotFound("Can't find project", "Project")
         } else {
@@ -111,9 +109,12 @@ class ProjectHandler(
      */
     suspend fun createProject(request: ServerRequest): ServerResponse {
         val requestingContributor = request.attributes()[apiConfigs.headers.contributor]
-        return if (requestingContributor is RequestingContributor) {
+        return if (requestingContributor is SimpleContributor) {
             val project = request.awaitBody<ProjectDto>()
-                .convertToDomain(requestingContributor.id, requestingContributor.id)
+                .convertToDomain(
+                    requestingContributor.id,
+                    setOf(SimpleContributor(requestingContributor.id, emptySet())),
+                )
             val outputProject = service.createProject(project)
                 .convertToDto(requestingContributor, apiConfigs, request)
             created(URI.create(outputProject.links.getRequiredLink(IanaLinkRelations.SELF).href)).contentType(
@@ -136,7 +137,7 @@ class ProjectHandler(
         val projectId = request.pathVariable("id")
         val updateProjectData = try {
             request.awaitBody<ProjectDto>().let {
-                it.convertToDomain(it.creatorId ?: "", it.adminId ?: "")
+                it.convertToDomain(it.creatorId ?: "", it.admins ?: emptySet())
             }
         } catch (e: IllegalArgumentException) {
             return resolveBadRequest(
@@ -144,14 +145,14 @@ class ProjectHandler(
                 "Project Presentation",
             )
         }
-        return if (requestingContributor is RequestingContributor) {
+        return if (requestingContributor is SimpleContributor) {
             service.updateProject(
                 projectId,
                 updateProjectData,
-                requestingContributor as RequestingContributor,
+                requestingContributor as SimpleContributor,
             )?.let {
                 val outputProject = it.convertToDto(
-                    requestingContributor as? RequestingContributor,
+                    requestingContributor as? SimpleContributor,
                     apiConfigs,
                     request,
                 )
@@ -171,27 +172,30 @@ private fun Project.convertToDto(): ProjectDto {
         requirements.map { it.convertToDto() }.toMutableSet(),
         creatorId,
         private,
-        adminId,
+        admins,
         createdAt,
     )
 }
 
 private fun Project.convertToDto(
-    requestingContributor: RequestingContributor?,
+    simpleContributor: SimpleContributor?,
     apiConfigs: ApiConfigs,
     request: ServerRequest,
-): ProjectDto = convertToDto().resolveHypermedia(requestingContributor, this, apiConfigs, request)
+): ProjectDto = convertToDto().resolveHypermedia(simpleContributor, this, apiConfigs, request)
 
 private fun Attribute<*>.convertToDto(): AttributeDto {
     return AttributeDto(key, value.toString())
 }
 
-private fun ProjectDto.convertToDomain(contributorId: String, adminId: String): Project {
+private fun ProjectDto.convertToDomain(
+    contributorId: String,
+    admins: Set<SimpleContributor>,
+): Project {
     return Project(
         name
             ?: throw IllegalArgumentException("Project name expected"),
         contributorId,
-        adminId,
+        admins,
         ZoneId.of("America/Argentina/Cordoba"),
         private ?: false,
         attributes.map { it.convertToDomain() }.toMutableSet(),
@@ -200,7 +204,7 @@ private fun ProjectDto.convertToDomain(contributorId: String, adminId: String): 
 }
 
 private fun ProjectDto.resolveHypermedia(
-    requestingContributor: RequestingContributor?,
+    simpleContributor: SimpleContributor?,
     project: Project,
     apiConfigs: ApiConfigs,
     request: ServerRequest,
@@ -215,8 +219,8 @@ private fun ProjectDto.resolveHypermedia(
     add(selfLinkWithDefaultAffordance)
 
     // edit Project
-    if (requestingContributor != null) {
-        if (project.canEdit(requestingContributor)) {
+    if (simpleContributor != null) {
+        if (project.isAdministeredBy(simpleContributor)) {
             val editProjectRoute = apiConfigs.routes.updateProject
             val editProjectLink = Link.of(
                 uriBuilder(request).path(editProjectRoute.resolvePath()).build().toUriString(),

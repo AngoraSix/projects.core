@@ -1,8 +1,8 @@
 package com.angorasix.projects.core.domain.project
 
-import com.angorasix.commons.domain.RequestingContributor
+import com.angorasix.commons.domain.SimpleContributor
 import org.springframework.data.annotation.Id
-import org.springframework.data.annotation.PersistenceConstructor
+import org.springframework.data.annotation.PersistenceCreator
 import java.time.ZoneId
 import java.time.ZonedDateTime
 
@@ -14,11 +14,11 @@ import java.time.ZonedDateTime
  *
  * @author rozagerardo
  */
-data class Project @PersistenceConstructor private constructor(
+data class Project @PersistenceCreator private constructor(
     @field:Id val id: String?,
     var name: String,
     val creatorId: String,
-    val adminId: String?,
+    val admins: Set<SimpleContributor> = emptySet(),
     val createdAt: ZonedDateTime,
     val private: Boolean = false,
     var attributes: MutableSet<Attribute<*>> = mutableSetOf<Attribute<*>>(),
@@ -36,7 +36,7 @@ data class Project @PersistenceConstructor private constructor(
     constructor(
         name: String,
         creatorId: String,
-        adminId: String,
+        admins: Set<SimpleContributor>,
         zone: ZoneId? = ZoneId.systemDefault(),
         private: Boolean = false,
         attributes: MutableSet<Attribute<*>> = mutableSetOf(),
@@ -45,7 +45,7 @@ data class Project @PersistenceConstructor private constructor(
         null,
         name,
         creatorId,
-        adminId,
+        admins,
         ZonedDateTime.now(zone),
         private,
         attributes,
@@ -61,6 +61,6 @@ data class Project @PersistenceConstructor private constructor(
         attributes.add(attribute)
     }
 
-    fun canEdit(requestingContributor: RequestingContributor): Boolean =
-        adminId == requestingContributor.id
+    fun isAdministeredBy(simpleContributor: SimpleContributor): Boolean =
+        admins.any { it.id == simpleContributor.id }
 }

@@ -2,12 +2,10 @@ package com.angorasix.projects.core.presentation.router
 
 import com.angorasix.projects.core.infrastructure.config.configurationproperty.api.ApiConfigs
 import com.angorasix.projects.core.infrastructure.config.configurationproperty.api.BasePathConfigs
-import com.angorasix.projects.core.infrastructure.config.configurationproperty.api.HeadersConfigs
 import com.angorasix.projects.core.infrastructure.config.configurationproperty.api.Route
 import com.angorasix.projects.core.infrastructure.config.configurationproperty.api.RoutesConfigs
 import com.angorasix.projects.core.presentation.dto.ProjectDto
 import com.angorasix.projects.core.presentation.handler.ProjectHandler
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
@@ -32,7 +30,6 @@ class ProjectRouterUnitTest {
 
     private lateinit var router: ProjectRouter
 
-    private var headerConfigs: HeadersConfigs = HeadersConfigs("MockedContributorHeader")
     private var routeConfigs: RoutesConfigs = RoutesConfigs(
         "",
         "/{id}",
@@ -53,11 +50,10 @@ class ProjectRouterUnitTest {
     private lateinit var handler: ProjectHandler
 
     @BeforeEach
-    fun init(@MockK apiConfigs: ApiConfigs, @MockK objectMapper: ObjectMapper) {
-        every { apiConfigs.headers } returns headerConfigs
+    fun init(@MockK apiConfigs: ApiConfigs) {
         every { apiConfigs.routes } returns routeConfigs
         every { apiConfigs.basePaths } returns basePathsConfigs
-        router = ProjectRouter(handler, objectMapper, apiConfigs)
+        router = ProjectRouter(handler, apiConfigs)
     }
 
     @Test
@@ -98,9 +94,9 @@ class ProjectRouterUnitTest {
             val mockedResponse = EntityResponse.fromObject("any").build().awaitSingle()
             coEvery { handler.listProjects(getAllProjectsRequest) } returns mockedResponse
             coEvery { handler.getProject(getSingleProjectRequest) } returns mockedResponse
-            coEvery { handler.createProject(getSingleProjectRequest) } returns mockedResponse
-            coEvery { handler.updateProject(getSingleProjectRequest) } returns mockedResponse
-            coEvery { handler.validateAdminUser(getSingleProjectRequest) } returns mockedResponse
+            coEvery { handler.createProject(createProjectRequest) } returns mockedResponse
+            coEvery { handler.updateProject(updateProjectRequest) } returns mockedResponse
+            coEvery { handler.validateAdminUser(validateAdminRequest) } returns mockedResponse
             // if routes don't match, they will throw an exception as with the invalid Route no need to assert anything
             outputRouter.route(getAllProjectsRequest).awaitSingle().handle(getAllProjectsRequest)
                 .awaitSingle()

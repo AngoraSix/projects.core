@@ -1,6 +1,6 @@
 package com.angorasix.projects.core.presentation.handler
 
-import com.angorasix.commons.domain.RequestingContributor
+import com.angorasix.commons.domain.SimpleContributor
 import com.angorasix.projects.core.application.ProjectService
 import com.angorasix.projects.core.domain.project.Project
 import com.angorasix.projects.core.infrastructure.config.configurationproperty.api.ApiConfigs
@@ -17,11 +17,9 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.reactor.mono
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.AssertionsForClassTypes.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -71,7 +69,7 @@ class ProjectHandlerUnitTest {
     fun init() {
         every { apiConfigs.headers } returns headerConfigs
         every { apiConfigs.routes } returns routeConfigs
-        handler = ProjectHandler(service, apiConfigs, null)
+        handler = ProjectHandler(service, apiConfigs)
     }
 
     @Test
@@ -84,7 +82,7 @@ class ProjectHandlerUnitTest {
             val mockedRequest: ServerRequest =
                 MockServerRequest.builder().exchange(mockedExchange).build()
             val mockedProject =
-                Project("mockedProjectName", "creator_id", "creator_id", ZoneId.systemDefault())
+                Project("mockedProjectName", "creator_id", setOf(SimpleContributor("creator_id", emptySet())), ZoneId.systemDefault())
             val retrievedProject = flowOf(mockedProject)
             coEvery { service.findProjects(ListProjectsFilter(), null) } returns retrievedProject
 
@@ -104,22 +102,22 @@ class ProjectHandlerUnitTest {
     @Test
     @Throws(Exception::class)
     fun `Given request with project and RequestingContributor - When create project - Then handler retrieves Created`() =
-        runBlocking { // = runBlockingTest { // until we resolve why service.createProject is hanging https://github.com/Kotlin/kotlinx.coroutines/issues/1204
+        runBlocking { // = runTest { // until we resolve why service.createProject is hanging https://github.com/Kotlin/kotlinx.coroutines/issues/1204
             val mockedProjectDto = ProjectDto(
                 null,
                 "mockedInputProjectName",
             )
-            val mockedRequestingContributor = RequestingContributor("mockedId")
+            val mockedSimpleContributor = SimpleContributor("mockedId")
             val mockedExchange = MockServerWebExchange.from(
                 MockServerHttpRequest.get(routeConfigs.createProject.path).build(),
             )
             val mockedRequest: ServerRequest = MockServerRequest.builder()
-                .attribute(headerConfigs.contributor, mockedRequestingContributor)
+                .attribute(headerConfigs.contributor, mockedSimpleContributor)
                 .exchange(mockedExchange).body(mono { mockedProjectDto })
             val mockedProject = Project(
                 "mockedProjectName",
                 "creator_id",
-                "creator_id",
+                setOf(SimpleContributor("creator_id", emptySet())),
                 ZoneId.systemDefault(),
             )
             coEvery { service.createProject(ofType(Project::class)) } returns mockedProject
@@ -139,7 +137,7 @@ class ProjectHandlerUnitTest {
     @Test
     @Throws(Exception::class)
     fun `Given request with project and no RequestingContributor - When create project - Then handler retrieves Bad Request`() =
-        runBlocking { // = runBlockingTest { // until we resolve why service.createProject is hanging https://github.com/Kotlin/kotlinx.coroutines/issues/1204
+        runBlocking { // = runTest { // until we resolve why service.createProject is hanging https://github.com/Kotlin/kotlinx.coroutines/issues/1204
             val mockedProjectDto = ProjectDto(
                 null,
                 "mockedInputProjectName",
@@ -152,7 +150,7 @@ class ProjectHandlerUnitTest {
             val mockedProject = Project(
                 "mockedProjectName",
                 "creator_id",
-                "creator_id",
+                setOf(SimpleContributor("creator_id", emptySet())),
                 ZoneId.systemDefault(),
             )
             coEvery { service.createProject(ofType(Project::class)) } returns mockedProject
@@ -172,28 +170,28 @@ class ProjectHandlerUnitTest {
     @Test
     @Throws(Exception::class)
     fun `Given request with project and RequestingContributor - When update project - Then handler retrieves Updated`() =
-        runBlocking { // = runBlockingTest { // until we resolve why service.createProject is hanging https://github.com/Kotlin/kotlinx.coroutines/issues/1204
+        runBlocking { // = runTest { // until we resolve why service.createProject is hanging https://github.com/Kotlin/kotlinx.coroutines/issues/1204
             val mockedProjectDto = ProjectDto(
                 null,
                 "mockedInputProjectName",
             )
-            val mockedRequestingContributor = RequestingContributor("mockedId")
+            val mockedSimpleContributor = SimpleContributor("mockedId")
             val mockedExchange =
                 MockServerWebExchange.from(MockServerHttpRequest.get("/id1-mocked").build())
             val mockedRequest: ServerRequest = MockServerRequest.builder()
-                .attribute(headerConfigs.contributor, mockedRequestingContributor)
+                .attribute(headerConfigs.contributor, mockedSimpleContributor)
                 .pathVariable("id", "id1").exchange(mockedExchange).body(mono { mockedProjectDto })
             val mockedProject = Project(
                 "mockedProjectName",
                 "creator_id",
-                "creator_id",
+                setOf(SimpleContributor("creator_id", emptySet())),
                 ZoneId.systemDefault(),
             )
             coEvery {
                 service.updateProject(
                     "id1",
                     ofType(Project::class),
-                    mockedRequestingContributor,
+                    mockedSimpleContributor,
                 )
             } returns mockedProject
 
@@ -210,7 +208,7 @@ class ProjectHandlerUnitTest {
                 service.updateProject(
                     "id1",
                     ofType(Project::class),
-                    mockedRequestingContributor,
+                    mockedSimpleContributor,
                 )
             }
         }
@@ -218,21 +216,21 @@ class ProjectHandlerUnitTest {
     @Test
     @Throws(Exception::class)
     fun `Given existing projects - When get project for non Admin contributor - Then handler retrieves Ok Response without Edit link`() =
-        runBlockingTest {
+        runTest {
             val projectId = "projectId"
-            val mockedRequestingContributor = RequestingContributor("mockedId")
+            val mockedSimpleContributor = SimpleContributor("mockedId")
             val mockedExchange =
                 MockServerWebExchange.from(MockServerHttpRequest.get("/id1-mocked").build())
             val mockedRequest: ServerRequest =
                 MockServerRequest.builder()
-                    .attribute(headerConfigs.contributor, mockedRequestingContributor)
+                    .attribute(headerConfigs.contributor, mockedSimpleContributor)
                     .pathVariable("id", projectId).exchange(mockedExchange).build()
             val mockedProject =
-                Project("mockedProjectName", "creator_id", "otherId", ZoneId.systemDefault())
+                Project("mockedProjectName", "creator_id", setOf(SimpleContributor("other_id", emptySet())), ZoneId.systemDefault())
             coEvery {
                 service.findSingleProject(
                     projectId,
-                    mockedRequestingContributor,
+                    mockedSimpleContributor,
                 )
             } returns mockedProject
 
@@ -246,28 +244,28 @@ class ProjectHandlerUnitTest {
             assertThat(responseBody.creatorId).isEqualTo("creator_id")
             assertThat(responseBody.links.hasSize(1)).isTrue()
             assertThat(responseBody.links.getLink("updateProject")).isEmpty
-            coVerify { service.findSingleProject(projectId, mockedRequestingContributor) }
+            coVerify { service.findSingleProject(projectId, mockedSimpleContributor) }
         }
 
     @Test
     @Throws(Exception::class)
     fun `Given existing projects - When get project for Admin Contributor - Then handler retrieves Ok Response with Edit link`() =
-        runBlockingTest {
+        runTest {
             val projectId = "projectId"
-            val mockedRequestingContributor = RequestingContributor("mockedId")
+            val mockedSimpleContributor = SimpleContributor("mockedId")
 
             val mockedExchange =
                 MockServerWebExchange.from(MockServerHttpRequest.get("/id1-mocked").build())
             val mockedRequest: ServerRequest =
                 MockServerRequest.builder()
-                    .attribute(headerConfigs.contributor, mockedRequestingContributor)
+                    .attribute(headerConfigs.contributor, mockedSimpleContributor)
                     .pathVariable("id", projectId).exchange(mockedExchange).build()
             val mockedProject =
-                Project("mockedProjectName", "creator_id", "mockedId", ZoneId.systemDefault())
+                Project("mockedProjectName", "creator_id", setOf(SimpleContributor("mockedId", emptySet())), ZoneId.systemDefault())
             coEvery {
                 service.findSingleProject(
                     projectId,
-                    mockedRequestingContributor,
+                    mockedSimpleContributor,
                 )
             } returns mockedProject
 
@@ -281,32 +279,32 @@ class ProjectHandlerUnitTest {
             assertThat(responseBody.creatorId).isEqualTo("creator_id")
             assertThat(responseBody.links.hasSize(2)).isTrue()
             assertThat(responseBody.links.getLink("updateProject")).isNotNull
-            coVerify { service.findSingleProject(projectId, mockedRequestingContributor) }
+            coVerify { service.findSingleProject(projectId, mockedSimpleContributor) }
         }
 
     @Test
     @Throws(Exception::class)
     fun `Given contributor - When check if Requesting Contributor is Admin of project - Then handler retrieves Ok Response`() =
-        runBlockingTest {
+        runTest {
             val projectId = "projectId"
-            val mockedRequestingContributor = RequestingContributor("mockedId")
+            val mockedSimpleContributor = SimpleContributor("mockedId")
             val mockedExchange = MockServerWebExchange.from(
                 MockServerHttpRequest.get(routeConfigs.validateAdminUser.path).build(),
             )
             val mockedRequest: ServerRequest = MockServerRequest.builder()
-                .attribute(headerConfigs.contributor, mockedRequestingContributor)
+                .attribute(headerConfigs.contributor, mockedSimpleContributor)
                 .pathVariable("id", projectId)
                 .exchange(mockedExchange).build()
             val mockedProject = Project(
                 "mockedProjectName",
                 "creator_id",
-                "mockedId",
+                setOf(SimpleContributor("mockedId", emptySet())),
                 ZoneId.systemDefault(),
             )
             coEvery {
                 service.administeredProject(
                     projectId,
-                    mockedRequestingContributor,
+                    mockedSimpleContributor,
                 )
             } returns mockedProject
 
@@ -317,32 +315,32 @@ class ProjectHandlerUnitTest {
             outputResponse as EntityResponse<IsAdminDto>
             val responseBody = response.entity()
             assertThat(responseBody.isAdmin).isTrue()
-            coVerify { service.administeredProject(projectId, mockedRequestingContributor) }
+            coVerify { service.administeredProject(projectId, mockedSimpleContributor) }
         }
 
     @Test
     @Throws(Exception::class)
     fun `Given contributor - When get project admin not matching contributor - Then handler retrieves Ok Response with false value`() =
-        runBlockingTest {
+        runTest {
             val projectId = "projectId"
-            val mockedRequestingContributor = RequestingContributor("mockedId")
+            val mockedSimpleContributor = SimpleContributor("mockedId")
             val mockedExchange = MockServerWebExchange.from(
                 MockServerHttpRequest.get(routeConfigs.validateAdminUser.path).build(),
             )
             val mockedRequest: ServerRequest = MockServerRequest.builder()
-                .attribute(headerConfigs.contributor, mockedRequestingContributor)
+                .attribute(headerConfigs.contributor, mockedSimpleContributor)
                 .pathVariable("id", projectId)
                 .exchange(mockedExchange).build()
             val mockedProject = Project(
                 "mockedProjectName",
                 "creator_id",
-                "otherId",
+                setOf(SimpleContributor("otherId", emptySet())),
                 ZoneId.systemDefault(),
             )
             coEvery {
                 service.administeredProject(
                     projectId,
-                    mockedRequestingContributor,
+                    mockedSimpleContributor,
                 )
             } returns mockedProject
 
@@ -353,6 +351,6 @@ class ProjectHandlerUnitTest {
             outputResponse as EntityResponse<IsAdminDto>
             val responseBody = response.entity()
             assertThat(responseBody.isAdmin).isFalse()
-            coVerify { service.administeredProject(projectId, mockedRequestingContributor) }
+            coVerify { service.administeredProject(projectId, mockedSimpleContributor) }
         }
 }
