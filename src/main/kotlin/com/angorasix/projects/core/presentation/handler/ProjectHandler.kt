@@ -10,7 +10,6 @@ import com.angorasix.projects.core.domain.project.Project
 import com.angorasix.projects.core.infrastructure.config.configurationproperty.api.ApiConfigs
 import com.angorasix.projects.core.infrastructure.queryfilters.ListProjectsFilter
 import com.angorasix.projects.core.presentation.dto.AttributeDto
-import com.angorasix.projects.core.presentation.dto.IsAdminDto
 import com.angorasix.projects.core.presentation.dto.ProjectDto
 import kotlinx.coroutines.flow.map
 import org.springframework.hateoas.IanaLinkRelations
@@ -24,7 +23,6 @@ import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.ServerResponse.created
 import org.springframework.web.reactive.function.server.ServerResponse.ok
 import org.springframework.web.reactive.function.server.awaitBody
-import org.springframework.web.reactive.function.server.awaitPrincipal
 import org.springframework.web.reactive.function.server.bodyAndAwait
 import org.springframework.web.reactive.function.server.bodyValueAndAwait
 import org.springframework.web.util.UriComponentsBuilder
@@ -48,7 +46,7 @@ class ProjectHandler(
      * @return the `ServerResponse`
      */
     suspend fun listProjects(@Suppress("UNUSED_PARAMETER") request: ServerRequest): ServerResponse {
-        val requestingContributor = request.attributes()[apiConfigs.headers.contributor]
+        val requestingContributor = request.attributes()[AngoraSixInfrastructure.REQUEST_ATTRIBUTE_CONTRIBUTOR_KEY]
         return service.findProjects(
             request.queryParams()
                 .toQueryFilter(),
@@ -71,7 +69,7 @@ class ProjectHandler(
      * @return the `ServerResponse`
      */
     suspend fun getProject(request: ServerRequest): ServerResponse {
-        val requestingContributor = request.attributes()[apiConfigs.headers.contributor]
+        val requestingContributor = request.attributes()[AngoraSixInfrastructure.REQUEST_ATTRIBUTE_CONTRIBUTOR_KEY]
         val projectId = request.pathVariable("id")
         return service.findSingleProject(projectId, requestingContributor as SimpleContributor?)
             ?.let {
@@ -85,23 +83,26 @@ class ProjectHandler(
     }
 
     /**
-     * Handler for the Get Single Project endpoint, retrieving a Mono with the requested Project.
+     * Handler for the Get Single Project endpoint,
+     * retrieving a Mono indicating whether the user is admin of the Project.
+     *
+     * @TODO: Still used now that admins is resolved per-service?
      *
      * @param request - HTTP `ServerRequest` object
      * @return the `ServerResponse`
      */
-    suspend fun validateAdminUser(request: ServerRequest): ServerResponse {
-        val requestingContributor = request.attributes()[apiConfigs.headers.contributor]
-        val projectId = request.pathVariable("id")
-        return if (requestingContributor is SimpleContributor) {
-            service.administeredProject(projectId, requestingContributor)?.let {
-                val result = it.isAdministeredBy(requestingContributor)
-                ok().contentType(MediaTypes.HAL_FORMS_JSON).bodyValueAndAwait(IsAdminDto(result))
-            } ?: resolveNotFound("Can't find project", "Project")
-        } else {
-            resolveBadRequest("Invalid Contributor Header", "Contributor Header")
-        }
-    }
+//    suspend fun validateAdminUser(request: ServerRequest): ServerResponse {
+//        val requestingContributor = request.attributes()[AngoraSixInfrastructure.REQUEST_ATTRIBUTE_CONTRIBUTOR_KEY]
+//        val projectId = request.pathVariable("id")
+//        return if (requestingContributor is SimpleContributor) {
+//            service.administeredProject(projectId, requestingContributor)?.let {
+//                val result = it.isAdministeredBy(requestingContributor)
+//                ok().contentType(MediaTypes.HAL_FORMS_JSON).bodyValueAndAwait(IsAdminDto(result))
+//            } ?: resolveNotFound("Can't find project", "Project")
+//        } else {
+//            resolveBadRequest("Invalid Contributor Header", "Contributor Header")
+//        }
+//    }
 
     /**
      * Handler for the Create Projects endpoint, to create a new Project entity.
@@ -151,10 +152,10 @@ class ProjectHandler(
             service.updateProject(
                 projectId,
                 updateProjectData,
-                requestingContributor as SimpleContributor,
+                requestingContributor,
             )?.let {
                 val outputProject = it.convertToDto(
-                    requestingContributor as? SimpleContributor,
+                    requestingContributor,
                     apiConfigs,
                     request,
                 )

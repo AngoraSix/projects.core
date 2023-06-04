@@ -85,9 +85,9 @@ class ProjectRouterUnitTest {
                             "testProjectNameUpdated",
                         ),
                     )
-            val validateAdminRequest = builder().method(HttpMethod.GET)
-                .uri(URI(basePathsConfigs.projectsCore + routeConfigs.validateAdminUser.path))
-                .exchange(mockedExchange).build()
+//            val validateAdminRequest = builder().method(HttpMethod.GET)
+//                .uri(URI(basePathsConfigs.projectsCore + routeConfigs.validateAdminUser.path))
+//                .exchange(mockedExchange).build()
             val invalidRequest =
                 builder().uri(URI("/invalid-path")).exchange(mockedExchange).build()
 
@@ -96,7 +96,7 @@ class ProjectRouterUnitTest {
             coEvery { handler.getProject(getSingleProjectRequest) } returns mockedResponse
             coEvery { handler.createProject(createProjectRequest) } returns mockedResponse
             coEvery { handler.updateProject(updateProjectRequest) } returns mockedResponse
-            coEvery { handler.validateAdminUser(validateAdminRequest) } returns mockedResponse
+//            coEvery { handler.validateAdminUser(validateAdminRequest) } returns mockedResponse
             // if routes don't match, they will throw an exception as with the invalid Route no need to assert anything
             outputRouter.route(getAllProjectsRequest).awaitSingle().handle(getAllProjectsRequest)
                 .awaitSingle()
@@ -106,8 +106,8 @@ class ProjectRouterUnitTest {
                 .awaitSingle()
             outputRouter.route(updateProjectRequest).awaitSingle().handle(updateProjectRequest)
                 .awaitSingle()
-            outputRouter.route(validateAdminRequest).awaitSingle().handle(validateAdminRequest)
-                .awaitSingle()
+//            outputRouter.route(validateAdminRequest).awaitSingle().handle(validateAdminRequest)
+//                .awaitSingle()
             // disabled until junit-jupiter 5.7.0 is released and included to starter dependency
             assertThrows<NoSuchElementException> {
                 outputRouter.route(invalidRequest).awaitSingle()

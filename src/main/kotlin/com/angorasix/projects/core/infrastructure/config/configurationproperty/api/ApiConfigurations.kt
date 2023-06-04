@@ -2,7 +2,6 @@ package com.angorasix.projects.core.infrastructure.config.configurationproperty.
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.NestedConfigurationProperty
-import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
 
 /**
@@ -19,7 +18,8 @@ data class ApiConfigs(
     @NestedConfigurationProperty
     var routes: RoutesConfigs,
     @NestedConfigurationProperty
-    var basePaths: BasePathConfigs) {}
+    var basePaths: BasePathConfigs,
+)
 
 data class HeadersConfigs constructor(val contributor: String)
 
