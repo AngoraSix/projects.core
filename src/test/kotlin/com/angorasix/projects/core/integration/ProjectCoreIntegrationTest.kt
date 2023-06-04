@@ -7,7 +7,6 @@ import com.angorasix.projects.core.integration.utils.IntegrationProperties
 import com.angorasix.projects.core.integration.utils.initializeMongodb
 import com.angorasix.projects.core.presentation.dto.AttributeDto
 import com.angorasix.projects.core.presentation.dto.ProjectDto
-import com.angorasix.projects.core.utils.mockRequestingContributorHeader
 import com.fasterxml.jackson.databind.ObjectMapper
 import kotlinx.coroutines.runBlocking
 import org.hamcrest.Matchers.allOf
@@ -164,7 +163,6 @@ class ProjectCoreIntegrationTest(
             .uri("/projects-core/")
             .accept(MediaTypes.HAL_FORMS_JSON)
             .contentType(MediaTypes.HAL_FORMS_JSON)
-            .header(apiConfigs.headers.contributor, mockRequestingContributorHeader())
             .body(
                 Mono.just(newProject),
                 ProjectDto::class.java,
