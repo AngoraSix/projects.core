@@ -1,6 +1,7 @@
 package com.angorasix.projects.core.presentation.handler
 
 import com.angorasix.commons.domain.SimpleContributor
+import com.angorasix.commons.infrastructure.constants.AngoraSixInfrastructure
 import com.angorasix.commons.infrastructure.presentation.error.resolveBadRequest
 import com.angorasix.commons.infrastructure.presentation.error.resolveNotFound
 import com.angorasix.projects.core.application.ProjectService
@@ -23,6 +24,7 @@ import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.ServerResponse.created
 import org.springframework.web.reactive.function.server.ServerResponse.ok
 import org.springframework.web.reactive.function.server.awaitBody
+import org.springframework.web.reactive.function.server.awaitPrincipal
 import org.springframework.web.reactive.function.server.bodyAndAwait
 import org.springframework.web.reactive.function.server.bodyValueAndAwait
 import org.springframework.web.util.UriComponentsBuilder
@@ -108,7 +110,7 @@ class ProjectHandler(
      * @return the `ServerResponse`
      */
     suspend fun createProject(request: ServerRequest): ServerResponse {
-        val requestingContributor = request.attributes()[apiConfigs.headers.contributor]
+        val requestingContributor = request.attributes()[AngoraSixInfrastructure.REQUEST_ATTRIBUTE_CONTRIBUTOR_KEY]
         return if (requestingContributor is SimpleContributor) {
             val project = request.awaitBody<ProjectDto>()
                 .convertToDomain(
@@ -133,7 +135,7 @@ class ProjectHandler(
      * @return the `ServerResponse`
      */
     suspend fun updateProject(request: ServerRequest): ServerResponse {
-        val requestingContributor = request.attributes()[apiConfigs.headers.contributor]
+        val requestingContributor = request.attributes()[AngoraSixInfrastructure.REQUEST_ATTRIBUTE_CONTRIBUTOR_KEY]
         val projectId = request.pathVariable("id")
         val updateProjectData = try {
             request.awaitBody<ProjectDto>().let {
