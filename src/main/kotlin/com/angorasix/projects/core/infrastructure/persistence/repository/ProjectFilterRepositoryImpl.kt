@@ -1,6 +1,6 @@
 package com.angorasix.projects.core.infrastructure.persistence.repository
 
-import com.angorasix.commons.domain.RequestingContributor
+import com.angorasix.commons.domain.SimpleContributor
 import com.angorasix.projects.core.domain.project.Project
 import com.angorasix.projects.core.infrastructure.queryfilters.ListProjectsFilter
 import kotlinx.coroutines.flow.Flow
@@ -21,57 +21,47 @@ class ProjectFilterRepositoryImpl(val mongoOps: ReactiveMongoOperations) : Proje
 
     override fun findUsingFilter(
         filter: ListProjectsFilter,
-        requestingContributor: RequestingContributor?,
+        simpleContributor: SimpleContributor?,
     ): Flow<Project> {
-        return mongoOps.find(filter.toQuery(requestingContributor), Project::class.java).asFlow()
+        return mongoOps.find(filter.toQuery(simpleContributor), Project::class.java).asFlow()
     }
 
     override suspend fun findByIdForContributor(
         filter: ListProjectsFilter,
-        requestingContributor: RequestingContributor?,
+        simpleContributor: SimpleContributor?,
     ): Project? {
-        return mongoOps.find(filter.toQuery(requestingContributor), Project::class.java)
+        return mongoOps.find(filter.toQuery(simpleContributor), Project::class.java)
             .awaitFirstOrNull()
     }
 }
 
-private fun ListProjectsFilter.toQuery(requestingContributor: RequestingContributor?): Query {
+private fun ListProjectsFilter.toQuery(simpleContributor: SimpleContributor?): Query {
     val query = Query()
-
-    val requestingOthers = adminId == null || adminId != requestingContributor?.id
+    val requestingOthers = adminId == null || adminId != simpleContributor?.id
     val requestingOwn =
-        requestingContributor != null && (adminId == null || adminId == requestingContributor.id)
-
-    var othersCriteria: Criteria? = null
-    var ownCriteria: Criteria? = null
+        simpleContributor != null && (adminId == null || adminId == simpleContributor.id)
 
     if (requestingOthers) {
         if (private == true && !requestingOwn) {
-            // we won't be retrieving any project in this case
             query.addCriteria(where("_id").`is`(null))
             return query
         }
-        othersCriteria = Criteria().andOperator(
-            adminId?.let { where("adminId").`is`(adminId) } ?: where("adminId").ne(
-                requestingContributor?.id,
-            ),
+        val othersCriteria = Criteria().andOperator(
+            adminId?.let { where("adminId").`is`(it) }
+                ?: where("adminId").ne(simpleContributor?.id),
             where("private").`is`(false),
         )
-    }
-    if (requestingOwn) {
-        ownCriteria = private?.let {
-            Criteria().andOperator(
-                where("adminId").`is`(requestingContributor?.id),
-                where("private").`is`(private),
-            )
-        } ?: where("adminId").`is`(requestingContributor?.id)
+        query.addCriteria(othersCriteria)
     }
 
-    if (requestingOthers && requestingOwn) {
-        query.addCriteria(Criteria().orOperator(othersCriteria, ownCriteria))
-    } else {
-        othersCriteria?.let { query.addCriteria(it) }
-        ownCriteria?.let { query.addCriteria(it) }
+    if (requestingOwn) {
+        val ownCriteria = private?.let {
+            Criteria().andOperator(
+                where("adminId").`is`(simpleContributor?.id),
+                where("private").`is`(it),
+            )
+        } ?: where("adminId").`is`(simpleContributor?.id)
+        query.addCriteria(ownCriteria)
     }
 
     ids?.let { query.addCriteria(where("_id").`in`(it)) }

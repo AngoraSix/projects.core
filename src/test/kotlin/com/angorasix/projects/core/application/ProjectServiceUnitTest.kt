@@ -1,6 +1,6 @@
 package com.angorasix.projects.core.application
 
-import com.angorasix.commons.domain.RequestingContributor
+import com.angorasix.commons.domain.SimpleContributor
 import com.angorasix.projects.core.domain.project.Attribute
 import com.angorasix.projects.core.domain.project.Project
 import com.angorasix.projects.core.domain.project.ProjectRepository
@@ -45,7 +45,7 @@ class ProjectServiceUnitTest {
             val mockedProject = Project(
                 "mockedProjectName",
                 "creator_id",
-                "creator_id",
+                setOf(SimpleContributor("creator_id", emptySet())),
                 ZoneId.systemDefault(),
             )
             val filter = ListProjectsFilter()
@@ -67,7 +67,7 @@ class ProjectServiceUnitTest {
             val mockedProject = Project(
                 "mockedProjectName",
                 "creator_id",
-                "creator_id",
+                setOf(SimpleContributor("creator_id", emptySet())),
                 ZoneId.systemDefault(),
             )
             coEvery {
@@ -92,13 +92,13 @@ class ProjectServiceUnitTest {
         val mockedProject = Project(
             "mockedProjectName",
             "creator_id",
-            "creator_id",
+            setOf(SimpleContributor("creator_id", emptySet())),
             ZoneId.systemDefault(),
         )
         val savedProject = Project(
             "savedProjectName",
             "creator_id",
-            "creator_id",
+            setOf(SimpleContributor("creator_id", emptySet())),
             ZoneId.systemDefault(),
         )
         coEvery { repository.save(mockedProject) } returns savedProject
@@ -110,7 +110,7 @@ class ProjectServiceUnitTest {
     @Test
     @Throws(Exception::class)
     fun whenUpdateProject_thenServiceRetrieveSavedProject() = runTest {
-        val mockedRequestingContributor = RequestingContributor("mockedId")
+        val mockedSimpleContributor = SimpleContributor("mockedId")
         val mockedExistingProject = mockk<Project>()
         every {
             mockedExistingProject.setProperty(Project::name.name) value "mockedUpdatedProjectName"
@@ -124,29 +124,29 @@ class ProjectServiceUnitTest {
         val mockedUpdateProject = Project(
             "mockedUpdatedProjectName",
             "creator_id",
-            "creator_id",
+            setOf(SimpleContributor("creator_id", emptySet())),
             ZoneId.systemDefault(),
         )
         val savedProject = Project(
             "savedProjectName",
             "creator_id",
-            "creator_id",
+            setOf(SimpleContributor("creator_id", emptySet())),
             ZoneId.systemDefault(),
         )
         coEvery {
             repository.findByIdForContributor(
                 ListProjectsFilter(listOf("id1"), "mockedId"),
-                mockedRequestingContributor,
+                mockedSimpleContributor,
             )
         } returns mockedExistingProject
         coEvery { repository.save(any()) } returns savedProject
         val outputProject =
-            service.updateProject("id1", mockedUpdateProject, mockedRequestingContributor)
+            service.updateProject("id1", mockedUpdateProject, mockedSimpleContributor)
         assertThat(outputProject).isSameAs(savedProject)
         coVerifyAll {
             repository.findByIdForContributor(
                 ListProjectsFilter(listOf("id1"), "mockedId"),
-                mockedRequestingContributor,
+                mockedSimpleContributor,
             )
             repository.findByIdForContributor(
                 ListProjectsFilter(listOf("id1"), null),
@@ -168,13 +168,13 @@ class ProjectServiceUnitTest {
         val mockedProject = Project(
             "mockedProjectName",
             "creator_id",
-            "creator_id",
+            setOf(SimpleContributor("creator_id", emptySet())),
             ZoneId.systemDefault(),
         )
         val updatedProject = Project(
             "updatedProjectName",
             "creator_id",
-            "creator_id",
+            setOf(SimpleContributor("creator_id", emptySet())),
             ZoneId.systemDefault(),
         )
         coEvery { repository.save(mockedProject) } returns updatedProject

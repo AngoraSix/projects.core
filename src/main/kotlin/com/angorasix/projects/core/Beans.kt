@@ -21,7 +21,7 @@ val beans = beans {
     bean<ProjectService>()
     bean<ProjectHandler>()
     bean {
-        ProjectRouter(ref(), ref(), ref()).projectRouterFunction()
+        ProjectRouter(ref(), ref()).projectRouterFunction()
     }
 }
 

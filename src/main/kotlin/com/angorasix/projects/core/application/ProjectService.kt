@@ -1,6 +1,6 @@
 package com.angorasix.projects.core.application
 
-import com.angorasix.commons.domain.RequestingContributor
+import com.angorasix.commons.domain.SimpleContributor
 import com.angorasix.projects.core.domain.project.Project
 import com.angorasix.projects.core.domain.project.ProjectRepository
 import com.angorasix.projects.core.infrastructure.queryfilters.ListProjectsFilter
@@ -20,7 +20,10 @@ class ProjectService(private val repository: ProjectRepository) {
      *
      * @return [Flux] of [Project]
      */
-    fun findProjects(filter: ListProjectsFilter, requestingContributor: RequestingContributor?): Flow<Project> = repository.findUsingFilter(filter, requestingContributor)
+    fun findProjects(
+        filter: ListProjectsFilter,
+        simpleContributor: SimpleContributor?,
+    ): Flow<Project> = repository.findUsingFilter(filter, simpleContributor)
 
     /**
      * Method to create a new [Project].
@@ -36,8 +39,18 @@ class ProjectService(private val repository: ProjectRepository) {
      * @param updateData the [Project] to be updated
      * @return a [Mono] with the persisted [Project]
      */
-    suspend fun updateProject(projectId: String, updateData: Project, requestingContributor: RequestingContributor): Project? =
-        repository.findByIdForContributor(ListProjectsFilter(listOf(projectId), requestingContributor.id), requestingContributor)?.updateWithData(updateData)?.let { repository.save(it) }
+    suspend fun updateProject(
+        projectId: String,
+        updateData: Project,
+        simpleContributor: SimpleContributor,
+    ): Project? =
+        repository.findByIdForContributor(
+            ListProjectsFilter(
+                listOf(projectId),
+                simpleContributor.id,
+            ),
+            simpleContributor,
+        )?.updateWithData(updateData)?.let { repository.save(it) }
 
     /**
      * Method to find a single [Project] from an id.
@@ -45,7 +58,11 @@ class ProjectService(private val repository: ProjectRepository) {
      * @param projectId [Project] id
      * @return a [Mono] with the persisted [Project]
      */
-    suspend fun findSingleProject(projectId: String, requestingContributor: RequestingContributor?): Project? = repository.findByIdForContributor(ListProjectsFilter(listOf(projectId)), requestingContributor)
+    suspend fun findSingleProject(
+        projectId: String,
+        simpleContributor: SimpleContributor?,
+    ): Project? =
+        repository.findByIdForContributor(ListProjectsFilter(listOf(projectId)), simpleContributor)
 
     /**
      * Method to find a single [Project] from an id.
@@ -53,7 +70,16 @@ class ProjectService(private val repository: ProjectRepository) {
      * @param projectId [Project] id
      * @return a [Mono] with the persisted [Project]
      */
-    suspend fun administeredProject(projectId: String, requestingContributor: RequestingContributor): Project? = repository.findByIdForContributor(ListProjectsFilter(listOf(projectId), requestingContributor.id), requestingContributor)
+    suspend fun administeredProject(
+        projectId: String,
+        simpleContributor: SimpleContributor,
+    ): Project? = repository.findByIdForContributor(
+        ListProjectsFilter(
+            listOf(projectId),
+            simpleContributor.id,
+        ),
+        simpleContributor,
+    )
 
     private fun Project.updateWithData(other: Project): Project {
         this.name = other.name

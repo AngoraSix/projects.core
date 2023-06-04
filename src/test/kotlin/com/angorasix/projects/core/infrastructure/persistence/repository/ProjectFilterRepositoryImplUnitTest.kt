@@ -1,6 +1,6 @@
 package com.angorasix.projects.core.infrastructure.persistence.repository
 
-import com.angorasix.commons.domain.RequestingContributor
+import com.angorasix.commons.domain.SimpleContributor
 import com.angorasix.projects.core.domain.project.Project
 import com.angorasix.projects.core.infrastructure.queryfilters.ListProjectsFilter
 import io.mockk.every
@@ -85,11 +85,11 @@ class ProjectFilterRepositoryImplUnitTest {
     fun `Given empty ProjectFilter - When findUsingFilter for own user - Then find repo operation filtering out adminId projects`() =
         runTest {
             val filter = ListProjectsFilter(null, "mockedAdminId", true)
-            val requestingContributor = RequestingContributor("mockedAdminId", true)
+            val simpleContributor = SimpleContributor("mockedAdminId", emptySet())
             val mockedFlux = mockk<Flux<Project>>()
             every { mongoOps.find(capture(slot), Project::class.java) } returns mockedFlux
 
-            filterRepoImpl.findUsingFilter(filter, requestingContributor)
+            filterRepoImpl.findUsingFilter(filter, simpleContributor)
 
             val capturedQuery = slot.captured
 
