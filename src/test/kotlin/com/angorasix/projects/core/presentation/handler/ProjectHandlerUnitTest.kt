@@ -5,7 +5,6 @@ import com.angorasix.commons.infrastructure.constants.AngoraSixInfrastructure
 import com.angorasix.projects.core.application.ProjectService
 import com.angorasix.projects.core.domain.project.Project
 import com.angorasix.projects.core.infrastructure.config.configurationproperty.api.ApiConfigs
-import com.angorasix.projects.core.infrastructure.config.configurationproperty.api.HeadersConfigs
 import com.angorasix.projects.core.infrastructure.config.configurationproperty.api.Route
 import com.angorasix.projects.core.infrastructure.config.configurationproperty.api.RoutesConfigs
 import com.angorasix.projects.core.infrastructure.queryfilters.ListProjectsFilter
@@ -48,8 +47,6 @@ class ProjectHandlerUnitTest {
     @MockK
     private lateinit var apiConfigs: ApiConfigs
 
-    private var headerConfigs: HeadersConfigs = HeadersConfigs("MockedContributorHeader")
-
     private var routeConfigs: RoutesConfigs = RoutesConfigs(
         "",
         "/{id}",
@@ -67,7 +64,6 @@ class ProjectHandlerUnitTest {
 
     @BeforeEach
     fun init() {
-        every { apiConfigs.headers } returns headerConfigs
         every { apiConfigs.routes } returns routeConfigs
         handler = ProjectHandler(service, apiConfigs)
     }

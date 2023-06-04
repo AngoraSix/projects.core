@@ -1,7 +1,5 @@
 configs:
   api:
-    headers:
-      contributor: ${A6_PROJECTS_CORE_CONTRIBUTORHEADER:A6-Contributor}
     basePaths:
       projectsCore: "/projects-core"
     routes:
