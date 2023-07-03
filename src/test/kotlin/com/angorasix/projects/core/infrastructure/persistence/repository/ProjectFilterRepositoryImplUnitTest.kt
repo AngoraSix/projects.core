@@ -54,11 +54,44 @@ class ProjectFilterRepositoryImplUnitTest {
             val capturedQuery = slot.captured
 
             verify { mongoOps.find(capturedQuery, Project::class.java) }
-            assertThat(capturedQuery.queryObject).containsKey("\$and")
-            assertThat(capturedQuery.queryObject["\$and"] as List<Map<String, Any>>)
-                .anyMatch { it.containsKey("adminId") }
+            assertThat(capturedQuery.queryObject).containsKey("\$or")
+            val orCriteria = capturedQuery.queryObject["\$or"] as List<Map<String, Any>>
+            assertThat(orCriteria)
+                .anyMatch { it.containsKey("\$and") }
+            val andCriteriaElement = orCriteria.find {
+                it.containsKey("\$and")
+            } as Map<String, Any>
+            val andCriteria = andCriteriaElement["\$and"] as List<Map<String, Any>>
+            assertThat(andCriteria).anyMatch { it.containsKey("admins") }
                 .anyMatch { it["private"] == false }
             assertThat(output).isNull()
+        }
+
+    @Test
+    @Throws(Exception::class)
+    fun `Given empty ProjectFilter - When findUsingFilter for contributor - Then find repo operation filtering out private projects`() =
+        runTest {
+            val simpleContributor = SimpleContributor("mockedAdminId", emptySet())
+            val filter = ListProjectsFilter()
+            val mockedFlux = mockk<Flux<Project>>()
+            every { mongoOps.find(capture(slot), Project::class.java) } returns mockedFlux
+
+            filterRepoImpl.findUsingFilter(filter, simpleContributor)
+
+            val capturedQuery = slot.captured
+
+            verify { mongoOps.find(capturedQuery, Project::class.java) }
+            assertThat(capturedQuery.queryObject).containsKey("\$or")
+            val orCriteria = capturedQuery.queryObject["\$or"] as List<Map<String, Any>>
+            assertThat(orCriteria)
+                .anyMatch { it.containsKey("\$and") }
+            val andCriteriaElement = orCriteria.find {
+                it.containsKey("\$and")
+            } as Map<String, Any>
+            val andCriteria = andCriteriaElement["\$and"] as List<Map<String, Any>>
+            assertThat(andCriteria)
+                .anyMatch { it.containsKey("admins") }
+                .anyMatch { it["private"] == false }
         }
 
     @Test
@@ -74,9 +107,15 @@ class ProjectFilterRepositoryImplUnitTest {
             val capturedQuery = slot.captured
 
             verify { mongoOps.find(capturedQuery, Project::class.java) }
-            assertThat(capturedQuery.queryObject).containsKey("\$and")
-            assertThat(capturedQuery.queryObject["\$and"] as List<Map<String, Any>>)
-                .anyMatch { it.containsKey("adminId") }
+            assertThat(capturedQuery.queryObject).containsKey("\$or")
+            val orCriteria = capturedQuery.queryObject["\$or"] as List<Map<String, Any>>
+            assertThat(orCriteria)
+                .anyMatch { it.containsKey("\$and") }
+            val andCriteriaElement = orCriteria.find {
+                it.containsKey("\$and")
+            } as Map<String, Any>
+            val andCriteria = andCriteriaElement["\$and"] as List<Map<String, Any>>
+            assertThat(andCriteria).anyMatch { it.containsKey("admins") }
                 .anyMatch { it["private"] == false }
         }
 
@@ -94,9 +133,15 @@ class ProjectFilterRepositoryImplUnitTest {
             val capturedQuery = slot.captured
 
             verify { mongoOps.find(capturedQuery, Project::class.java) }
-            assertThat(capturedQuery.queryObject).containsKey("\$and")
-            assertThat(capturedQuery.queryObject["\$and"] as List<Map<String, Any>>)
-                .anyMatch { it.containsKey("adminId") }
+            assertThat(capturedQuery.queryObject).containsKey("\$or")
+            val orCriteria = capturedQuery.queryObject["\$or"] as List<Map<String, Any>>
+            assertThat(orCriteria)
+                .anyMatch { it.containsKey("\$and") }
+            val andCriteriaElement = orCriteria.find {
+                it.containsKey("\$and")
+            } as Map<String, Any>
+            val andCriteria = andCriteriaElement["\$and"] as List<Map<String, Any>>
+            assertThat(andCriteria).anyMatch { it.containsKey("admins") }
                 .anyMatch { it["private"] == true }
         }
 
@@ -113,9 +158,16 @@ class ProjectFilterRepositoryImplUnitTest {
             val capturedQuery = slot.captured
 
             verify { mongoOps.find(capturedQuery, Project::class.java) }
-            assertThat(capturedQuery.queryObject).containsKey("\$and").containsKey("_id")
-            assertThat(capturedQuery.queryObject["\$and"] as List<Map<String, Any>>).anyMatch {
-                it.containsKey("adminId")
+            assertThat(capturedQuery.queryObject).containsKey("\$or")
+            val orCriteria = capturedQuery.queryObject["\$or"] as List<Map<String, Any>>
+            assertThat(orCriteria)
+                .anyMatch { it.containsKey("\$and") }
+            val andCriteriaElement = orCriteria.find {
+                it.containsKey("\$and")
+            } as Map<String, Any>
+            val andCriteria = andCriteriaElement["\$and"] as List<Map<String, Any>>
+            assertThat(andCriteria).anyMatch {
+                it.containsKey("admins")
             }
         }
 }

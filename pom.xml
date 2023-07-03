@@ -6,12 +6,12 @@
   <parent>
     <artifactId>parent-pom-spring-kotlin</artifactId>
     <groupId>com.angorasix</groupId>
-    <version>0.2.0</version>
+    <version>0.2.1</version>
   </parent>
   <artifactId>projects.core</artifactId>
   <name>projects.core</name>
   <description>Projects Core Service</description>
-  <version>0.2.0</version>
+  <version>0.2.1</version>
 
   <properties>
     <jacoco-coverage.class.branch.min>0.50</jacoco-coverage.class.branch.min>
@@ -42,7 +42,7 @@
     <dependency>
       <artifactId>commons.core</artifactId>
       <groupId>com.angorasix</groupId>
-      <version>0.2.0</version>
+      <version>0.2.2</version>
     </dependency>
 
     <!-- check if necessary with newer versions https://github.com/Playtika/testcontainers-spring-boot/issues/562 -->

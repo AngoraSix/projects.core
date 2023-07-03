@@ -1,6 +1,6 @@
 package com.angorasix.projects.core.presentation.router
 
-import com.angorasix.commons.presentation.filter.extractRequestingContributor
+import com.angorasix.commons.reactive.presentation.filter.extractRequestingContributor
 import com.angorasix.projects.core.infrastructure.config.configurationproperty.api.ApiConfigs
 import com.angorasix.projects.core.presentation.handler.ProjectHandler
 import org.springframework.web.reactive.function.server.CoRouterFunctionDsl
@@ -30,7 +30,7 @@ class ProjectRouter(
             )
         }
         apiConfigs.basePaths.projectsCore.nest {
-//            defineValidateAdminUserEndpoint()
+            defineValidateAdminUserEndpoint()
             apiConfigs.routes.baseByIdCrudRoute.nest {
                 defineUpdateProjectEndpoint()
                 defineGetProjectEndpoint()
@@ -42,11 +42,11 @@ class ProjectRouter(
         }
     }
 
-//    private fun CoRouterFunctionDsl.defineValidateAdminUserEndpoint() {
-//        path(apiConfigs.routes.validateAdminUser.path).nest {
-//            method(apiConfigs.routes.validateAdminUser.method, handler::validateAdminUser)
-//        }
-//    }
+    private fun CoRouterFunctionDsl.defineValidateAdminUserEndpoint() {
+        path(apiConfigs.routes.validateAdminUser.path).nest {
+            method(apiConfigs.routes.validateAdminUser.method, handler::validateAdminUser)
+        }
+    }
 
     private fun CoRouterFunctionDsl.defineUpdateProjectEndpoint() {
         method(apiConfigs.routes.updateProject.method).nest {
