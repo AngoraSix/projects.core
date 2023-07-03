@@ -2,14 +2,15 @@ package com.angorasix.projects.core.presentation.handler
 
 import com.angorasix.commons.domain.SimpleContributor
 import com.angorasix.commons.infrastructure.constants.AngoraSixInfrastructure
-import com.angorasix.commons.infrastructure.presentation.error.resolveBadRequest
-import com.angorasix.commons.infrastructure.presentation.error.resolveNotFound
+import com.angorasix.commons.reactive.presentation.error.resolveBadRequest
+import com.angorasix.commons.reactive.presentation.error.resolveNotFound
 import com.angorasix.projects.core.application.ProjectService
 import com.angorasix.projects.core.domain.project.Attribute
 import com.angorasix.projects.core.domain.project.Project
 import com.angorasix.projects.core.infrastructure.config.configurationproperty.api.ApiConfigs
 import com.angorasix.projects.core.infrastructure.queryfilters.ListProjectsFilter
 import com.angorasix.projects.core.presentation.dto.AttributeDto
+import com.angorasix.projects.core.presentation.dto.IsAdminDto
 import com.angorasix.projects.core.presentation.dto.ProjectDto
 import kotlinx.coroutines.flow.map
 import org.springframework.hateoas.IanaLinkRelations
@@ -46,7 +47,8 @@ class ProjectHandler(
      * @return the `ServerResponse`
      */
     suspend fun listProjects(@Suppress("UNUSED_PARAMETER") request: ServerRequest): ServerResponse {
-        val requestingContributor = request.attributes()[AngoraSixInfrastructure.REQUEST_ATTRIBUTE_CONTRIBUTOR_KEY]
+        val requestingContributor =
+            request.attributes()[AngoraSixInfrastructure.REQUEST_ATTRIBUTE_CONTRIBUTOR_KEY]
         return service.findProjects(
             request.queryParams()
                 .toQueryFilter(),
@@ -69,12 +71,13 @@ class ProjectHandler(
      * @return the `ServerResponse`
      */
     suspend fun getProject(request: ServerRequest): ServerResponse {
-        val requestingContributor = request.attributes()[AngoraSixInfrastructure.REQUEST_ATTRIBUTE_CONTRIBUTOR_KEY]
+        val requestingContributor =
+            request.attributes()[AngoraSixInfrastructure.REQUEST_ATTRIBUTE_CONTRIBUTOR_KEY]
         val projectId = request.pathVariable("id")
         return service.findSingleProject(projectId, requestingContributor as SimpleContributor?)
             ?.let {
                 val outputProject = it.convertToDto(
-                    requestingContributor as? SimpleContributor,
+                    requestingContributor,
                     apiConfigs,
                     request,
                 )
@@ -91,18 +94,19 @@ class ProjectHandler(
      * @param request - HTTP `ServerRequest` object
      * @return the `ServerResponse`
      */
-//    suspend fun validateAdminUser(request: ServerRequest): ServerResponse {
-//        val requestingContributor = request.attributes()[AngoraSixInfrastructure.REQUEST_ATTRIBUTE_CONTRIBUTOR_KEY]
-//        val projectId = request.pathVariable("id")
-//        return if (requestingContributor is SimpleContributor) {
-//            service.administeredProject(projectId, requestingContributor)?.let {
-//                val result = it.isAdministeredBy(requestingContributor)
-//                ok().contentType(MediaTypes.HAL_FORMS_JSON).bodyValueAndAwait(IsAdminDto(result))
-//            } ?: resolveNotFound("Can't find project", "Project")
-//        } else {
-//            resolveBadRequest("Invalid Contributor Header", "Contributor Header")
-//        }
-//    }
+    suspend fun validateAdminUser(request: ServerRequest): ServerResponse {
+        val requestingContributor =
+            request.attributes()[AngoraSixInfrastructure.REQUEST_ATTRIBUTE_CONTRIBUTOR_KEY]
+        val projectId = request.pathVariable("id")
+        return if (requestingContributor is SimpleContributor) {
+            service.administeredProject(projectId, requestingContributor)?.let {
+                val result = it.isAdministeredBy(requestingContributor)
+                ok().contentType(MediaTypes.HAL_FORMS_JSON).bodyValueAndAwait(IsAdminDto(result))
+            } ?: resolveNotFound("Can't find project", "Project")
+        } else {
+            resolveBadRequest("Invalid Contributor Header", "Contributor Header")
+        }
+    }
 
     /**
      * Handler for the Create Projects endpoint, to create a new Project entity.
@@ -111,7 +115,8 @@ class ProjectHandler(
      * @return the `ServerResponse`
      */
     suspend fun createProject(request: ServerRequest): ServerResponse {
-        val requestingContributor = request.attributes()[AngoraSixInfrastructure.REQUEST_ATTRIBUTE_CONTRIBUTOR_KEY]
+        val requestingContributor =
+            request.attributes()[AngoraSixInfrastructure.REQUEST_ATTRIBUTE_CONTRIBUTOR_KEY]
         return if (requestingContributor is SimpleContributor) {
             val project = request.awaitBody<ProjectDto>()
                 .convertToDomain(
@@ -136,7 +141,8 @@ class ProjectHandler(
      * @return the `ServerResponse`
      */
     suspend fun updateProject(request: ServerRequest): ServerResponse {
-        val requestingContributor = request.attributes()[AngoraSixInfrastructure.REQUEST_ATTRIBUTE_CONTRIBUTOR_KEY]
+        val requestingContributor =
+            request.attributes()[AngoraSixInfrastructure.REQUEST_ATTRIBUTE_CONTRIBUTOR_KEY]
         val projectId = request.pathVariable("id")
         val updateProjectData = try {
             request.awaitBody<ProjectDto>().let {

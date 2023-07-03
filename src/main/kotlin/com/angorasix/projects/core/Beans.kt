@@ -2,6 +2,7 @@ package com.angorasix.projects.core
 
 import com.angorasix.projects.core.application.ProjectService
 import com.angorasix.projects.core.infrastructure.persistence.converter.ZonedDateTimeConvertersUtils
+import com.angorasix.projects.core.infrastructure.security.ProjectSecurityConfiguration
 import com.angorasix.projects.core.presentation.handler.ProjectHandler
 import com.angorasix.projects.core.presentation.router.ProjectRouter
 import org.springframework.context.ApplicationContextInitializer
@@ -10,13 +11,16 @@ import org.springframework.context.support.beans
 import org.springframework.data.mongodb.core.convert.MongoCustomConversions
 
 val beans = beans {
-    bean<MongoCustomConversions> {
+    bean {
         MongoCustomConversions(
             listOf(
                 ref<ZonedDateTimeConvertersUtils.ZonedDateTimeReaderConverter>(),
                 ref<ZonedDateTimeConvertersUtils.ZonedDateTimeWritingConverter>(),
             ),
         )
+    }
+    bean {
+        ProjectSecurityConfiguration().springSecurityFilterChain(ref())
     }
     bean<ProjectService>()
     bean<ProjectHandler>()

@@ -41,28 +41,33 @@ private fun ListProjectsFilter.toQuery(simpleContributor: SimpleContributor?): Q
     val requestingOwn =
         simpleContributor != null && (adminId == null || adminId == simpleContributor.id)
 
-    if (requestingOthers) {
+    val othersCriteria = if (requestingOthers) {
         if (private == true && !requestingOwn) {
             query.addCriteria(where("_id").`is`(null))
             return query
         }
-        val othersCriteria = Criteria().andOperator(
-            adminId?.let { where("adminId").`is`(it) }
-                ?: where("adminId").ne(simpleContributor?.id),
+        Criteria().andOperator(
+            adminId?.let {
+                where("admins").elemMatch(where("id").`is`(it))
+            } ?: where("admins").not().elemMatch(where("id").`is`(simpleContributor?.id)),
             where("private").`is`(false),
         )
-        query.addCriteria(othersCriteria)
+    } else {
+        Criteria()
     }
 
-    if (requestingOwn) {
-        val ownCriteria = private?.let {
+    val ownCriteria = if (requestingOwn) {
+        private?.let {
             Criteria().andOperator(
-                where("adminId").`is`(simpleContributor?.id),
+                where("admins").elemMatch(where("id").`is`(simpleContributor?.id)),
                 where("private").`is`(it),
             )
-        } ?: where("adminId").`is`(simpleContributor?.id)
-        query.addCriteria(ownCriteria)
+        } ?: where("admins").elemMatch(where("id").`is`(simpleContributor?.id))
+    } else {
+        Criteria()
     }
+
+    query.addCriteria(Criteria().orOperator(othersCriteria, ownCriteria))
 
     ids?.let { query.addCriteria(where("_id").`in`(it)) }
     return query
