@@ -104,7 +104,7 @@ class ProjectHandler(
                 ok().contentType(MediaTypes.HAL_FORMS_JSON).bodyValueAndAwait(IsAdminDto(result))
             } ?: resolveNotFound("Can't find project", "Project")
         } else {
-            resolveBadRequest("Invalid Contributor Header", "Contributor Header")
+            resolveBadRequest("Invalid Contributor Authentication", "Authentication")
         }
     }
 
@@ -120,8 +120,8 @@ class ProjectHandler(
         return if (requestingContributor is SimpleContributor) {
             val project = request.awaitBody<ProjectDto>()
                 .convertToDomain(
-                    requestingContributor.id,
-                    setOf(SimpleContributor(requestingContributor.id, emptySet())),
+                    requestingContributor.contributorId,
+                    setOf(SimpleContributor(requestingContributor.contributorId, emptySet())),
                 )
             val outputProject = service.createProject(project)
                 .convertToDto(requestingContributor, apiConfigs, request)

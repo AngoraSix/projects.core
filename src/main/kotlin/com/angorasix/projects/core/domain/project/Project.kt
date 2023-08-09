@@ -62,5 +62,5 @@ data class Project @PersistenceCreator private constructor(
     }
 
     fun isAdministeredBy(simpleContributor: SimpleContributor): Boolean =
-        admins.any { it.id == simpleContributor.id }
+        admins.any { it.contributorId == simpleContributor.contributorId }
 }

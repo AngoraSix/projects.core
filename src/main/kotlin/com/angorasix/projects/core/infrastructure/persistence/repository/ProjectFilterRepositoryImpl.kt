@@ -37,9 +37,9 @@ class ProjectFilterRepositoryImpl(val mongoOps: ReactiveMongoOperations) : Proje
 
 private fun ListProjectsFilter.toQuery(simpleContributor: SimpleContributor?): Query {
     val query = Query()
-    val requestingOthers = adminId == null || adminId != simpleContributor?.id
+    val requestingOthers = adminId == null || adminId != simpleContributor?.contributorId
     val requestingOwn =
-        simpleContributor != null && (adminId == null || adminId == simpleContributor.id)
+        simpleContributor != null && (adminId == null || adminId == simpleContributor.contributorId)
 
     val othersCriteria = if (requestingOthers) {
         if (private == true && !requestingOwn) {
@@ -49,7 +49,7 @@ private fun ListProjectsFilter.toQuery(simpleContributor: SimpleContributor?): Q
         Criteria().andOperator(
             adminId?.let {
                 where("admins").elemMatch(where("id").`is`(it))
-            } ?: where("admins").not().elemMatch(where("id").`is`(simpleContributor?.id)),
+            } ?: where("admins").not().elemMatch(where("id").`is`(simpleContributor?.contributorId)),
             where("private").`is`(false),
         )
     } else {
@@ -59,10 +59,10 @@ private fun ListProjectsFilter.toQuery(simpleContributor: SimpleContributor?): Q
     val ownCriteria = if (requestingOwn) {
         private?.let {
             Criteria().andOperator(
-                where("admins").elemMatch(where("id").`is`(simpleContributor?.id)),
+                where("admins").elemMatch(where("id").`is`(simpleContributor?.contributorId)),
                 where("private").`is`(it),
             )
-        } ?: where("admins").elemMatch(where("id").`is`(simpleContributor?.id))
+        } ?: where("admins").elemMatch(where("id").`is`(simpleContributor?.contributorId))
     } else {
         Criteria()
     }
