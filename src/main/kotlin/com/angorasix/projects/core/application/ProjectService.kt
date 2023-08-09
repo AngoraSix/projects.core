@@ -47,7 +47,7 @@ class ProjectService(private val repository: ProjectRepository) {
         repository.findByIdForContributor(
             ListProjectsFilter(
                 listOf(projectId),
-                simpleContributor.id,
+                simpleContributor.contributorId,
             ),
             simpleContributor,
         )?.updateWithData(updateData)?.let { repository.save(it) }
@@ -76,7 +76,7 @@ class ProjectService(private val repository: ProjectRepository) {
     ): Project? = repository.findByIdForContributor(
         ListProjectsFilter(
             listOf(projectId),
-            simpleContributor.id,
+            simpleContributor.contributorId,
         ),
         simpleContributor,
     )
