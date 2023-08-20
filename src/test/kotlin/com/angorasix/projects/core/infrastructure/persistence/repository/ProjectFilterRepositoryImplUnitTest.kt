@@ -123,7 +123,7 @@ class ProjectFilterRepositoryImplUnitTest {
     @Throws(Exception::class)
     fun `Given empty ProjectFilter - When findUsingFilter for own user - Then find repo operation filtering out adminId projects`() =
         runTest {
-            val filter = ListProjectsFilter(null, "mockedAdminId", true)
+            val filter = ListProjectsFilter(null, listOf("mockedAdminId"), true)
             val simpleContributor = SimpleContributor("mockedAdminId", emptySet())
             val mockedFlux = mockk<Flux<Project>>()
             every { mongoOps.find(capture(slot), Project::class.java) } returns mockedFlux
@@ -149,7 +149,7 @@ class ProjectFilterRepositoryImplUnitTest {
     @Throws(Exception::class)
     fun `Given populated ProjectFilter - When findUsingFilter - Then find repo operation with populated query`() =
         runTest {
-            val filter = ListProjectsFilter(listOf("1", "2"), "adminId1")
+            val filter = ListProjectsFilter(listOf("1", "2"), listOf("adminId1"))
             val mockedFlux = mockk<Flux<Project>>()
             every { mongoOps.find(capture(slot), Project::class.java) } returns mockedFlux
 

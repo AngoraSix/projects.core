@@ -18,7 +18,6 @@ import org.springframework.hateoas.Link
 import org.springframework.hateoas.MediaTypes
 import org.springframework.hateoas.mediatype.Affordances
 import org.springframework.http.HttpMethod
-import org.springframework.util.MultiValueMap
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.ServerResponse.created
@@ -50,8 +49,9 @@ class ProjectHandler(
         val requestingContributor =
             request.attributes()[AngoraSixInfrastructure.REQUEST_ATTRIBUTE_CONTRIBUTOR_KEY]
         return service.findProjects(
-            request.queryParams()
-                .toQueryFilter(),
+            ListProjectsFilter.fromMultiValueMap(
+                request.queryParams(),
+            ),
             requestingContributor as SimpleContributor?,
         ).map {
             it.convertToDto(
@@ -250,12 +250,4 @@ private fun uriBuilder(request: ServerRequest) = request.requestPath().contextPa
 
 private fun AttributeDto.convertToDomain(): Attribute<*> {
     return Attribute(key, value)
-}
-
-private fun MultiValueMap<String, String>.toQueryFilter(): ListProjectsFilter {
-    return ListProjectsFilter(
-        get("ids")?.flatMap { it.split(",") },
-        getFirst("adminId"),
-        getFirst("private")?.toBoolean(),
-    )
 }

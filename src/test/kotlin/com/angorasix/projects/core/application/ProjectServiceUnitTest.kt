@@ -135,7 +135,7 @@ class ProjectServiceUnitTest {
         )
         coEvery {
             repository.findByIdForContributor(
-                ListProjectsFilter(listOf("id1"), "mockedId"),
+                ListProjectsFilter(listOf("id1"), listOf("mockedId")),
                 mockedSimpleContributor,
             )
         } returns mockedExistingProject
@@ -145,7 +145,7 @@ class ProjectServiceUnitTest {
         assertThat(outputProject).isSameAs(savedProject)
         coVerifyAll {
             repository.findByIdForContributor(
-                ListProjectsFilter(listOf("id1"), "mockedId"),
+                ListProjectsFilter(listOf("id1"), listOf("mockedId")),
                 mockedSimpleContributor,
             )
             repository.findByIdForContributor(
