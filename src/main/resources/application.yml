@@ -11,4 +11,4 @@ spring:
     name: ${A6_PROJECTS_CORE_APP_NAME:projects.core}
   data:
     mongodb:
-      uri: ${A6_PROJECTS_CORE_MONGO_DB_URI:mongodb://localhost:27017/projects.core}
+      uri: ${A6_PROJECTS_CORE_MONGO_DB_URI:mongodb://localhost:27017/}${A6_PROJECTS_CORE_MONGO_DB_NAME:a6-contributors}${A6_PROJECTS_CORE_MONGO_DB_PARAMS:?}
