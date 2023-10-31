@@ -9,6 +9,8 @@ jobs:
   build-test-artifact:
     uses: AngoraSix/infra/.github/workflows/action-build-test-maven.yml@main
   publish-docker-image:
+    runs-on: ubuntu-latest
+    steps:
     - uses: actions/checkout@v4
     - uses: actions/download-artifact@master
       with:
