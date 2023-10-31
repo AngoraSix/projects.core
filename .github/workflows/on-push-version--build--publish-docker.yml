@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-test-artifact:
-    uses: AngoraSix/infra/.github/workflows/action-build-test-maven@main
+    uses: AngoraSix/infra/.github/workflows/action-build-test-maven.yml@main
   publish-docker-image:
     steps:
       - uses: actions/checkout@v4
