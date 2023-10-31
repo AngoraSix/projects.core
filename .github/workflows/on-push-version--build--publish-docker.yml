@@ -9,6 +9,9 @@ jobs:
   build-test-artifact:
     uses: AngoraSix/infra/.github/workflows/action-build-test-maven.yml@main
   publish-docker-image:
+    permissions:
+      contents: 'read'
+      id-token: 'write'
     uses: AngoraSix/infra/.github/workflows/action-push-gcp.yml@main
     with:
       app: projects-core
