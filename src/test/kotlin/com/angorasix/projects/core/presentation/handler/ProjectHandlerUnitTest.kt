@@ -32,6 +32,8 @@ import org.springframework.http.HttpStatus
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest
 import org.springframework.mock.web.reactive.function.server.MockServerRequest
 import org.springframework.mock.web.server.MockServerWebExchange
+import org.springframework.util.LinkedMultiValueMap
+import org.springframework.util.MultiValueMap
 import org.springframework.web.reactive.function.server.EntityResponse
 import org.springframework.web.reactive.function.server.ServerRequest
 import java.time.ZoneId
@@ -87,6 +89,53 @@ class ProjectHandlerUnitTest {
                 )
             val retrievedProject = flowOf(mockedProject)
             coEvery { service.findProjects(ListProjectsFilter(), null) } returns retrievedProject
+
+            val outputResponse = handler.listProjects(mockedRequest)
+
+            assertThat(outputResponse.statusCode()).isEqualTo(HttpStatus.OK)
+            val response = @Suppress("UNCHECKED_CAST")
+            outputResponse as EntityResponse<Flow<ProjectDto>>
+            val responseBody = response.entity()
+            responseBody.collect {
+                assertThat(it.name).isEqualTo("mockedProjectName")
+                assertThat(it.creatorId).isEqualTo("creator_id")
+            }
+            coVerify { service.findProjects(ListProjectsFilter(), null) }
+        }
+
+    @Test
+    @Throws(Exception::class)
+    fun `Given existing projects - When list projects using Filter - Then handler retrieves Ok Response using filters`() =
+        runTest {
+            val mockedExchange = MockServerWebExchange.from(
+                MockServerHttpRequest.get(routeConfigs.listProjects.path).build(),
+            )
+            val mockedRequest: ServerRequest =
+                MockServerRequest.builder().queryParams(
+                    generateListProjectsFilterMultiValueMap(
+                        "id1,id2",
+                        "true",
+                        "adminId1",
+                    ),
+                ).exchange(mockedExchange).build()
+            val mockedProject =
+                Project(
+                    "mockedProjectName",
+                    "creator_id",
+                    setOf(SimpleContributor("creator_id", emptySet())),
+                    ZoneId.systemDefault(),
+                )
+            val retrievedProject = flowOf(mockedProject)
+            coEvery {
+                service.findProjects(
+                    ListProjectsFilter(
+                        listOf("id1", "id2"),
+                        listOf("adminId1"),
+                        true,
+                    ),
+                    null,
+                )
+            } returns retrievedProject
 
             val outputResponse = handler.listProjects(mockedRequest)
 
@@ -181,7 +230,8 @@ class ProjectHandlerUnitTest {
                 "mockedInputProjectName",
             )
             val mockedSimpleContributor = SimpleContributor("mockedId")
-            val mockedExchange = MockServerWebExchange.from(MockServerHttpRequest.get("/id1-mocked").build())
+            val mockedExchange =
+                MockServerWebExchange.from(MockServerHttpRequest.get("/id1-mocked").build())
             val mockedRequest: ServerRequest = MockServerRequest.builder()
                 .attribute(
                     AngoraSixInfrastructure.REQUEST_ATTRIBUTE_CONTRIBUTOR_KEY,
@@ -382,4 +432,16 @@ class ProjectHandlerUnitTest {
             assertThat(responseBody.isAdmin).isFalse()
             coVerify { service.administeredProject(projectId, mockedSimpleContributor) }
         }
+
+    fun generateListProjectsFilterMultiValueMap(
+        ids: String,
+        private: String,
+        adminId: String,
+    ): MultiValueMap<String, String> {
+        val multiMap: MultiValueMap<String, String> = LinkedMultiValueMap()
+        multiMap.add("ids", ids)
+        multiMap.add("private", private)
+        multiMap.add("adminId", adminId)
+        return multiMap
+    }
 }

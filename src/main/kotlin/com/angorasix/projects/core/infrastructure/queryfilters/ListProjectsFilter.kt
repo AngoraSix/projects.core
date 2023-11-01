@@ -1,6 +1,5 @@
 package com.angorasix.projects.core.infrastructure.queryfilters
 
-import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
 
 /**
@@ -14,13 +13,13 @@ data class ListProjectsFilter(
     val adminId: Collection<String>? = null,
     val private: Boolean? = null,
 ) {
-    fun toMultiValueMap(): MultiValueMap<String, String> {
-        val multiMap: MultiValueMap<String, String> = LinkedMultiValueMap()
-        multiMap.add("ids", ids?.joinToString(","))
-        multiMap.add("private", private.toString())
-        multiMap.add("adminId", adminId?.joinToString(","))
-        return multiMap
-    }
+//    fun toMultiValueMap(): MultiValueMap<String, String> {
+//        val multiMap: MultiValueMap<String, String> = LinkedMultiValueMap()
+//        multiMap.add("ids", ids?.joinToString(","))
+//        multiMap.add("private", private.toString())
+//        multiMap.add("adminId", adminId?.joinToString(","))
+//        return multiMap
+//    }
 
     companion object {
         fun fromMultiValueMap(multiMap: MultiValueMap<String, String>): ListProjectsFilter {
