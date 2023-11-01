@@ -13,7 +13,7 @@ jobs:
     permissions:
       contents: 'read'
       id-token: 'write'
-    uses: AngoraSix/infra/.github/workflows/action-push-gcp.yml@main
+    uses: AngoraSix/infra/.github/workflows/action-push-gcp-maven.yml@main
     with:
       app: projects-core
     secrets:
