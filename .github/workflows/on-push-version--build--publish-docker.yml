@@ -2,8 +2,8 @@ name: Workflow executed when pushing git tag for a new version
 
 on:
   push:
-    branches:
-      - main
+    tags:
+      - v*.*.*
 
 jobs:
   build-test-artifact:
