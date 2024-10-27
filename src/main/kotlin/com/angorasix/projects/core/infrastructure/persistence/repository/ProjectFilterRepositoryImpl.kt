@@ -26,7 +26,7 @@ class ProjectFilterRepositoryImpl(val mongoOps: ReactiveMongoOperations) : Proje
         return mongoOps.find(filter.toQuery(simpleContributor), Project::class.java).asFlow()
     }
 
-    override suspend fun findByIdForContributor(
+    override suspend fun findForContributorUsingFilter(
         filter: ListProjectsFilter,
         simpleContributor: SimpleContributor?,
     ): Project? {

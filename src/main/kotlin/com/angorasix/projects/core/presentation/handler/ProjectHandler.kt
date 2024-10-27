@@ -2,6 +2,7 @@ package com.angorasix.projects.core.presentation.handler
 
 import com.angorasix.commons.domain.SimpleContributor
 import com.angorasix.commons.infrastructure.constants.AngoraSixInfrastructure
+import com.angorasix.commons.presentation.dto.IsAdminDto
 import com.angorasix.commons.reactive.presentation.error.resolveBadRequest
 import com.angorasix.commons.reactive.presentation.error.resolveNotFound
 import com.angorasix.projects.core.application.ProjectService
@@ -10,7 +11,6 @@ import com.angorasix.projects.core.domain.project.Project
 import com.angorasix.projects.core.infrastructure.config.configurationproperty.api.ApiConfigs
 import com.angorasix.projects.core.infrastructure.queryfilters.ListProjectsFilter
 import com.angorasix.projects.core.presentation.dto.AttributeDto
-import com.angorasix.projects.core.presentation.dto.IsAdminDto
 import com.angorasix.projects.core.presentation.dto.ProjectDto
 import kotlinx.coroutines.flow.map
 import org.springframework.hateoas.IanaLinkRelations
@@ -130,7 +130,7 @@ class ProjectHandler(
             )
                 .bodyValueAndAwait(outputProject)
         } else {
-            resolveBadRequest("Invalid Contributor Header", "Contributor Header")
+            resolveBadRequest("Invalid Contributor", "Contributor")
         }
     }
 
@@ -168,7 +168,7 @@ class ProjectHandler(
                 ok().contentType(MediaTypes.HAL_FORMS_JSON).bodyValueAndAwait(outputProject)
             } ?: resolveNotFound("Can't update this project", "Project")
         } else {
-            resolveBadRequest("Invalid Contributor Header", "Contributor Header")
+            resolveBadRequest("Invalid Contributor", "Contributor")
         }
     }
 }
