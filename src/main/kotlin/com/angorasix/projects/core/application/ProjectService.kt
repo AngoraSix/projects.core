@@ -44,7 +44,7 @@ class ProjectService(private val repository: ProjectRepository) {
         updateData: Project,
         simpleContributor: SimpleContributor,
     ): Project? =
-        repository.findByIdForContributor(
+        repository.findForContributorUsingFilter(
             ListProjectsFilter(
                 listOf(projectId),
                 listOf(simpleContributor.contributorId),
@@ -62,7 +62,7 @@ class ProjectService(private val repository: ProjectRepository) {
         projectId: String,
         simpleContributor: SimpleContributor?,
     ): Project? =
-        repository.findByIdForContributor(ListProjectsFilter(listOf(projectId)), simpleContributor)
+        repository.findForContributorUsingFilter(ListProjectsFilter(listOf(projectId)), simpleContributor)
 
     /**
      * Method to find a single [Project] from an id.
@@ -73,7 +73,7 @@ class ProjectService(private val repository: ProjectRepository) {
     suspend fun administeredProject(
         projectId: String,
         simpleContributor: SimpleContributor,
-    ): Project? = repository.findByIdForContributor(
+    ): Project? = repository.findForContributorUsingFilter(
         ListProjectsFilter(
             listOf(projectId),
             listOf(simpleContributor.contributorId),

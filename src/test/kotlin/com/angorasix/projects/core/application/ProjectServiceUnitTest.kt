@@ -71,7 +71,7 @@ class ProjectServiceUnitTest {
                 ZoneId.systemDefault(),
             )
             coEvery {
-                repository.findByIdForContributor(
+                repository.findForContributorUsingFilter(
                     ListProjectsFilter(listOf(mockedProjectId)),
                     null,
                 )
@@ -79,7 +79,7 @@ class ProjectServiceUnitTest {
             val outputProject = service.findSingleProject(mockedProjectId, null)
             assertThat(outputProject).isSameAs(mockedProject)
             coVerify {
-                repository.findByIdForContributor(
+                repository.findForContributorUsingFilter(
                     ListProjectsFilter(listOf(mockedProjectId)),
                     null,
                 )
@@ -134,7 +134,7 @@ class ProjectServiceUnitTest {
             ZoneId.systemDefault(),
         )
         coEvery {
-            repository.findByIdForContributor(
+            repository.findForContributorUsingFilter(
                 ListProjectsFilter(listOf("id1"), listOf("mockedId")),
                 mockedSimpleContributor,
             )
@@ -144,11 +144,11 @@ class ProjectServiceUnitTest {
             service.updateProject("id1", mockedUpdateProject, mockedSimpleContributor)
         assertThat(outputProject).isSameAs(savedProject)
         coVerifyAll {
-            repository.findByIdForContributor(
+            repository.findForContributorUsingFilter(
                 ListProjectsFilter(listOf("id1"), listOf("mockedId")),
                 mockedSimpleContributor,
             )
-            repository.findByIdForContributor(
+            repository.findForContributorUsingFilter(
                 ListProjectsFilter(listOf("id1"), null),
                 null,
             )

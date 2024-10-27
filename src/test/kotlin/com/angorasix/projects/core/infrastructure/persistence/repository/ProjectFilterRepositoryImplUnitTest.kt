@@ -49,7 +49,7 @@ class ProjectFilterRepositoryImplUnitTest {
             val queryOutput: Flux<Project> = Flux.empty()
             every { mongoOps.find(capture(slot), Project::class.java) } returns queryOutput
 
-            val output = filterRepoImpl.findByIdForContributor(filter, null)
+            val output = filterRepoImpl.findForContributorUsingFilter(filter, null)
 
             val capturedQuery = slot.captured
 

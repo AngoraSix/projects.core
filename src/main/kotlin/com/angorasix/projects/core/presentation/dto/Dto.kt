@@ -28,5 +28,3 @@ data class ProjectDto(
         attributes: MutableSet<AttributeDto> = mutableSetOf(),
     ) : this(null, name, attributes)
 }
-
-data class IsAdminDto(val isAdmin: Boolean)

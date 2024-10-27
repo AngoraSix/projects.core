@@ -2,13 +2,13 @@ package com.angorasix.projects.core.presentation.handler
 
 import com.angorasix.commons.domain.SimpleContributor
 import com.angorasix.commons.infrastructure.constants.AngoraSixInfrastructure
+import com.angorasix.commons.presentation.dto.IsAdminDto
 import com.angorasix.projects.core.application.ProjectService
 import com.angorasix.projects.core.domain.project.Project
 import com.angorasix.projects.core.infrastructure.config.configurationproperty.api.ApiConfigs
 import com.angorasix.projects.core.infrastructure.config.configurationproperty.api.Route
 import com.angorasix.projects.core.infrastructure.config.configurationproperty.api.RoutesConfigs
 import com.angorasix.projects.core.infrastructure.queryfilters.ListProjectsFilter
-import com.angorasix.projects.core.presentation.dto.IsAdminDto
 import com.angorasix.projects.core.presentation.dto.ProjectDto
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -217,7 +217,7 @@ class ProjectHandlerUnitTest {
             val responseBody = response.entity()
             assertThat(responseBody.content?.status).isEqualTo(HttpStatus.BAD_REQUEST)
             var properties = responseBody.content?.properties as Map<String, Any>?
-            assertThat(properties?.get("errorCode") as String).isEqualTo("CONTRIBUTOR_HEADER_INVALID")
+            assertThat(properties?.get("errorCode") as String).isEqualTo("CONTRIBUTOR_INVALID")
             Unit
         }
 

@@ -18,7 +18,7 @@ interface ProjectFilterRepository {
         simpleContributor: SimpleContributor?,
     ): Flow<Project>
 
-    suspend fun findByIdForContributor(
+    suspend fun findForContributorUsingFilter(
         filter: ListProjectsFilter,
         simpleContributor: SimpleContributor?,
     ): Project?
