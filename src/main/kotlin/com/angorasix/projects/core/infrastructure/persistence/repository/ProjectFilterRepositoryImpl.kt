@@ -50,7 +50,7 @@ private fun ListProjectsFilter.toQuery(simpleContributor: SimpleContributor?): Q
         orCriteria.add(
             Criteria().andOperator(
                 adminId?.let {
-                    where("admins").elemMatch(where("contributorId").`in`(it))
+                    where("admins").elemMatch(where("contributorId").`in`(it as Collection<Any>))
                 } ?: where("admins").not()
                     .elemMatch(where("contributorId").`is`(simpleContributor?.contributorId)),
                 where("private").`is`(false),
@@ -72,6 +72,6 @@ private fun ListProjectsFilter.toQuery(simpleContributor: SimpleContributor?): Q
 
     query.addCriteria(Criteria().orOperator(orCriteria))
 
-    ids?.let { query.addCriteria(where("_id").`in`(it)) }
+    ids?.let { query.addCriteria(where("_id").`in`(it as Collection<Any>)) }
     return query
 }

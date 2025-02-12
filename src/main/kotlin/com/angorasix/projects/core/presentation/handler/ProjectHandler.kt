@@ -89,8 +89,6 @@ class ProjectHandler(
      * Handler for the Get Single Project endpoint,
      * retrieving a Mono indicating whether the user is admin of the Project.
      *
-     * @TODO: Still used now that admins is resolved per-service?
-     *
      * @param request - HTTP `ServerRequest` object
      * @return the `ServerResponse`
      */
