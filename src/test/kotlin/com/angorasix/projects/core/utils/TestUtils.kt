@@ -1,6 +1,6 @@
 package com.angorasix.projects.core.utils
 
-import java.util.*
+import java.util.Base64
 
 /**
  * <p>
@@ -9,10 +9,11 @@ import java.util.*
  * @author rozagerardo
  */
 fun mockRequestingContributorHeader(): String {
-    val requestingContributorJson = """
+    val requestingContributorJson =
+        """
         {
           "contributorId": "mockedContributorId1"
         }
-    """.trimIndent()
+        """.trimIndent()
     return Base64.getUrlEncoder().encodeToString(requestingContributorJson.toByteArray())
 }

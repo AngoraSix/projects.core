@@ -22,12 +22,11 @@ data class ListProjectsFilter(
 //    }
 
     companion object {
-        fun fromMultiValueMap(multiMap: MultiValueMap<String, String>): ListProjectsFilter {
-            return ListProjectsFilter(
+        fun fromMultiValueMap(multiMap: MultiValueMap<String, String>): ListProjectsFilter =
+            ListProjectsFilter(
                 multiMap.getFirst("ids")?.split(","),
                 multiMap.getFirst("adminId")?.split(","),
                 multiMap.getFirst("private")?.toBoolean(),
             )
-        }
     }
 }

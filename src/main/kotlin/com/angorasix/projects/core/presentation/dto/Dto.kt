@@ -3,25 +3,28 @@ package com.angorasix.projects.core.presentation.dto
 import com.angorasix.commons.domain.SimpleContributor
 import com.fasterxml.jackson.annotation.JsonProperty
 import org.springframework.hateoas.RepresentationModel
-import java.time.ZonedDateTime
+import java.time.Instant
 
 /**
  *
  *
  * @author rozagerardo
  */
-data class AttributeDto(val key: String, val value: String)
+data class AttributeDto(
+    val key: String,
+    val value: String,
+)
 
 data class ProjectDto(
-    var id: String? = null,
-    var name: String? = null,
-    var attributes: MutableSet<AttributeDto> = mutableSetOf(),
-    var requirements: MutableSet<AttributeDto> = mutableSetOf(),
-    var creatorId: String? = null,
+    val id: String? = null,
+    val name: String? = null,
+    val attributes: MutableSet<AttributeDto> = mutableSetOf(),
+    val requirements: MutableSet<AttributeDto> = mutableSetOf(),
+    val creatorId: String? = null,
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    var private: Boolean? = null,
-    var admins: Set<SimpleContributor>? = mutableSetOf(),
-    var createdAt: ZonedDateTime? = null,
+    val private: Boolean? = null,
+    val admins: Set<SimpleContributor>? = mutableSetOf(),
+    val createdInstant: Instant? = null,
 ) : RepresentationModel<ProjectDto>() {
     constructor(
         name: String,

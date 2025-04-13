@@ -28,7 +28,7 @@ import org.springframework.http.MediaType
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.web.reactive.server.WebTestClient
 import reactor.core.publisher.Mono
-import java.time.ZonedDateTime
+import java.time.Instant
 
 @SpringBootTest(
     classes = [ProjectsCoreApplication::class],
@@ -43,50 +43,51 @@ class ProjectCoreIntegrationTest(
     @Autowired val webTestClient: WebTestClient,
     @Autowired val apiConfigs: ApiConfigs,
 ) {
-
     @BeforeAll
-    fun setUp() = runBlocking {
-        initializeMongodb(
-            properties.mongodb.baseJsonFile,
-            mongoTemplate,
-            mapper,
-        )
-    }
+    fun setUp() =
+        runBlocking {
+            initializeMongodb(
+                properties.mongodb.baseJsonFile,
+                mongoTemplate,
+                mapper,
+            )
+        }
 
     @Test
     fun `Given persisted projects - When request projects list - Then Ok response with projects`() {
-        webTestClient.get()
+        webTestClient
+            .get()
             .uri("/projects-core/")
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
-            .expectStatus().isOk.expectBody() // @formatter:off
-            .jsonPath("$").isArray.jsonPath("$.length()")
+            .expectStatus()
+            .isOk
+            .expectBody() // @formatter:off
+            .jsonPath("$")
+            .isArray
+            .jsonPath("$.length()")
             .value(
                 greaterThanOrEqualTo(2),
-            )
-            .jsonPath("$..name")
+            ).jsonPath("$..name")
             .value(
                 hasItems(
                     "Angora Sustainable",
                     "A Local Project",
                 ),
-            )
-            .jsonPath("$..creatorId")
+            ).jsonPath("$..creatorId")
             .value(
                 hasItems(
                     "rozagerardo",
                     "mockUserId",
                 ),
-            )
-            .jsonPath("$..attributes..key")
+            ).jsonPath("$..attributes..key")
             .value(
                 hasItems(
                     "category",
                     "industry",
                     "location",
                 ),
-            )
-            .jsonPath("$[?(@.name == 'Angora Sustainable')].creatorId")
+            ).jsonPath("$[?(@.name == 'Angora Sustainable')].creatorId")
             .value(contains("rozagerardo"))
             .jsonPath("$[?(@.name == 'Angora Sustainable')].attributes.length()")
             .isEqualTo(5)
@@ -100,8 +101,7 @@ class ProjectCoreIntegrationTest(
                 contains(
                     "2020-09-01T00:00:00-03:00",
                 ),
-            )
-            .jsonPath("$[?(@.name == 'A Local Project')].attributes.length()")
+            ).jsonPath("$[?(@.name == 'A Local Project')].attributes.length()")
             .isEqualTo(3)
             .jsonPath("$[?(@.name == 'A Local Project')].attributes[?(@.key == 'location')].value")
             .value(contains("Argentina/Cordoba/Cordoba"))
@@ -116,11 +116,14 @@ class ProjectCoreIntegrationTest(
         initElementQuery.addCriteria(Criteria.where("name").`is`("Angora Sustainable"))
         val elementId = mongoTemplate.findOne(initElementQuery, Project::class.java).block()?.id
 
-        webTestClient.get()
+        webTestClient
+            .get()
             .uri("/projects-core/$elementId")
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
-            .expectStatus().isOk.expectBody() // @formatter:off
+            .expectStatus()
+            .isOk
+            .expectBody() // @formatter:off
             .jsonPath("$.name")
             .isEqualTo("Angora Sustainable")
             .jsonPath("$.creatorId")
@@ -139,47 +142,61 @@ class ProjectCoreIntegrationTest(
 
     @Test
     fun `Given Project and Angorasix Header - When create new Project - Then Created`() {
-        val newProject = ProjectDto(
-            "id1",
-            "name1",
-            mutableSetOf(
-                AttributeDto(
-                    "attribute1Key",
-                    "attribute1Value",
+        val newProject =
+            ProjectDto(
+                "id1",
+                "name1",
+                mutableSetOf(
+                    AttributeDto(
+                        "attribute1Key",
+                        "attribute1Value",
+                    ),
                 ),
-            ),
-            mutableSetOf(
-                AttributeDto(
-                    "requirement1Key",
-                    "requirement1Value",
+                mutableSetOf(
+                    AttributeDto(
+                        "requirement1Key",
+                        "requirement1Value",
+                    ),
                 ),
-            ),
-            null,
-            null,
-            null,
-            ZonedDateTime.now(),
-        )
-        webTestClient.post()
+                null,
+                null,
+                null,
+                Instant.now(),
+            )
+        webTestClient
+            .post()
             .uri("/projects-core/")
             .accept(MediaTypes.HAL_FORMS_JSON)
             .contentType(MediaTypes.HAL_FORMS_JSON)
             .body(
                 Mono.just(newProject),
                 ProjectDto::class.java,
-            )
-            .exchange()
-            .expectStatus().isCreated.expectBody() // @formatter:off
-            .jsonPath("$.name").isEqualTo("name1")
-            .jsonPath("$.creatorId").isEqualTo("mockedContributorId1")
-            .jsonPath("$.requirements.length()").isEqualTo(1)
-            .jsonPath("$.attributes[0].key").isEqualTo("attribute1Key")
-            .jsonPath("$.attributes[0].value").isEqualTo("attribute1Value")
-            .jsonPath("$.id").value(allOf(not("id1"), notNullValue()))
-            .jsonPath("$.requirements.length()").isEqualTo(1)
-            .jsonPath("$.requirements[0].key").isEqualTo("requirement1Key")
-            .jsonPath("$.requirements[0].value").isEqualTo("requirement1Value")
-            .jsonPath("$.createdAt").exists()
-            .jsonPath("$.adminId").isEqualTo("mockedContributorId1")
+            ).exchange()
+            .expectStatus()
+            .isCreated
+            .expectBody() // @formatter:off
+            .jsonPath("$.name")
+            .isEqualTo("name1")
+            .jsonPath("$.creatorId")
+            .isEqualTo("mockedContributorId1")
+            .jsonPath("$.requirements.length()")
+            .isEqualTo(1)
+            .jsonPath("$.attributes[0].key")
+            .isEqualTo("attribute1Key")
+            .jsonPath("$.attributes[0].value")
+            .isEqualTo("attribute1Value")
+            .jsonPath("$.id")
+            .value(allOf(not("id1"), notNullValue()))
+            .jsonPath("$.requirements.length()")
+            .isEqualTo(1)
+            .jsonPath("$.requirements[0].key")
+            .isEqualTo("requirement1Key")
+            .jsonPath("$.requirements[0].value")
+            .isEqualTo("requirement1Value")
+            .jsonPath("$.createdAt")
+            .exists()
+            .jsonPath("$.adminId")
+            .isEqualTo("mockedContributorId1")
         // @formatter:on
     }
 }

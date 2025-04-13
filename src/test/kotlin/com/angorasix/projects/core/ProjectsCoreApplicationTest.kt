@@ -9,10 +9,12 @@ import org.springframework.boot.test.context.SpringBootTest
  * @author rozagerardo
  */
 @SpringBootTest(
-    properties = ["spring.data.mongodb.uri=mongodb://" + "\${embedded.mongodb.host}:\${embedded.mongodb.port}/" + "\${embedded.mongodb.database}"],
+    properties = [
+        "spring.data.mongodb.uri=mongodb://" + "\${embedded.mongodb.host}:\${embedded.mongodb.port}/" +
+            "\${embedded.mongodb.database}",
+    ],
 )
 class ProjectsCoreApplicationTest {
-
     @Test
     fun contextLoads() {
         // empty block since we only want to test that the Context loads correctly

@@ -35,16 +35,16 @@ suspend fun initializeMongodb(
     val file: File = ClassPathResource(jsonFile).file
     val dataEntries: Collection<MutableMap<String, Any>> = mapper.readValue(file.inputStream())
 
-    dataEntries.asFlow()
+    dataEntries
+        .asFlow()
         .map { entry ->
             entry[CREATED_AT] =
                 mapCreatedAt(@Suppress("UNCHECKED_CAST") (entry[CREATED_AT] as MutableMap<String, Any>))
             val document = Document(entry)
-            template.insert(
-                document,
-                "project",
-            )
-                .block()
-        }
-        .collect()
+            template
+                .insert(
+                    document,
+                    "project",
+                ).block()
+        }.collect()
 }

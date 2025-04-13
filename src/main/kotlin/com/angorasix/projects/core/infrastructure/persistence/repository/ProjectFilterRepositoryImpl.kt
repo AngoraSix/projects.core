@@ -17,22 +17,21 @@ import org.springframework.data.mongodb.core.query.Query
  *
  * @author rozagerardo
  */
-class ProjectFilterRepositoryImpl(val mongoOps: ReactiveMongoOperations) : ProjectFilterRepository {
-
+class ProjectFilterRepositoryImpl(
+    val mongoOps: ReactiveMongoOperations,
+) : ProjectFilterRepository {
     override fun findUsingFilter(
         filter: ListProjectsFilter,
         simpleContributor: SimpleContributor?,
-    ): Flow<Project> {
-        return mongoOps.find(filter.toQuery(simpleContributor), Project::class.java).asFlow()
-    }
+    ): Flow<Project> = mongoOps.find(filter.toQuery(simpleContributor), Project::class.java).asFlow()
 
     override suspend fun findForContributorUsingFilter(
         filter: ListProjectsFilter,
         simpleContributor: SimpleContributor?,
-    ): Project? {
-        return mongoOps.find(filter.toQuery(simpleContributor), Project::class.java)
+    ): Project? =
+        mongoOps
+            .find(filter.toQuery(simpleContributor), Project::class.java)
             .awaitFirstOrNull()
-    }
 }
 
 private fun ListProjectsFilter.toQuery(simpleContributor: SimpleContributor?): Query {
@@ -51,7 +50,8 @@ private fun ListProjectsFilter.toQuery(simpleContributor: SimpleContributor?): Q
             Criteria().andOperator(
                 adminId?.let {
                     where("admins").elemMatch(where("contributorId").`in`(it as Collection<Any>))
-                } ?: where("admins").not()
+                } ?: where("admins")
+                    .not()
                     .elemMatch(where("contributorId").`is`(simpleContributor?.contributorId)),
                 where("private").`is`(false),
             ),

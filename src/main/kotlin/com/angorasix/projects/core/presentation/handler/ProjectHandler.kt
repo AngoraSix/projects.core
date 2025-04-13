@@ -5,6 +5,8 @@ import com.angorasix.commons.infrastructure.constants.AngoraSixInfrastructure
 import com.angorasix.commons.presentation.dto.IsAdminDto
 import com.angorasix.commons.reactive.presentation.error.resolveBadRequest
 import com.angorasix.commons.reactive.presentation.error.resolveNotFound
+import com.angorasix.commons.reactive.presentation.mappings.addLink
+import com.angorasix.commons.reactive.presentation.mappings.addSelfLink
 import com.angorasix.projects.core.application.ProjectService
 import com.angorasix.projects.core.domain.project.Attribute
 import com.angorasix.projects.core.domain.project.Project
@@ -14,10 +16,7 @@ import com.angorasix.projects.core.presentation.dto.AttributeDto
 import com.angorasix.projects.core.presentation.dto.ProjectDto
 import kotlinx.coroutines.flow.map
 import org.springframework.hateoas.IanaLinkRelations
-import org.springframework.hateoas.Link
 import org.springframework.hateoas.MediaTypes
-import org.springframework.hateoas.mediatype.Affordances
-import org.springframework.http.HttpMethod
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.ServerResponse.created
@@ -25,9 +24,7 @@ import org.springframework.web.reactive.function.server.ServerResponse.ok
 import org.springframework.web.reactive.function.server.awaitBody
 import org.springframework.web.reactive.function.server.bodyAndAwait
 import org.springframework.web.reactive.function.server.bodyValueAndAwait
-import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
-import java.time.ZoneId
 
 /**
  * Project Handler (Controller) containing all handler functions related to Project endpoints.
@@ -38,30 +35,30 @@ class ProjectHandler(
     private val service: ProjectService,
     private val apiConfigs: ApiConfigs,
 ) {
-
     /**
      * Handler for the List Projects endpoint, retrieving a Flux including all persisted Projects.
      *
      * @param request - HTTP `ServerRequest` object
      * @return the `ServerResponse`
      */
-    suspend fun listProjects(@Suppress("UNUSED_PARAMETER") request: ServerRequest): ServerResponse {
+    suspend fun listProjects(request: ServerRequest): ServerResponse {
         val requestingContributor =
             request.attributes()[AngoraSixInfrastructure.REQUEST_ATTRIBUTE_CONTRIBUTOR_KEY]
-        return service.findProjects(
-            ListProjectsFilter.fromMultiValueMap(
-                request.queryParams(),
-            ),
-            requestingContributor as SimpleContributor?,
-        ).map {
-            it.convertToDto(
-                requestingContributor,
-                apiConfigs,
-                request,
-            )
-        }.let {
-            ok().contentType(MediaTypes.HAL_FORMS_JSON).bodyAndAwait(it)
-        }
+        return service
+            .findProjects(
+                ListProjectsFilter.fromMultiValueMap(
+                    request.queryParams(),
+                ),
+                requestingContributor as SimpleContributor?,
+            ).map {
+                it.convertToDto(
+                    requestingContributor,
+                    apiConfigs,
+                    request,
+                )
+            }.let {
+                ok().contentType(MediaTypes.HAL_FORMS_JSON).bodyAndAwait(it)
+            }
     }
 
     /**
@@ -74,13 +71,15 @@ class ProjectHandler(
         val requestingContributor =
             request.attributes()[AngoraSixInfrastructure.REQUEST_ATTRIBUTE_CONTRIBUTOR_KEY]
         val projectId = request.pathVariable("id")
-        return service.findSingleProject(projectId, requestingContributor as SimpleContributor?)
+        return service
+            .findSingleProject(projectId, requestingContributor as SimpleContributor?)
             ?.let {
-                val outputProject = it.convertToDto(
-                    requestingContributor,
-                    apiConfigs,
-                    request,
-                )
+                val outputProject =
+                    it.convertToDto(
+                        requestingContributor,
+                        apiConfigs,
+                        request,
+                    )
                 ok().contentType(MediaTypes.HAL_FORMS_JSON).bodyValueAndAwait(outputProject)
             } ?: resolveNotFound("Can't find Project", "Project")
     }
@@ -116,17 +115,21 @@ class ProjectHandler(
         val requestingContributor =
             request.attributes()[AngoraSixInfrastructure.REQUEST_ATTRIBUTE_CONTRIBUTOR_KEY]
         return if (requestingContributor is SimpleContributor) {
-            val project = request.awaitBody<ProjectDto>()
-                .convertToDomain(
-                    requestingContributor.contributorId,
-                    setOf(SimpleContributor(requestingContributor.contributorId, emptySet())),
-                )
-            val outputProject = service.createProject(project)
-                .convertToDto(requestingContributor, apiConfigs, request)
-            created(URI.create(outputProject.links.getRequiredLink(IanaLinkRelations.SELF).href)).contentType(
-                MediaTypes.HAL_FORMS_JSON,
-            )
-                .bodyValueAndAwait(outputProject)
+            val project =
+                request
+                    .awaitBody<ProjectDto>()
+                    .convertToDomain(
+                        requestingContributor.contributorId,
+                        setOf(SimpleContributor(requestingContributor.contributorId, emptySet())),
+                    )
+            val outputProject =
+                service
+                    .createProject(project)
+                    .convertToDto(requestingContributor, apiConfigs, request)
+            created(URI.create(outputProject.links.getRequiredLink(IanaLinkRelations.SELF).href))
+                .contentType(
+                    MediaTypes.HAL_FORMS_JSON,
+                ).bodyValueAndAwait(outputProject)
         } else {
             resolveBadRequest("Invalid Contributor", "Contributor")
         }
@@ -142,37 +145,40 @@ class ProjectHandler(
         val requestingContributor =
             request.attributes()[AngoraSixInfrastructure.REQUEST_ATTRIBUTE_CONTRIBUTOR_KEY]
         val projectId = request.pathVariable("id")
-        val updateProjectData = try {
-            request.awaitBody<ProjectDto>().let {
-                it.convertToDomain(it.creatorId ?: "", it.admins ?: emptySet())
-            }
-        } catch (e: IllegalArgumentException) {
-            return resolveBadRequest(
-                e.message ?: "Incorrect Project body",
-                "Project Presentation",
-            )
-        }
-        return if (requestingContributor is SimpleContributor) {
-            service.updateProject(
-                projectId,
-                updateProjectData,
-                requestingContributor,
-            )?.let {
-                val outputProject = it.convertToDto(
-                    requestingContributor,
-                    apiConfigs,
-                    request,
+        val updateProjectData =
+            try {
+                request.awaitBody<ProjectDto>().let {
+                    it.convertToDomain(it.creatorId ?: "", it.admins ?: emptySet())
+                }
+            } catch (e: IllegalArgumentException) {
+                return resolveBadRequest(
+                    e.message ?: "Incorrect Project body",
+                    "Project Presentation",
                 )
-                ok().contentType(MediaTypes.HAL_FORMS_JSON).bodyValueAndAwait(outputProject)
-            } ?: resolveNotFound("Can't update this project", "Project")
+            }
+        return if (requestingContributor is SimpleContributor) {
+            service
+                .updateProject(
+                    projectId,
+                    updateProjectData,
+                    requestingContributor,
+                )?.let {
+                    val outputProject =
+                        it.convertToDto(
+                            requestingContributor,
+                            apiConfigs,
+                            request,
+                        )
+                    ok().contentType(MediaTypes.HAL_FORMS_JSON).bodyValueAndAwait(outputProject)
+                } ?: resolveNotFound("Can't update this project", "Project")
         } else {
             resolveBadRequest("Invalid Contributor", "Contributor")
         }
     }
 }
 
-private fun Project.convertToDto(): ProjectDto {
-    return ProjectDto(
+private fun Project.convertToDto(): ProjectDto =
+    ProjectDto(
         id,
         name,
         attributes.map { it.convertToDto() }.toMutableSet(),
@@ -180,9 +186,8 @@ private fun Project.convertToDto(): ProjectDto {
         creatorId,
         private,
         admins,
-        createdAt,
+        createdInstant,
     )
-}
 
 private fun Project.convertToDto(
     simpleContributor: SimpleContributor?,
@@ -190,25 +195,21 @@ private fun Project.convertToDto(
     request: ServerRequest,
 ): ProjectDto = convertToDto().resolveHypermedia(simpleContributor, this, apiConfigs, request)
 
-private fun Attribute<*>.convertToDto(): AttributeDto {
-    return AttributeDto(key, value.toString())
-}
+private fun Attribute<*>.convertToDto(): AttributeDto = AttributeDto(key, value.toString())
 
 private fun ProjectDto.convertToDomain(
     contributorId: String,
     admins: Set<SimpleContributor>,
-): Project {
-    return Project(
+): Project =
+    Project(
         name
             ?: throw IllegalArgumentException("Project name expected"),
         contributorId,
         admins,
-        ZoneId.of("America/Argentina/Cordoba"),
         private ?: false,
         attributes.map { it.convertToDomain() }.toMutableSet(),
         requirements.map { it.convertToDomain() }.toMutableSet(),
     )
-}
 
 private fun ProjectDto.resolveHypermedia(
     simpleContributor: SimpleContributor?,
@@ -218,34 +219,16 @@ private fun ProjectDto.resolveHypermedia(
 ): ProjectDto {
     val getSingleRoute = apiConfigs.routes.getProject
     // self
-    val selfLink =
-        Link.of(uriBuilder(request).path(getSingleRoute.resolvePath()).build().toUriString())
-            .withRel(getSingleRoute.name).expand(id).withSelfRel()
-    val selfLinkWithDefaultAffordance =
-        Affordances.of(selfLink).afford(HttpMethod.OPTIONS).withName("default").toLink()
-    add(selfLinkWithDefaultAffordance)
+    requireNotNull(id)
+    addSelfLink(getSingleRoute, request, listOf(id))
 
     // edit Project
     if (simpleContributor != null) {
         if (project.isAdministeredBy(simpleContributor)) {
-            val editProjectRoute = apiConfigs.routes.updateProject
-            val editProjectLink = Link.of(
-                uriBuilder(request).path(editProjectRoute.resolvePath()).build().toUriString(),
-            ).withTitle(editProjectRoute.name).withName(editProjectRoute.name)
-                .withRel(editProjectRoute.name).expand(id)
-            val editProjectAffordanceLink = Affordances.of(editProjectLink).afford(HttpMethod.PUT)
-                .withName(editProjectRoute.name).toLink()
-            add(editProjectAffordanceLink)
+            addLink(apiConfigs.routes.updateProject, apiConfigs.projectActions.updateProject, request, listOf(id))
         }
     }
     return this
 }
 
-private fun uriBuilder(request: ServerRequest) = request.requestPath().contextPath().let {
-    UriComponentsBuilder.fromHttpRequest(request.exchange().request).replacePath(it.toString()) //
-        .replaceQuery("")
-}
-
-private fun AttributeDto.convertToDomain(): Attribute<*> {
-    return Attribute(key, value)
-}
+private fun AttributeDto.convertToDomain(): Attribute<*> = Attribute(key, value)

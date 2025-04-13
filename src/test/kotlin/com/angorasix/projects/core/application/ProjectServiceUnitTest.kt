@@ -23,7 +23,6 @@ import org.assertj.core.api.AssertionsForClassTypes.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import java.time.ZoneId
 
 @ExtendWith(MockKExtension::class)
 @ExperimentalCoroutinesApi
@@ -42,12 +41,12 @@ class ProjectServiceUnitTest {
     @Throws(Exception::class)
     fun `given existing projects - when request find projects - then receive projects`() =
         runTest {
-            val mockedProject = Project(
-                "mockedProjectName",
-                "creator_id",
-                setOf(SimpleContributor("creator_id", emptySet())),
-                ZoneId.systemDefault(),
-            )
+            val mockedProject =
+                Project(
+                    "mockedProjectName",
+                    "creator_id",
+                    setOf(SimpleContributor("creator_id", emptySet())),
+                )
             val filter = ListProjectsFilter()
             coEvery { repository.findUsingFilter(filter, null) } returns flowOf(mockedProject)
 
@@ -64,12 +63,12 @@ class ProjectServiceUnitTest {
     fun givenExistingProject_whenFindSingleProjects_thenServiceRetrievesMonoWithProject() =
         runTest {
             val mockedProjectId = "id1"
-            val mockedProject = Project(
-                "mockedProjectName",
-                "creator_id",
-                setOf(SimpleContributor("creator_id", emptySet())),
-                ZoneId.systemDefault(),
-            )
+            val mockedProject =
+                Project(
+                    "mockedProjectName",
+                    "creator_id",
+                    setOf(SimpleContributor("creator_id", emptySet())),
+                )
             coEvery {
                 repository.findForContributorUsingFilter(
                     ListProjectsFilter(listOf(mockedProjectId)),
@@ -88,98 +87,101 @@ class ProjectServiceUnitTest {
 
     @Test
     @Throws(Exception::class)
-    fun whenCreateProject_thenServiceRetrieveSavedProject() = runTest {
-        val mockedProject = Project(
-            "mockedProjectName",
-            "creator_id",
-            setOf(SimpleContributor("creator_id", emptySet())),
-            ZoneId.systemDefault(),
-        )
-        val savedProject = Project(
-            "savedProjectName",
-            "creator_id",
-            setOf(SimpleContributor("creator_id", emptySet())),
-            ZoneId.systemDefault(),
-        )
-        coEvery { repository.save(mockedProject) } returns savedProject
-        val outputProject = service.createProject(mockedProject)
-        assertThat(outputProject).isSameAs(savedProject)
-        coVerify { repository.save(mockedProject) }
-    }
+    fun whenCreateProject_thenServiceRetrieveSavedProject() =
+        runTest {
+            val mockedProject =
+                Project(
+                    "mockedProjectName",
+                    "creator_id",
+                    setOf(SimpleContributor("creator_id", emptySet())),
+                )
+            val savedProject =
+                Project(
+                    "savedProjectName",
+                    "creator_id",
+                    setOf(SimpleContributor("creator_id", emptySet())),
+                )
+            coEvery { repository.save(mockedProject) } returns savedProject
+            val outputProject = service.createProject(mockedProject)
+            assertThat(outputProject).isSameAs(savedProject)
+            coVerify { repository.save(mockedProject) }
+        }
 
     @Test
     @Throws(Exception::class)
-    fun whenUpdateProject_thenServiceRetrieveSavedProject() = runTest {
-        val mockedSimpleContributor = SimpleContributor("mockedId")
-        val mockedExistingProject = mockk<Project>()
-        every {
-            mockedExistingProject.setProperty(Project::name.name) value "mockedUpdatedProjectName"
-        } just Runs
-        every {
-            mockedExistingProject.setProperty(Project::attributes.name) value emptySet<Attribute<Any>>()
-        } just Runs
-        every {
-            mockedExistingProject.setProperty(Project::requirements.name) value emptySet<Attribute<Any>>()
-        } just Runs
-        val mockedUpdateProject = Project(
-            "mockedUpdatedProjectName",
-            "creator_id",
-            setOf(SimpleContributor("creator_id", emptySet())),
-            ZoneId.systemDefault(),
-        )
-        val savedProject = Project(
-            "savedProjectName",
-            "creator_id",
-            setOf(SimpleContributor("creator_id", emptySet())),
-            ZoneId.systemDefault(),
-        )
-        coEvery {
-            repository.findForContributorUsingFilter(
-                ListProjectsFilter(listOf("id1"), listOf("mockedId")),
-                mockedSimpleContributor,
-            )
-        } returns mockedExistingProject
-        coEvery { repository.save(any()) } returns savedProject
-        val outputProject =
-            service.updateProject("id1", mockedUpdateProject, mockedSimpleContributor)
-        assertThat(outputProject).isSameAs(savedProject)
-        coVerifyAll {
-            repository.findForContributorUsingFilter(
-                ListProjectsFilter(listOf("id1"), listOf("mockedId")),
-                mockedSimpleContributor,
-            )
-            repository.findForContributorUsingFilter(
-                ListProjectsFilter(listOf("id1"), null),
-                null,
-            )
-            repository.save(any())
+    fun whenUpdateProject_thenServiceRetrieveSavedProject() =
+        runTest {
+            val mockedSimpleContributor = SimpleContributor("mockedId")
+            val mockedExistingProject = mockk<Project>()
+            every {
+                mockedExistingProject.setProperty(Project::name.name) value "mockedUpdatedProjectName"
+            } just Runs
+            every {
+                mockedExistingProject.setProperty(Project::attributes.name) value emptySet<Attribute<Any>>()
+            } just Runs
+            every {
+                mockedExistingProject.setProperty(Project::requirements.name) value emptySet<Attribute<Any>>()
+            } just Runs
+            val mockedUpdateProject =
+                Project(
+                    "mockedUpdatedProjectName",
+                    "creator_id",
+                    setOf(SimpleContributor("creator_id", emptySet())),
+                )
+            val savedProject =
+                Project(
+                    "savedProjectName",
+                    "creator_id",
+                    setOf(SimpleContributor("creator_id", emptySet())),
+                )
+            coEvery {
+                repository.findForContributorUsingFilter(
+                    ListProjectsFilter(listOf("id1"), listOf("mockedId")),
+                    mockedSimpleContributor,
+                )
+            } returns mockedExistingProject
+            coEvery { repository.save(any()) } returns savedProject
+            val outputProject =
+                service.updateProject("id1", mockedUpdateProject, mockedSimpleContributor)
+            assertThat(outputProject).isSameAs(savedProject)
+            coVerifyAll {
+                repository.findForContributorUsingFilter(
+                    ListProjectsFilter(listOf("id1"), listOf("mockedId")),
+                    mockedSimpleContributor,
+                )
+                repository.findForContributorUsingFilter(
+                    ListProjectsFilter(listOf("id1"), null),
+                    null,
+                )
+                repository.save(any())
+            }
+            verifyAll {
+                mockedExistingProject.setProperty(Project::name.name) value "mockedUpdatedProjectName"
+                mockedExistingProject.setProperty(Project::attributes.name) value emptySet<Attribute<Any>>()
+                mockedExistingProject.setProperty(Project::requirements.name) value emptySet<Attribute<Any>>()
+            }
+            confirmVerified(mockedExistingProject, repository)
         }
-        verifyAll {
-            mockedExistingProject.setProperty(Project::name.name) value "mockedUpdatedProjectName"
-            mockedExistingProject.setProperty(Project::attributes.name) value emptySet<Attribute<Any>>()
-            mockedExistingProject.setProperty(Project::requirements.name) value emptySet<Attribute<Any>>()
-        }
-        confirmVerified(mockedExistingProject, repository)
-    }
 
     @Test
     @Throws(Exception::class)
-    fun whenUpdateProject_thenServiceRetrieveUpdatedProject() = runTest {
-        val mockedProject = Project(
-            "mockedProjectName",
-            "creator_id",
-            setOf(SimpleContributor("creator_id", emptySet())),
-            ZoneId.systemDefault(),
-        )
-        val updatedProject = Project(
-            "updatedProjectName",
-            "creator_id",
-            setOf(SimpleContributor("creator_id", emptySet())),
-            ZoneId.systemDefault(),
-        )
-        coEvery { repository.save(mockedProject) } returns updatedProject
-        val outputProject = service.createProject(mockedProject)
-        assertThat(outputProject).isSameAs(updatedProject)
-        coVerify { repository.save(mockedProject) }
-    }
+    fun whenUpdateProject_thenServiceRetrieveUpdatedProject() =
+        runTest {
+            val mockedProject =
+                Project(
+                    "mockedProjectName",
+                    "creator_id",
+                    setOf(SimpleContributor("creator_id", emptySet())),
+                )
+            val updatedProject =
+                Project(
+                    "updatedProjectName",
+                    "creator_id",
+                    setOf(SimpleContributor("creator_id", emptySet())),
+                )
+            coEvery { repository.save(mockedProject) } returns updatedProject
+            val outputProject = service.createProject(mockedProject)
+            assertThat(outputProject).isSameAs(updatedProject)
+            coVerify { repository.save(mockedProject) }
+        }
 }
