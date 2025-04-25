@@ -3,8 +3,10 @@ package com.angorasix.projects.core.application
 import com.angorasix.commons.domain.SimpleContributor
 import com.angorasix.projects.core.domain.project.Project
 import com.angorasix.projects.core.domain.project.ProjectRepository
+import com.angorasix.projects.core.infrastructure.applicationevents.ProjectCreatedApplicationEvent
 import com.angorasix.projects.core.infrastructure.queryfilters.ListProjectsFilter
 import kotlinx.coroutines.flow.Flow
+import org.springframework.context.ApplicationEventPublisher
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
@@ -15,6 +17,7 @@ import reactor.core.publisher.Mono
  */
 class ProjectService(
     private val repository: ProjectRepository,
+    private val events: ApplicationEventPublisher,
 ) {
     /**
      * Method to retrieve a collection of [Project]s.
@@ -32,7 +35,13 @@ class ProjectService(
      * @param newProject [Project] to persist
      * @return a [Mono] with the persisted [Project]
      */
-    suspend fun createProject(newProject: Project): Project = repository.save(newProject)
+    suspend fun createProject(
+        newProject: Project,
+        requestingContributor: SimpleContributor,
+    ): Project =
+        repository.save(newProject).also { saved ->
+            events.publishEvent(ProjectCreatedApplicationEvent(saved, requestingContributor))
+        }
 
     /**
      * Method to update an existing [Project].

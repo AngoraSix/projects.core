@@ -194,7 +194,7 @@ class ProjectHandlerUnitTest {
                 )
             val mockedPersistedProject = spyk(mockedProjectBase)
             every { mockedPersistedProject.id } returns "mockedId"
-            coEvery { service.createProject(ofType(Project::class)) } returns mockedPersistedProject
+            coEvery { service.createProject(ofType(Project::class), ofType(SimpleContributor::class)) } returns mockedPersistedProject
 
             val outputResponse = handler.createProject(mockedRequest)
 
@@ -207,7 +207,7 @@ class ProjectHandlerUnitTest {
             assertThat(responseBody).isNotSameAs(mockedProjectDto)
             assertThat(responseBody.name).isEqualTo("mockedProjectName")
             assertThat(responseBody.creatorId).isEqualTo("creator_id")
-            coVerify { service.createProject(ofType(Project::class)) }
+            coVerify { service.createProject(ofType(Project::class), ofType(SimpleContributor::class)) }
         }
 
     @Test
@@ -232,7 +232,7 @@ class ProjectHandlerUnitTest {
                     "creator_id",
                     setOf(SimpleContributor("creator_id", emptySet())),
                 )
-            coEvery { service.createProject(ofType(Project::class)) } returns mockedProject
+            coEvery { service.createProject(ofType(Project::class), ofType(SimpleContributor::class)) } returns mockedProject
 
             val outputResponse = handler.createProject(mockedRequest)
 

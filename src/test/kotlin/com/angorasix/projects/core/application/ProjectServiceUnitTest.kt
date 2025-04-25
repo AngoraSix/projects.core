@@ -23,6 +23,7 @@ import org.assertj.core.api.AssertionsForClassTypes.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.springframework.context.ApplicationEventPublisher
 
 @ExtendWith(MockKExtension::class)
 @ExperimentalCoroutinesApi
@@ -32,9 +33,12 @@ class ProjectServiceUnitTest {
     @MockK
     private lateinit var repository: ProjectRepository
 
+    @MockK
+    private lateinit var applicationEventPublisher: ApplicationEventPublisher
+
     @BeforeEach
     fun init() {
-        service = ProjectService(repository)
+        service = ProjectService(repository, applicationEventPublisher)
     }
 
     @Test
@@ -89,6 +93,7 @@ class ProjectServiceUnitTest {
     @Throws(Exception::class)
     fun whenCreateProject_thenServiceRetrieveSavedProject() =
         runTest {
+            val mockedContributor = SimpleContributor("mockedId")
             val mockedProject =
                 Project(
                     "mockedProjectName",
@@ -102,9 +107,10 @@ class ProjectServiceUnitTest {
                     setOf(SimpleContributor("creator_id", emptySet())),
                 )
             coEvery { repository.save(mockedProject) } returns savedProject
-            val outputProject = service.createProject(mockedProject)
+            val outputProject = service.createProject(mockedProject, mockedContributor)
             assertThat(outputProject).isSameAs(savedProject)
             coVerify { repository.save(mockedProject) }
+            coVerify { applicationEventPublisher.publishEvent(any()) }
         }
 
     @Test
@@ -167,6 +173,7 @@ class ProjectServiceUnitTest {
     @Throws(Exception::class)
     fun whenUpdateProject_thenServiceRetrieveUpdatedProject() =
         runTest {
+            val mockedContributor = SimpleContributor("mockedId")
             val mockedProject =
                 Project(
                     "mockedProjectName",
@@ -180,7 +187,7 @@ class ProjectServiceUnitTest {
                     setOf(SimpleContributor("creator_id", emptySet())),
                 )
             coEvery { repository.save(mockedProject) } returns updatedProject
-            val outputProject = service.createProject(mockedProject)
+            val outputProject = service.createProject(mockedProject, mockedContributor)
             assertThat(outputProject).isSameAs(updatedProject)
             coVerify { repository.save(mockedProject) }
         }

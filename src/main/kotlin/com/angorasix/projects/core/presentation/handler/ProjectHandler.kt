@@ -124,7 +124,7 @@ class ProjectHandler(
                     )
             val outputProject =
                 service
-                    .createProject(project)
+                    .createProject(project, requestingContributor = requestingContributor)
                     .convertToDto(requestingContributor, apiConfigs, request)
             created(URI.create(outputProject.links.getRequiredLink(IanaLinkRelations.SELF).href))
                 .contentType(
