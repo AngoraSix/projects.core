@@ -3,8 +3,10 @@ package com.angorasix.projects.core.application
 import com.angorasix.commons.domain.SimpleContributor
 import com.angorasix.projects.core.domain.project.Project
 import com.angorasix.projects.core.domain.project.ProjectRepository
+import com.angorasix.projects.core.infrastructure.applicationevents.ProjectCreatedApplicationEvent
 import com.angorasix.projects.core.infrastructure.queryfilters.ListProjectsFilter
 import kotlinx.coroutines.flow.Flow
+import org.springframework.context.ApplicationEventPublisher
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
@@ -13,8 +15,10 @@ import reactor.core.publisher.Mono
  *
  * @author rozagerardo
  */
-class ProjectService(private val repository: ProjectRepository) {
-
+class ProjectService(
+    private val repository: ProjectRepository,
+    private val events: ApplicationEventPublisher,
+) {
     /**
      * Method to retrieve a collection of [Project]s.
      *
@@ -31,7 +35,13 @@ class ProjectService(private val repository: ProjectRepository) {
      * @param newProject [Project] to persist
      * @return a [Mono] with the persisted [Project]
      */
-    suspend fun createProject(newProject: Project): Project = repository.save(newProject)
+    suspend fun createProject(
+        newProject: Project,
+        requestingContributor: SimpleContributor,
+    ): Project =
+        repository.save(newProject).also { saved ->
+            events.publishEvent(ProjectCreatedApplicationEvent(saved, requestingContributor))
+        }
 
     /**
      * Method to update an existing [Project].
@@ -44,13 +54,15 @@ class ProjectService(private val repository: ProjectRepository) {
         updateData: Project,
         simpleContributor: SimpleContributor,
     ): Project? =
-        repository.findForContributorUsingFilter(
-            ListProjectsFilter(
-                listOf(projectId),
-                listOf(simpleContributor.contributorId),
-            ),
-            simpleContributor,
-        )?.updateWithData(updateData)?.let { repository.save(it) }
+        repository
+            .findForContributorUsingFilter(
+                ListProjectsFilter(
+                    listOf(projectId),
+                    listOf(simpleContributor.contributorId),
+                ),
+                simpleContributor,
+            )?.updateWithData(updateData)
+            ?.let { repository.save(it) }
 
     /**
      * Method to find a single [Project] from an id.
@@ -61,8 +73,7 @@ class ProjectService(private val repository: ProjectRepository) {
     suspend fun findSingleProject(
         projectId: String,
         simpleContributor: SimpleContributor?,
-    ): Project? =
-        repository.findForContributorUsingFilter(ListProjectsFilter(listOf(projectId)), simpleContributor)
+    ): Project? = repository.findForContributorUsingFilter(ListProjectsFilter(listOf(projectId)), simpleContributor)
 
     /**
      * Method to find a single [Project] from an id.
@@ -73,13 +84,14 @@ class ProjectService(private val repository: ProjectRepository) {
     suspend fun administeredProject(
         projectId: String,
         simpleContributor: SimpleContributor,
-    ): Project? = repository.findForContributorUsingFilter(
-        ListProjectsFilter(
-            listOf(projectId),
-            listOf(simpleContributor.contributorId),
-        ),
-        simpleContributor,
-    )
+    ): Project? =
+        repository.findForContributorUsingFilter(
+            ListProjectsFilter(
+                listOf(projectId),
+                listOf(simpleContributor.contributorId),
+            ),
+            simpleContributor,
+        )
 
     private fun Project.updateWithData(other: Project): Project {
         this.name = other.name

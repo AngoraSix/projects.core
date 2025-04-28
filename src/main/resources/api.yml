@@ -2,36 +2,40 @@ configs:
   api:
     basePaths:
       projectsCore: "/projects-core"
-    routes:
-      baseListCrudRoute: ""
       baseByIdCrudRoute: "/{id}"
+    routes:
       createProject:
         name: projectCreate
         basePaths:
           - ${configs.api.basePaths.projectsCore}
         method: POST
-        path: ${configs.api.routes.baseListCrudRoute}
+        path: ""
       updateProject:
         name: updateProject
         basePaths:
           - ${configs.api.basePaths.projectsCore}
+          - ${configs.api.basePaths.baseByIdCrudRoute}
         method: PUT
-        path: ${configs.api.routes.baseByIdCrudRoute}
+        path: ""
       validateAdminUser:
         name: validateAdminUser
         basePaths:
           - ${configs.api.basePaths.projectsCore}
+          - ${configs.api.basePaths.baseByIdCrudRoute}
         method: GET
-        path: "/{id}/isAdmin"
+        path: "/isAdmin"
       getProject:
         name: getProject
         basePaths:
           - ${configs.api.basePaths.projectsCore}
+          - ${configs.api.basePaths.baseByIdCrudRoute}
         method: GET
-        path: ${configs.api.routes.baseByIdCrudRoute}
+        path: ""
       listProjects:
         name: listProjects
         basePaths:
           - ${configs.api.basePaths.projectsCore}
         method: GET
-        path: ${configs.api.routes.baseListCrudRoute}
+        path: ""
+    projectActions:
+      updateProject: updateProject

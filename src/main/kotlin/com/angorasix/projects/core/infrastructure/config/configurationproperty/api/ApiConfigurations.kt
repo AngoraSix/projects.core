@@ -1,8 +1,8 @@
 package com.angorasix.projects.core.infrastructure.config.configurationproperty.api
 
+import com.angorasix.commons.infrastructure.config.configurationproperty.api.Route
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.NestedConfigurationProperty
-import org.springframework.http.HttpMethod
 
 /**
  * <p>
@@ -17,13 +17,16 @@ data class ApiConfigs(
     var routes: RoutesConfigs,
     @NestedConfigurationProperty
     var basePaths: BasePathConfigs,
+    @NestedConfigurationProperty
+    var projectActions: ProjectActions,
 )
 
-data class BasePathConfigs constructor(val projectsCore: String)
-
-data class RoutesConfigs constructor(
-    val baseListCrudRoute: String,
+data class BasePathConfigs(
+    val projectsCore: String,
     val baseByIdCrudRoute: String,
+)
+
+data class RoutesConfigs(
     val createProject: Route,
     val updateProject: Route,
     val validateAdminUser: Route,
@@ -31,12 +34,6 @@ data class RoutesConfigs constructor(
     val listProjects: Route,
 )
 
-data class Route(
-    val name: String,
-    val basePaths: List<String>,
-    val method: HttpMethod,
-    val path: String,
-) {
-
-    fun resolvePath(): String = basePaths.joinToString("").plus(path)
-}
+data class ProjectActions(
+    val updateProject: String,
+)

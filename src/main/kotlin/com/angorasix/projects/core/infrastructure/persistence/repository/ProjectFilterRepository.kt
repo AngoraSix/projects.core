@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.Flow
  * @author rozagerardo
  */
 interface ProjectFilterRepository {
-
     fun findUsingFilter(
         filter: ListProjectsFilter,
         simpleContributor: SimpleContributor?,

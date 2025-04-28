@@ -1,12 +1,9 @@
-context:
-  initializer:
-    classes: com.angorasix.projects.core.BeansInitializer
 server:
   port: ${A6_PROJECTS_CORE_PORT:10200}
 
 spring:
   config:
-    import: classpath:/api.yml, classpath:/security.yml
+    import: classpath:/api.yml, classpath:/security.yml, classpath:/amqp.yml
   application:
     name: ${A6_PROJECTS_CORE_APP_NAME:projects.core}
   data:
