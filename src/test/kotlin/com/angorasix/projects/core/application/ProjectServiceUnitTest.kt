@@ -4,6 +4,7 @@ import com.angorasix.commons.domain.SimpleContributor
 import com.angorasix.projects.core.domain.project.Attribute
 import com.angorasix.projects.core.domain.project.Project
 import com.angorasix.projects.core.domain.project.ProjectRepository
+import com.angorasix.projects.core.infrastructure.applicationevents.ProjectCreatedApplicationEvent
 import com.angorasix.projects.core.infrastructure.queryfilters.ListProjectsFilter
 import io.mockk.Runs
 import io.mockk.coEvery
@@ -107,10 +108,11 @@ class ProjectServiceUnitTest {
                     setOf(SimpleContributor("creator_id", emptySet())),
                 )
             coEvery { repository.save(mockedProject) } returns savedProject
+            every { applicationEventPublisher.publishEvent(ofType(ProjectCreatedApplicationEvent::class)) } just Runs
             val outputProject = service.createProject(mockedProject, mockedContributor)
             assertThat(outputProject).isSameAs(savedProject)
             coVerify { repository.save(mockedProject) }
-            coVerify { applicationEventPublisher.publishEvent(any()) }
+            coVerify { applicationEventPublisher.publishEvent(ofType(ProjectCreatedApplicationEvent::class)) }
         }
 
     @Test
@@ -187,8 +189,10 @@ class ProjectServiceUnitTest {
                     setOf(SimpleContributor("creator_id", emptySet())),
                 )
             coEvery { repository.save(mockedProject) } returns updatedProject
+            every { applicationEventPublisher.publishEvent(ofType(ProjectCreatedApplicationEvent::class)) } just Runs
             val outputProject = service.createProject(mockedProject, mockedContributor)
             assertThat(outputProject).isSameAs(updatedProject)
             coVerify { repository.save(mockedProject) }
+            coVerify { applicationEventPublisher.publishEvent(ofType(ProjectCreatedApplicationEvent::class)) }
         }
 }
