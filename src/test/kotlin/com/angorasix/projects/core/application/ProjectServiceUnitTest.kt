@@ -1,6 +1,6 @@
 package com.angorasix.projects.core.application
 
-import com.angorasix.commons.domain.SimpleContributor
+import com.angorasix.commons.domain.A6Contributor
 import com.angorasix.projects.core.domain.project.Attribute
 import com.angorasix.projects.core.domain.project.Project
 import com.angorasix.projects.core.domain.project.ProjectRepository
@@ -50,7 +50,7 @@ class ProjectServiceUnitTest {
                 Project(
                     "mockedProjectName",
                     "creator_id",
-                    setOf(SimpleContributor("creator_id", emptySet())),
+                    setOf(A6Contributor("creator_id")),
                 )
             val filter = ListProjectsFilter()
             coEvery { repository.findUsingFilter(filter, null) } returns flowOf(mockedProject)
@@ -72,7 +72,7 @@ class ProjectServiceUnitTest {
                 Project(
                     "mockedProjectName",
                     "creator_id",
-                    setOf(SimpleContributor("creator_id", emptySet())),
+                    setOf(A6Contributor("creator_id")),
                 )
             coEvery {
                 repository.findForContributorUsingFilter(
@@ -94,18 +94,18 @@ class ProjectServiceUnitTest {
     @Throws(Exception::class)
     fun whenCreateProject_thenServiceRetrieveSavedProject() =
         runTest {
-            val mockedContributor = SimpleContributor("mockedId")
+            val mockedContributor = A6Contributor("mockedId")
             val mockedProject =
                 Project(
                     "mockedProjectName",
                     "creator_id",
-                    setOf(SimpleContributor("creator_id", emptySet())),
+                    setOf(A6Contributor("creator_id")),
                 )
             val savedProject =
                 Project(
                     "savedProjectName",
                     "creator_id",
-                    setOf(SimpleContributor("creator_id", emptySet())),
+                    setOf(A6Contributor("creator_id")),
                 )
             coEvery { repository.save(mockedProject) } returns savedProject
             every { applicationEventPublisher.publishEvent(ofType(ProjectCreatedApplicationEvent::class)) } just Runs
@@ -119,7 +119,7 @@ class ProjectServiceUnitTest {
     @Throws(Exception::class)
     fun whenUpdateProject_thenServiceRetrieveSavedProject() =
         runTest {
-            val mockedSimpleContributor = SimpleContributor("mockedId")
+            val mockedA6Contributor = A6Contributor("mockedId")
             val mockedExistingProject = mockk<Project>()
             every {
                 mockedExistingProject.setProperty(Project::name.name) value "mockedUpdatedProjectName"
@@ -134,28 +134,28 @@ class ProjectServiceUnitTest {
                 Project(
                     "mockedUpdatedProjectName",
                     "creator_id",
-                    setOf(SimpleContributor("creator_id", emptySet())),
+                    setOf(A6Contributor("creator_id")),
                 )
             val savedProject =
                 Project(
                     "savedProjectName",
                     "creator_id",
-                    setOf(SimpleContributor("creator_id", emptySet())),
+                    setOf(A6Contributor("creator_id")),
                 )
             coEvery {
                 repository.findForContributorUsingFilter(
                     ListProjectsFilter(listOf("id1"), listOf("mockedId")),
-                    mockedSimpleContributor,
+                    mockedA6Contributor,
                 )
             } returns mockedExistingProject
             coEvery { repository.save(any()) } returns savedProject
             val outputProject =
-                service.updateProject("id1", mockedUpdateProject, mockedSimpleContributor)
+                service.updateProject("id1", mockedUpdateProject, mockedA6Contributor)
             assertThat(outputProject).isSameAs(savedProject)
             coVerifyAll {
                 repository.findForContributorUsingFilter(
                     ListProjectsFilter(listOf("id1"), listOf("mockedId")),
-                    mockedSimpleContributor,
+                    mockedA6Contributor,
                 )
                 repository.findForContributorUsingFilter(
                     ListProjectsFilter(listOf("id1"), null),
@@ -175,18 +175,18 @@ class ProjectServiceUnitTest {
     @Throws(Exception::class)
     fun whenUpdateProject_thenServiceRetrieveUpdatedProject() =
         runTest {
-            val mockedContributor = SimpleContributor("mockedId")
+            val mockedContributor = A6Contributor("mockedId")
             val mockedProject =
                 Project(
                     "mockedProjectName",
                     "creator_id",
-                    setOf(SimpleContributor("creator_id", emptySet())),
+                    setOf(A6Contributor("creator_id")),
                 )
             val updatedProject =
                 Project(
                     "updatedProjectName",
                     "creator_id",
-                    setOf(SimpleContributor("creator_id", emptySet())),
+                    setOf(A6Contributor("creator_id")),
                 )
             coEvery { repository.save(mockedProject) } returns updatedProject
             every { applicationEventPublisher.publishEvent(ofType(ProjectCreatedApplicationEvent::class)) } just Runs

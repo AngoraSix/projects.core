@@ -1,6 +1,6 @@
 package com.angorasix.projects.core.presentation.dto
 
-import com.angorasix.commons.domain.SimpleContributor
+import com.angorasix.commons.domain.A6Contributor
 import com.fasterxml.jackson.annotation.JsonProperty
 import org.springframework.hateoas.RepresentationModel
 import java.time.Instant
@@ -23,7 +23,7 @@ data class ProjectDto(
     val creatorId: String? = null,
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     val private: Boolean? = null,
-    val admins: Set<SimpleContributor>? = mutableSetOf(),
+    val admins: Set<A6Contributor>? = mutableSetOf(),
     val createdInstant: Instant? = null,
 ) : RepresentationModel<ProjectDto>() {
     constructor(

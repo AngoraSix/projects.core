@@ -1,6 +1,6 @@
 package com.angorasix.projects.core.application
 
-import com.angorasix.commons.domain.SimpleContributor
+import com.angorasix.commons.domain.A6Contributor
 import com.angorasix.projects.core.domain.project.Project
 import com.angorasix.projects.core.domain.project.ProjectRepository
 import com.angorasix.projects.core.infrastructure.applicationevents.ProjectCreatedApplicationEvent
@@ -26,7 +26,7 @@ class ProjectService(
      */
     fun findProjects(
         filter: ListProjectsFilter,
-        simpleContributor: SimpleContributor?,
+        simpleContributor: A6Contributor?,
     ): Flow<Project> = repository.findUsingFilter(filter, simpleContributor)
 
     /**
@@ -37,7 +37,7 @@ class ProjectService(
      */
     suspend fun createProject(
         newProject: Project,
-        requestingContributor: SimpleContributor,
+        requestingContributor: A6Contributor,
     ): Project =
         repository.save(newProject).also { saved ->
             events.publishEvent(ProjectCreatedApplicationEvent(saved, requestingContributor))
@@ -52,7 +52,7 @@ class ProjectService(
     suspend fun updateProject(
         projectId: String,
         updateData: Project,
-        simpleContributor: SimpleContributor,
+        simpleContributor: A6Contributor,
     ): Project? =
         repository
             .findForContributorUsingFilter(
@@ -72,7 +72,7 @@ class ProjectService(
      */
     suspend fun findSingleProject(
         projectId: String,
-        simpleContributor: SimpleContributor?,
+        simpleContributor: A6Contributor?,
     ): Project? = repository.findForContributorUsingFilter(ListProjectsFilter(listOf(projectId)), simpleContributor)
 
     /**
@@ -83,7 +83,7 @@ class ProjectService(
      */
     suspend fun administeredProject(
         projectId: String,
-        simpleContributor: SimpleContributor,
+        simpleContributor: A6Contributor,
     ): Project? =
         repository.findForContributorUsingFilter(
             ListProjectsFilter(

@@ -1,6 +1,6 @@
 package com.angorasix.projects.core.presentation.handler
 
-import com.angorasix.commons.domain.SimpleContributor
+import com.angorasix.commons.domain.A6Contributor
 import com.angorasix.commons.infrastructure.config.configurationproperty.api.Route
 import com.angorasix.commons.infrastructure.constants.AngoraSixInfrastructure
 import com.angorasix.commons.presentation.dto.IsAdminDto
@@ -87,7 +87,7 @@ class ProjectHandlerUnitTest {
                 Project(
                     "mockedProjectName",
                     "creator_id",
-                    setOf(SimpleContributor("creator_id", emptySet())),
+                    setOf(A6Contributor("creator_id")),
                 )
             val mockedPersistedProject = spyk(mockedProject)
             every { mockedPersistedProject.id } returns "mockedId"
@@ -98,7 +98,6 @@ class ProjectHandlerUnitTest {
 
             assertThat(outputResponse.statusCode()).isEqualTo(HttpStatus.OK)
             val response =
-                @Suppress("UNCHECKED_CAST")
                 outputResponse
                     as EntityResponse<Flow<ProjectDto>>
             val responseBody = response.entity()
@@ -132,7 +131,7 @@ class ProjectHandlerUnitTest {
                 Project(
                     "mockedProjectName",
                     "creator_id",
-                    setOf(SimpleContributor("creator_id", emptySet())),
+                    setOf(A6Contributor("creator_id")),
                 )
             val mockedPersistedProject = spyk(mockedProject)
             every { mockedPersistedProject.id } returns "mockedId"
@@ -173,7 +172,7 @@ class ProjectHandlerUnitTest {
                     null,
                     "mockedInputProjectName",
                 )
-            val mockedSimpleContributor = SimpleContributor("mockedId")
+            val mockedA6Contributor = A6Contributor("mockedId")
             val mockedExchange =
                 MockServerWebExchange.from(
                     MockServerHttpRequest.get(routeConfigs.createProject.path).build(),
@@ -183,18 +182,18 @@ class ProjectHandlerUnitTest {
                     .builder()
                     .attribute(
                         AngoraSixInfrastructure.REQUEST_ATTRIBUTE_CONTRIBUTOR_KEY,
-                        mockedSimpleContributor,
+                        mockedA6Contributor,
                     ).exchange(mockedExchange)
                     .body(mono { mockedProjectDto })
             val mockedProjectBase =
                 Project(
                     "mockedProjectName",
                     "creator_id",
-                    setOf(SimpleContributor("creator_id", emptySet())),
+                    setOf(A6Contributor("creator_id")),
                 )
             val mockedPersistedProject = spyk(mockedProjectBase)
             every { mockedPersistedProject.id } returns "mockedId"
-            coEvery { service.createProject(ofType(Project::class), ofType(SimpleContributor::class)) } returns mockedPersistedProject
+            coEvery { service.createProject(ofType(Project::class), ofType(A6Contributor::class)) } returns mockedPersistedProject
 
             val outputResponse = handler.createProject(mockedRequest)
 
@@ -207,7 +206,7 @@ class ProjectHandlerUnitTest {
             assertThat(responseBody).isNotSameAs(mockedProjectDto)
             assertThat(responseBody.name).isEqualTo("mockedProjectName")
             assertThat(responseBody.creatorId).isEqualTo("creator_id")
-            coVerify { service.createProject(ofType(Project::class), ofType(SimpleContributor::class)) }
+            coVerify { service.createProject(ofType(Project::class), ofType(A6Contributor::class)) }
         }
 
     @Test
@@ -230,9 +229,9 @@ class ProjectHandlerUnitTest {
                 Project(
                     "mockedProjectName",
                     "creator_id",
-                    setOf(SimpleContributor("creator_id", emptySet())),
+                    setOf(A6Contributor("creator_id")),
                 )
-            coEvery { service.createProject(ofType(Project::class), ofType(SimpleContributor::class)) } returns mockedProject
+            coEvery { service.createProject(ofType(Project::class), ofType(A6Contributor::class)) } returns mockedProject
 
             val outputResponse = handler.createProject(mockedRequest)
 
@@ -258,7 +257,7 @@ class ProjectHandlerUnitTest {
                     null,
                     "mockedInputProjectName",
                 )
-            val mockedSimpleContributor = SimpleContributor("mockedId")
+            val mockedA6Contributor = A6Contributor("mockedId")
             val mockedExchange =
                 MockServerWebExchange.from(MockServerHttpRequest.get("/id1-mocked").build())
             val mockedRequest: ServerRequest =
@@ -266,7 +265,7 @@ class ProjectHandlerUnitTest {
                     .builder()
                     .attribute(
                         AngoraSixInfrastructure.REQUEST_ATTRIBUTE_CONTRIBUTOR_KEY,
-                        mockedSimpleContributor,
+                        mockedA6Contributor,
                     ).pathVariable("id", "id1")
                     .exchange(mockedExchange)
                     .body(mono { mockedProjectDto })
@@ -274,7 +273,7 @@ class ProjectHandlerUnitTest {
                 Project(
                     "mockedProjectName",
                     "creator_id",
-                    setOf(SimpleContributor("creator_id", emptySet())),
+                    setOf(A6Contributor("creator_id")),
                 )
             val mockedPersistedProject = spyk(mockedProject)
             every { mockedPersistedProject.id } returns "id1"
@@ -282,7 +281,7 @@ class ProjectHandlerUnitTest {
                 service.updateProject(
                     "id1",
                     ofType(Project::class),
-                    mockedSimpleContributor,
+                    mockedA6Contributor,
                 )
             } returns mockedPersistedProject
 
@@ -301,7 +300,7 @@ class ProjectHandlerUnitTest {
                 service.updateProject(
                     "id1",
                     ofType(Project::class),
-                    mockedSimpleContributor,
+                    mockedA6Contributor,
                 )
             }
         }
@@ -311,7 +310,7 @@ class ProjectHandlerUnitTest {
     fun `Given existing projects - When get project for non Admin contributor - Then handler retrieves Ok Response without Edit link`() =
         runTest {
             val projectId = "projectId"
-            val mockedSimpleContributor = SimpleContributor("mockedId")
+            val mockedA6Contributor = A6Contributor("mockedId")
             val mockedExchange =
                 MockServerWebExchange.from(MockServerHttpRequest.get("/id1-mocked").build())
             val mockedRequest: ServerRequest =
@@ -319,7 +318,7 @@ class ProjectHandlerUnitTest {
                     .builder()
                     .attribute(
                         AngoraSixInfrastructure.REQUEST_ATTRIBUTE_CONTRIBUTOR_KEY,
-                        mockedSimpleContributor,
+                        mockedA6Contributor,
                     ).pathVariable("id", projectId)
                     .exchange(mockedExchange)
                     .build()
@@ -327,14 +326,14 @@ class ProjectHandlerUnitTest {
                 Project(
                     "mockedProjectName",
                     "creator_id",
-                    setOf(SimpleContributor("other_id", emptySet())),
+                    setOf(A6Contributor("other_id")),
                 )
             val mockedPersistedProject = spyk(mockedProject)
             every { mockedPersistedProject.id } returns "mockedId"
             coEvery {
                 service.findSingleProject(
                     projectId,
-                    mockedSimpleContributor,
+                    mockedA6Contributor,
                 )
             } returns mockedPersistedProject
 
@@ -348,7 +347,7 @@ class ProjectHandlerUnitTest {
             assertThat(responseBody.creatorId).isEqualTo("creator_id")
             assertThat(responseBody.links.hasSize(1)).isTrue()
             assertThat(responseBody.links.getLink("updateProject")).isEmpty
-            coVerify { service.findSingleProject(projectId, mockedSimpleContributor) }
+            coVerify { service.findSingleProject(projectId, mockedA6Contributor) }
         }
 
     @Test
@@ -356,7 +355,7 @@ class ProjectHandlerUnitTest {
     fun `Given existing projects - When get project for Admin Contributor - Then handler retrieves Ok Response with Edit link`() =
         runTest {
             val projectId = "projectId"
-            val mockedSimpleContributor = SimpleContributor("mockedId")
+            val mockedA6Contributor = A6Contributor("mockedId")
 
             val mockedExchange =
                 MockServerWebExchange.from(MockServerHttpRequest.get("/id1-mocked").build())
@@ -365,7 +364,7 @@ class ProjectHandlerUnitTest {
                     .builder()
                     .attribute(
                         AngoraSixInfrastructure.REQUEST_ATTRIBUTE_CONTRIBUTOR_KEY,
-                        mockedSimpleContributor,
+                        mockedA6Contributor,
                     ).pathVariable("id", projectId)
                     .exchange(mockedExchange)
                     .build()
@@ -373,14 +372,14 @@ class ProjectHandlerUnitTest {
                 Project(
                     "mockedProjectName",
                     "creator_id",
-                    setOf(SimpleContributor("mockedId", emptySet())),
+                    setOf(A6Contributor("mockedId")),
                 )
             val mockedPersistedProject = spyk(mockedProject)
             every { mockedPersistedProject.id } returns "mockedId"
             coEvery {
                 service.findSingleProject(
                     projectId,
-                    mockedSimpleContributor,
+                    mockedA6Contributor,
                 )
             } returns mockedPersistedProject
 
@@ -394,7 +393,7 @@ class ProjectHandlerUnitTest {
             assertThat(responseBody.creatorId).isEqualTo("creator_id")
             assertThat(responseBody.links.hasSize(2)).isTrue()
             assertThat(responseBody.links.getLink("updateProject")).isNotNull
-            coVerify { service.findSingleProject(projectId, mockedSimpleContributor) }
+            coVerify { service.findSingleProject(projectId, mockedA6Contributor) }
         }
 
     @Test
@@ -402,7 +401,7 @@ class ProjectHandlerUnitTest {
     fun `Given contributor - When check if Requesting Contributor is Admin of project - Then handler retrieves Ok Response`() =
         runTest {
             val projectId = "projectId"
-            val mockedSimpleContributor = SimpleContributor("mockedId")
+            val mockedA6Contributor = A6Contributor("mockedId")
             val mockedExchange =
                 MockServerWebExchange.from(
                     MockServerHttpRequest.get(routeConfigs.validateAdminUser.path).build(),
@@ -412,7 +411,7 @@ class ProjectHandlerUnitTest {
                     .builder()
                     .attribute(
                         AngoraSixInfrastructure.REQUEST_ATTRIBUTE_CONTRIBUTOR_KEY,
-                        mockedSimpleContributor,
+                        mockedA6Contributor,
                     ).pathVariable("id", projectId)
                     .exchange(mockedExchange)
                     .build()
@@ -420,12 +419,12 @@ class ProjectHandlerUnitTest {
                 Project(
                     "mockedProjectName",
                     "creator_id",
-                    setOf(SimpleContributor("mockedId", emptySet())),
+                    setOf(A6Contributor("mockedId")),
                 )
             coEvery {
                 service.administeredProject(
                     projectId,
-                    mockedSimpleContributor,
+                    mockedA6Contributor,
                 )
             } returns mockedProject
 
@@ -438,7 +437,7 @@ class ProjectHandlerUnitTest {
                     as EntityResponse<IsAdminDto>
             val responseBody = response.entity()
             assertThat(responseBody.isAdmin).isTrue()
-            coVerify { service.administeredProject(projectId, mockedSimpleContributor) }
+            coVerify { service.administeredProject(projectId, mockedA6Contributor) }
         }
 
     @Test
@@ -446,7 +445,7 @@ class ProjectHandlerUnitTest {
     fun `Given contributor - When get project admin not matching contributor - Then handler retrieves Ok Response with false value`() =
         runTest {
             val projectId = "projectId"
-            val mockedSimpleContributor = SimpleContributor("mockedId")
+            val mockedA6Contributor = A6Contributor("mockedId")
             val mockedExchange =
                 MockServerWebExchange.from(
                     MockServerHttpRequest.get(routeConfigs.validateAdminUser.path).build(),
@@ -456,7 +455,7 @@ class ProjectHandlerUnitTest {
                     .builder()
                     .attribute(
                         AngoraSixInfrastructure.REQUEST_ATTRIBUTE_CONTRIBUTOR_KEY,
-                        mockedSimpleContributor,
+                        mockedA6Contributor,
                     ).pathVariable("id", projectId)
                     .exchange(mockedExchange)
                     .build()
@@ -464,12 +463,12 @@ class ProjectHandlerUnitTest {
                 Project(
                     "mockedProjectName",
                     "creator_id",
-                    setOf(SimpleContributor("otherId", emptySet())),
+                    setOf(A6Contributor("otherId")),
                 )
             coEvery {
                 service.administeredProject(
                     projectId,
-                    mockedSimpleContributor,
+                    mockedA6Contributor,
                 )
             } returns mockedProject
 
@@ -482,7 +481,7 @@ class ProjectHandlerUnitTest {
                     as EntityResponse<IsAdminDto>
             val responseBody = response.entity()
             assertThat(responseBody.isAdmin).isFalse()
-            coVerify { service.administeredProject(projectId, mockedSimpleContributor) }
+            coVerify { service.administeredProject(projectId, mockedA6Contributor) }
         }
 
     fun generateListProjectsFilterMultiValueMap(

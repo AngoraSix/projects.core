@@ -1,6 +1,6 @@
 package com.angorasix.projects.core.domain.project
 
-import com.angorasix.commons.domain.SimpleContributor
+import com.angorasix.commons.domain.A6Contributor
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.PersistenceCreator
 import java.time.Instant
@@ -19,7 +19,7 @@ data class Project
         @field:Id val id: String?,
         var name: String,
         val creatorId: String,
-        val admins: Set<SimpleContributor> = emptySet(),
+        val admins: Set<A6Contributor> = emptySet(),
         val createdInstant: Instant,
         val private: Boolean = false,
         var attributes: MutableSet<Attribute<*>> = mutableSetOf(),
@@ -32,7 +32,7 @@ data class Project
         constructor(
             name: String,
             creatorId: String,
-            admins: Set<SimpleContributor>,
+            admins: Set<A6Contributor>,
             private: Boolean = false,
             attributes: MutableSet<Attribute<*>> = mutableSetOf(),
             requirements: MutableSet<Attribute<*>> = mutableSetOf(),
@@ -56,7 +56,7 @@ data class Project
             attributes.add(attribute)
         }
 
-        fun isAdministeredBy(simpleContributor: SimpleContributor): Boolean =
+        fun isAdministeredBy(simpleContributor: A6Contributor): Boolean =
             admins.any {
                 it.contributorId ==
                     simpleContributor.contributorId
