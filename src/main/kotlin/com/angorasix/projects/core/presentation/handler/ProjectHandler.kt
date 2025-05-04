@@ -1,6 +1,6 @@
 package com.angorasix.projects.core.presentation.handler
 
-import com.angorasix.commons.domain.SimpleContributor
+import com.angorasix.commons.domain.A6Contributor
 import com.angorasix.commons.infrastructure.constants.AngoraSixInfrastructure
 import com.angorasix.commons.presentation.dto.IsAdminDto
 import com.angorasix.commons.reactive.presentation.error.resolveBadRequest
@@ -49,7 +49,7 @@ class ProjectHandler(
                 ListProjectsFilter.fromMultiValueMap(
                     request.queryParams(),
                 ),
-                requestingContributor as SimpleContributor?,
+                requestingContributor as A6Contributor?,
             ).map {
                 it.convertToDto(
                     requestingContributor,
@@ -72,7 +72,7 @@ class ProjectHandler(
             request.attributes()[AngoraSixInfrastructure.REQUEST_ATTRIBUTE_CONTRIBUTOR_KEY]
         val projectId = request.pathVariable("id")
         return service
-            .findSingleProject(projectId, requestingContributor as SimpleContributor?)
+            .findSingleProject(projectId, requestingContributor as A6Contributor?)
             ?.let {
                 val outputProject =
                     it.convertToDto(
@@ -95,7 +95,7 @@ class ProjectHandler(
         val requestingContributor =
             request.attributes()[AngoraSixInfrastructure.REQUEST_ATTRIBUTE_CONTRIBUTOR_KEY]
         val projectId = request.pathVariable("id")
-        return if (requestingContributor is SimpleContributor) {
+        return if (requestingContributor is A6Contributor) {
             service.administeredProject(projectId, requestingContributor)?.let {
                 val result = it.isAdministeredBy(requestingContributor)
                 ok().contentType(MediaTypes.HAL_FORMS_JSON).bodyValueAndAwait(IsAdminDto(result))
@@ -114,13 +114,13 @@ class ProjectHandler(
     suspend fun createProject(request: ServerRequest): ServerResponse {
         val requestingContributor =
             request.attributes()[AngoraSixInfrastructure.REQUEST_ATTRIBUTE_CONTRIBUTOR_KEY]
-        return if (requestingContributor is SimpleContributor) {
+        return if (requestingContributor is A6Contributor) {
             val project =
                 request
                     .awaitBody<ProjectDto>()
                     .convertToDomain(
                         requestingContributor.contributorId,
-                        setOf(SimpleContributor(requestingContributor.contributorId, emptySet())),
+                        setOf(A6Contributor(requestingContributor.contributorId)),
                     )
             val outputProject =
                 service
@@ -156,7 +156,7 @@ class ProjectHandler(
                     "Project Presentation",
                 )
             }
-        return if (requestingContributor is SimpleContributor) {
+        return if (requestingContributor is A6Contributor) {
             service
                 .updateProject(
                     projectId,
@@ -190,7 +190,7 @@ private fun Project.convertToDto(): ProjectDto =
     )
 
 private fun Project.convertToDto(
-    simpleContributor: SimpleContributor?,
+    simpleContributor: A6Contributor?,
     apiConfigs: ApiConfigs,
     request: ServerRequest,
 ): ProjectDto = convertToDto().resolveHypermedia(simpleContributor, this, apiConfigs, request)
@@ -199,7 +199,7 @@ private fun Attribute<*>.convertToDto(): AttributeDto = AttributeDto(key, value.
 
 private fun ProjectDto.convertToDomain(
     contributorId: String,
-    admins: Set<SimpleContributor>,
+    admins: Set<A6Contributor>,
 ): Project =
     Project(
         name
@@ -212,7 +212,7 @@ private fun ProjectDto.convertToDomain(
     )
 
 private fun ProjectDto.resolveHypermedia(
-    simpleContributor: SimpleContributor?,
+    simpleContributor: A6Contributor?,
     project: Project,
     apiConfigs: ApiConfigs,
     request: ServerRequest,

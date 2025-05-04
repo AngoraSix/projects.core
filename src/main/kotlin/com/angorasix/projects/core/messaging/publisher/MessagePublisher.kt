@@ -1,10 +1,10 @@
 package com.angorasix.projects.core.messaging.publisher
 
-import com.angorasix.commons.domain.SimpleContributor
-import com.angorasix.commons.infrastructure.intercommunication.dto.A6DomainResource
-import com.angorasix.commons.infrastructure.intercommunication.dto.A6InfraTopics
-import com.angorasix.commons.infrastructure.intercommunication.dto.messaging.A6InfraMessageDto
-import com.angorasix.commons.infrastructure.intercommunication.dto.project.ProjectCreated
+import com.angorasix.commons.domain.A6Contributor
+import com.angorasix.commons.infrastructure.intercommunication.A6DomainResource
+import com.angorasix.commons.infrastructure.intercommunication.A6InfraTopics
+import com.angorasix.commons.infrastructure.intercommunication.messaging.A6InfraMessageDto
+import com.angorasix.commons.infrastructure.intercommunication.project.ProjectCreated
 import com.angorasix.projects.core.infrastructure.config.configurationproperty.amqp.AmqpConfigurations
 import org.springframework.cloud.stream.function.StreamBridge
 import org.springframework.messaging.support.MessageBuilder
@@ -15,7 +15,7 @@ class MessagePublisher(
 ) {
     fun publishProjectCreated(
         projectCreated: ProjectCreated,
-        requestingContributor: SimpleContributor,
+        requestingContributor: A6Contributor,
     ) {
         streamBridge.send(
             amqpConfigs.bindings.projectCreated,
@@ -23,9 +23,9 @@ class MessagePublisher(
                 .withPayload(
                     A6InfraMessageDto(
                         targetId = projectCreated.projectId,
-                        targetType = A6DomainResource.Project,
+                        targetType = A6DomainResource.PROJECT,
                         objectId = projectCreated.projectId,
-                        objectType = A6DomainResource.Project.value,
+                        objectType = A6DomainResource.PROJECT.value,
                         topic = A6InfraTopics.PROJECT_CREATED.value,
                         requestingContributor = requestingContributor,
                         messageData = projectCreated,

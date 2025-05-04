@@ -1,6 +1,6 @@
 package com.angorasix.projects.core.infrastructure.applicationevents
 
-import com.angorasix.commons.infrastructure.intercommunication.dto.project.ProjectCreated
+import com.angorasix.commons.infrastructure.intercommunication.project.ProjectCreated
 import com.angorasix.projects.core.messaging.publisher.MessagePublisher
 import org.springframework.context.event.EventListener
 

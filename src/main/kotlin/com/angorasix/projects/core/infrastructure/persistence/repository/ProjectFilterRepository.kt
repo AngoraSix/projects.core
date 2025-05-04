@@ -1,6 +1,6 @@
 package com.angorasix.projects.core.infrastructure.persistence.repository
 
-import com.angorasix.commons.domain.SimpleContributor
+import com.angorasix.commons.domain.A6Contributor
 import com.angorasix.projects.core.domain.project.Project
 import com.angorasix.projects.core.infrastructure.queryfilters.ListProjectsFilter
 import kotlinx.coroutines.flow.Flow
@@ -14,11 +14,11 @@ import kotlinx.coroutines.flow.Flow
 interface ProjectFilterRepository {
     fun findUsingFilter(
         filter: ListProjectsFilter,
-        simpleContributor: SimpleContributor?,
+        simpleContributor: A6Contributor?,
     ): Flow<Project>
 
     suspend fun findForContributorUsingFilter(
         filter: ListProjectsFilter,
-        simpleContributor: SimpleContributor?,
+        simpleContributor: A6Contributor?,
     ): Project?
 }
